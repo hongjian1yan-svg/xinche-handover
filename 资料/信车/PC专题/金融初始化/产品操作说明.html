@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧车市 · 金融初始化功能操作说明</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 14px;
+    color: #303133;
+    background: #f5f7fa;
+    line-height: 1.7;
+  }
+
+  /* ===== 封面 ===== */
+  .cover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 60%, #1e40af 100%);
+    color: white;
+    padding: 80px 60px;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover-logo { font-size: 13px; opacity: 0.7; margin-bottom: 20px; letter-spacing: 1px; }
+  .cover-title { font-size: 32px; font-weight: 700; line-height: 1.3; margin-bottom: 12px; }
+  .cover-subtitle { font-size: 16px; opacity: 0.8; margin-bottom: 30px; }
+  .cover-meta { display: flex; gap: 40px; font-size: 13px; opacity: 0.65; }
+
+  /* ===== 主体布局 ===== */
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* ===== 目录 ===== */
+  .toc {
+    background: white;
+    border-radius: 8px;
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+  .toc h2 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1d4ed8; border-bottom: 2px solid #dbeafe; padding-bottom: 10px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin: 6px 0; }
+  .toc a { color: #374151; text-decoration: none; }
+  .toc a:hover { color: #2563eb; }
+  .toc .sub { padding-left: 18px; list-style-type: disc; }
+  .toc .sub li { margin: 4px 0; font-size: 13px; }
+
+  /* ===== 章节卡片 ===== */
+  .section {
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    overflow: hidden;
+  }
+  .section-header {
+    background: linear-gradient(90deg, #eff6ff 0%, #f8faff 100%);
+    border-left: 4px solid #2563eb;
+    padding: 18px 28px;
+  }
+  .section-header h2 { font-size: 20px; font-weight: 700; color: #1e40af; }
+  .section-header p { font-size: 13px; color: #6b7280; margin-top: 4px; }
+  .section-body { padding: 28px; }
+
+  /* ===== 小节 ===== */
+  .subsection { margin-bottom: 36px; }
+  .subsection:last-child { margin-bottom: 0; }
+  .subsection h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .subsection h3 .num {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-size: 12px;
+    margin-right: 8px;
+    font-weight: 700;
+  }
+
+  /* ===== 操作步骤 ===== */
+  .steps { counter-reset: step; }
+  .step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    background: #2563eb;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .step-text { flex: 1; }
+  .step-text strong { color: #2563eb; }
+
+  /* ===== 截图 ===== */
+  .screenshot-wrap {
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  }
+  .screenshot-cap {
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+  }
+  .screenshot-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ===== 提示框 ===== */
+  .tip, .warn, .info {
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .tip { background: #f0fdf4; border-left: 3px solid #16a34a; color: #166534; }
+  .warn { background: #fffbeb; border-left: 3px solid #d97706; color: #92400e; }
+  .info { background: #eff6ff; border-left: 3px solid #3b82f6; color: #1e40af; }
+  .tip::before { content: '✅ '; }
+  .warn::before { content: '⚠️ '; }
+  .info::before { content: 'ℹ️ '; }
+
+  /* ===== 表格 ===== */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 14px 0;
+  }
+  .data-table th {
+    background: #f3f4f6;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #d1d5db;
+  }
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #4b5563;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #f9fafb; }
+
+  /* ===== 标签 ===== */
+  .tag { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 12px; font-weight: 500; }
+  .tag-blue { background: #dbeafe; color: #1d4ed8; }
+  .tag-green { background: #dcfce7; color: #16a34a; }
+  .tag-red { background: #fee2e2; color: #dc2626; }
+  .tag-gray { background: #f3f4f6; color: #6b7280; }
+
+  /* ===== 流程图 ===== */
+  .flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+    padding: 16px;
+    background: #f8faff;
+    border-radius: 8px;
+  }
+  .flow-item {
+    background: #2563eb;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .flow-arrow { color: #94a3b8; font-size: 18px; }
+
+  /* ===== 打印 ===== */
+  @media print {
+    body { background: white; }
+    .cover { page-break-after: always; }
+    .section { box-shadow: none; border: 1px solid #e5e7eb; }
+    .screenshot-wrap { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 封面 -->
+<div class="cover">
+  <div class="cover-logo">智慧车市 · 运营培训文档</div>
+  <div class="cover-title">金融初始化功能<br>操作说明手册</div>
+  <div class="cover-subtitle">适用角色：超级管理员 / 市场管理员</div>
+  <div class="cover-meta">
+    <span>文档版本：v1.3</span>
+    <span>更新日期：2026-06-24</span>
+    <span>适用范围：金融初始化管理 · 市场配置</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 目录 -->
+<div class="toc" id="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#overview">功能概述</a></li>
+    <li>
+      <a href="#market-config">市场配置：金融系统设置</a>
+      <ul class="sub">
+        <li><a href="#mc-entry">进入市场配置页面</a></li>
+        <li><a href="#mc-fields">各配置项说明</a></li>
+        <li><a href="#mc-unvalued">未估价车辆申请用款开关</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#company">金融公司管理</a>
+      <ul class="sub">
+        <li><a href="#co-list">查看金融公司列表</a></li>
+        <li><a href="#co-add">新增金融公司</a></li>
+        <li><a href="#co-detail">查看金融公司详情</a></li>
+        <li><a href="#co-edit">编辑金融公司</a></li>
+        <li><a href="#co-delete">删除金融公司</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#channel">资金渠道管理</a>
+      <ul class="sub">
+        <li><a href="#ch-list">查看资金渠道列表</a></li>
+        <li><a href="#ch-add">新增资金渠道</a></li>
+        <li><a href="#ch-edit">编辑资金渠道</a></li>
+        <li><a href="#ch-stop">停用 / 启用资金渠道</a></li>
+        <li><a href="#ch-delete">删除资金渠道</a></li>
+        <li><a href="#ch-log">查看操作日志</a></li>
+      </ul>
+    </li>
+    <li><a href="#workflow">标准操作流程总览</a></li>
+  </ol>
+</div>
+
+<!-- ===== 1. 功能概述 ===== -->
+<div class="section" id="overview">
+  <div class="section-header">
+    <h2>一、功能概述</h2>
+    <p>了解金融初始化功能的组成结构与使用场景</p>
+  </div>
+  <div class="section-body">
+    <p>「金融初始化」是为二手车市场开通金融服务前必须完成的基础配置环节，主要包含两个模块：</p>
+
+    <table class="data-table" style="margin-top:16px;">
+      <thead>
+        <tr><th>模块</th><th>功能说明</th><th>管理入口</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>市场配置</strong></td>
+          <td>为特定市场开启金融系统，配置订单编号前缀、车辆评估要求、未估价车辆申请限制等参数</td>
+          <td>左侧导航 → 车市管理 → 市场列表 → 配置</td>
+        </tr>
+        <tr>
+          <td><strong>金融公司管理</strong></td>
+          <td>录入为该市场提供融资服务的金融机构信息（如银行、金融公司）</td>
+          <td>左侧导航 → 金融初始化管理</td>
+        </tr>
+        <tr>
+          <td><strong>资金渠道管理</strong></td>
+          <td>在每家金融公司下配置具体的贷款产品（渠道），包含放款比例、评估方式等</td>
+          <td>金融初始化管理页面下方</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info">建议操作顺序：先完成<strong>市场配置</strong>，再依次录入<strong>金融公司</strong>和<strong>资金渠道</strong>。</div>
+  </div>
+</div>
+
+<!-- ===== 2. 市场配置 ===== -->
+<div class="section" id="market-config">
+  <div class="section-header">
+    <h2>二、市场配置：金融系统设置</h2>
+    <p>在市场列表中为目标市场开启并配置金融功能</p>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection" id="mc-entry">
+      <h3><span class="num">1</span>进入市场配置页面</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">点击左侧导航栏中的 <strong>「车市管理」→「市场列表」</strong></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">在列表中找到需要配置的市场，点击操作列中的 <strong>「配置」</strong> 按钮</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">页面跳转至该市场的配置页，默认展示<strong>金融系统设置</strong>区域</div></div>
+      </div>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/09_市场列表.png" alt="市场列表">
+        <div class="screenshot-cap">图 2-1：市场列表页面，点击「配置」进入该市场的设置页</div>
+      </div>
+    </div>
+
+    <div class="subsection" id="mc-fields">
+      <h3><span class="num">2</span>金融系统设置各配置项说明</h3>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/10_市场配置页.png" alt="市场配置-金融系统设置">
+        <div class="screenshot-cap">图 2-2：市场配置页面——金融系统设置区域（全貌）</div>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr><th>配置项</th><th>说明</th><th>注意事项</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>金融系统</strong>（必填）</td>
+            <td>总开关：开启后该市场可使用金融用款申请功能</td>
+            <td>关闭后所有金融功能对该市场不可用</td>
+          </tr>
+          <tr>
+            <td><strong>金融订单编号前缀</strong>（必填）</td>
+            <td>该市场金融订单的唯一前缀，如「XCJR」，系统自动拼接后续数字</td>
+            <td>⚠️ 一旦保存后<strong>不可修改</strong>，请谨慎填写（仅限大写字母）</td>
+          </tr>
+          <tr>
+            <td><strong>用款申请车辆评估</strong>（必填）</td>
+            <td>控制商户用款申请时是否使用评估平台估价</td>
+            <td>选「开启」时需同步选择评估平台</td>
+          </tr>
+          <tr>
+            <td><strong>评估平台</strong>（条件必填）</td>
+            <td>当车辆评估开启时，选择对接的第三方评估平台</td>
+            <td>评估关闭时本项隐藏</td>
+          </tr>
+          <tr>
+            <td><strong>未估价车辆可申请用款</strong>（必填）</td>
+            <td>控制无估价的车辆是否允许发起用款申请</td>
+            <td>详见下方专项说明</td>
+          </tr>
+          <tr>
+            <td><strong>申请金额</strong>（必填）</td>
+            <td>设置金融申请金额的小数精度（保留一位或两位小数）</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>用款二次审核</strong>（必填）</td>
+            <td>开启后，审批通过的用款申请需进行二次人工确认</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>临时出场默认限制</strong>（必填）</td>
+            <td>质押车辆临时出场时的出入次数限制默认值</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip">填写完毕后点击页面底部 <strong>「保存」</strong> 按钮生效；如需放弃修改，点击 <strong>「返回」</strong> 回到市场列表。</div>
+    </div>
+
+    <div class="subsection" id="mc-unvalued">
+      <h3><span class="num">3</span>未估价车辆可申请用款——重点说明</h3>
+      <p>此开关用于控制<strong>无法获取估值的车辆</strong>是否可以发起用款申请，默认值为<strong>关闭</strong>。</p>
+
+      <table class="data-table" style="margin-top:14px;">
+        <thead>
+          <tr><th>状态</th><th>效果说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-green">开启</span></td>
+            <td>未经估价的车辆也可以发起用款申请，由人工判断放款是否合规</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-red">关闭（默认）</span></td>
+            <td>无法获取估值的车辆将被系统拦截，不允许发起用款申请</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warn">部分市场对质押车辆有强制估价要求，建议保持默认<strong>关闭</strong>状态，避免未估价车辆进入质押流程引发合规风险。</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 3. 金融公司管理 ===== -->
+<div class="section" id="company">
+  <div class="section-header">
+    <h2>三、金融公司管理</h2>
+    <p>录入和维护为车市提供融资服务的金融机构信息</p>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection" id="co-list">
+      <h3><span class="num">1</span>查看金融公司列表</h3>
+      <p>点击左侧导航 <strong>「金融初始化管理」</strong>，进入金融公司列表页。页面上方为筛选区，支持按市场名称、金融公司名称、负责人、负责人电话、创建时间等多维度查询。</p>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/01_金融公司列表.png" alt="金融公司列表">
+        <div class="screenshot-cap">图 3-1：金融公司列表页面（含筛选条件和数据表格）</div>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>列名</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>所属市场</td><td>该金融公司关联的二手车市场</td></tr>
+          <tr><td>金融公司名称</td><td>金融机构的正式名称</td></tr>
+          <tr><td>负责人 / 负责人电话</td><td>对接的业务负责人及联系方式</td></tr>
+          <tr><td>负责人证件号</td><td>负责人身份证号码（选填）</td></tr>
+          <tr><td>资金渠道数量</td><td>该公司下已配置的资金渠道总数</td></tr>
+          <tr><td>创建时间</td><td>录入系统的时间</td></tr>
+          <tr><td>操作</td><td>「查看」详情 / 「更多操作」下拉（编辑、删除）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info">点击 <strong>「查询数据导出」</strong> 可将当前筛选结果导出为 Excel 文件，便于对账或汇报。</div>
+    </div>
+
+    <div class="subsection" id="co-add">
+      <h3><span class="num">2</span>新增金融公司</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">点击列表左上角 <strong>「+ 新增金融公司」</strong> 蓝色按钮，弹出新增表单</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">填写各字段（带 <span style="color:red;">*</span> 的为必填项）</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">如需上传金融公司相关图片（如营业执照），点击「图片信息」区域的「+」上传</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">点击 <strong>「确定」</strong> 保存；或点击 <strong>「继续新增资金渠道」</strong>，保存后直接跳转到新增渠道流程</div></div>
+      </div>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/02_新增金融公司.png" alt="新增金融公司弹窗">
+        <div class="screenshot-cap">图 3-2：新增金融公司弹窗（必填字段标注红色星号）</div>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>字段</th><th>是否必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>所属市场</td><td><span class="tag tag-red">必填</span></td><td>从已配置金融系统的市场中选择</td></tr>
+          <tr><td>公司名称</td><td><span class="tag tag-red">必填</span></td><td>金融机构的正式全称</td></tr>
+          <tr><td>负责人</td><td><span class="tag tag-red">必填</span></td><td>业务对接人姓名</td></tr>
+          <tr><td>负责人电话</td><td><span class="tag tag-red">必填</span></td><td>11位手机号码</td></tr>
+          <tr><td>证件号码</td><td><span class="tag tag-gray">选填</span></td><td>负责人身份证号</td></tr>
+          <tr><td>备注</td><td><span class="tag tag-gray">选填</span></td><td>最多 50 字</td></tr>
+          <tr><td>图片信息</td><td><span class="tag tag-gray">选填</span></td><td>上传相关证明材料图片</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="subsection" id="co-detail">
+      <h3><span class="num">3</span>查看金融公司详情</h3>
+      <p>点击列表行右侧的 <strong>「查看」</strong> 按钮，右侧弹出详情抽屉，展示该公司的完整信息及其下所有资金渠道的只读列表。</p>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/03_金融公司详情.png" alt="金融公司详情抽屉">
+        <div class="screenshot-cap">图 3-3：金融公司详情抽屉（含所属资金渠道快览）</div>
+      </div>
+
+      <div class="tip">详情抽屉中的资金渠道列表为只读快览，如需完整管理渠道请前往页面下方「资金渠道」区域操作。</div>
+    </div>
+
+    <div class="subsection" id="co-edit">
+      <h3><span class="num">4</span>编辑金融公司</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">找到目标公司所在行，点击操作列 <strong>「更多操作 ▼」</strong> 下拉菜单</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">选择 <strong>「编辑」</strong>，弹出编辑表单（字段与新增相同，已填入当前数据）</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">修改完毕后点击 <strong>「确定」</strong> 保存</div></div>
+      </div>
+    </div>
+
+    <div class="subsection" id="co-delete">
+      <h3><span class="num">5</span>删除金融公司</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">点击操作列 <strong>「更多操作 ▼」→「删除」</strong></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">弹出二次确认弹窗，显示待删除公司名称</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">确认无误后点击 <strong>「确定」</strong> 完成删除</div></div>
+      </div>
+      <div class="warn">删除金融公司后，该公司下的所有资金渠道数据将一并删除且<strong>不可恢复</strong>，请谨慎操作。</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 4. 资金渠道管理 ===== -->
+<div class="section" id="channel">
+  <div class="section-header">
+    <h2>四、资金渠道管理</h2>
+    <p>在金融公司下配置具体的贷款产品（渠道），包含放款比例、评估方式等参数</p>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection" id="ch-list">
+      <h3><span class="num">1</span>查看资金渠道列表</h3>
+      <p>在「金融初始化管理」页面向下滚动，可见 <strong>「资金渠道」</strong> 列表区域。上方筛选栏支持按市场、金融公司、渠道名称、评估方式组合查询。</p>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/04_资金渠道列表.png" alt="资金渠道列表">
+        <div class="screenshot-cap">图 4-1：资金渠道列表（含状态列和操作按钮组）</div>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>列名</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>所属市场</td><td>渠道关联的市场</td></tr>
+          <tr><td>金融公司名称</td><td>渠道所属的金融机构</td></tr>
+          <tr><td>渠道名称</td><td>贷款产品的名称，如「泸州银行-标准质押产品」</td></tr>
+          <tr><td>放款比例</td><td>贷款金额占车辆评估价值的百分比上限</td></tr>
+          <tr><td>车辆评估方式</td><td>自动评估（接入平台）或人工评估</td></tr>
+          <tr><td>评估平台</td><td>自动评估时对接的第三方平台名称</td></tr>
+          <tr><td>创建时间</td><td>渠道录入时间</td></tr>
+          <tr><td>状态</td><td><span class="tag tag-green">启用</span> 或 <span class="tag tag-gray">停用</span>，新建默认启用</td></tr>
+          <tr><td>操作</td><td>编辑 / 删除 / 停用（或启用）/ 操作日志</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="subsection" id="ch-add">
+      <h3><span class="num">2</span>新增资金渠道</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">点击资金渠道区域左上角 <strong>「+ 新增渠道」</strong> 按钮，弹出新增表单</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">依次填写<strong>所属市场、渠道名称、所属金融公司、放款比例</strong>（必填）</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">选择<strong>车辆评估选项</strong>：选「自动评估」需额外选择评估平台；选「人工评估」无需选平台</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">点击 <strong>「保存」</strong> 完成新增，渠道默认状态为<span class="tag tag-green" style="margin:0 4px;">启用</span></div></div>
+      </div>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/06_新增资金渠道.png" alt="新增资金渠道弹窗">
+        <div class="screenshot-cap">图 4-2：新增资金渠道弹窗（选择自动评估时会展开评估平台字段）</div>
+      </div>
+
+      <div class="info">也可在新增金融公司时点击「继续新增资金渠道」，系统会自动预填所属市场和金融公司，更加便捷。</div>
+    </div>
+
+    <div class="subsection" id="ch-edit">
+      <h3><span class="num">3</span>编辑资金渠道</h3>
+      <p>编辑操作与渠道的<strong>启用/停用状态</strong>直接关联，规则如下：</p>
+
+      <table class="data-table" style="margin-bottom:16px;">
+        <thead><tr><th>渠道状态</th><th>可编辑字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-green">启用中</span></td>
+            <td>无（所有字段均不可修改）</td>
+            <td>渠道启用期间所有参数<strong>全部锁定</strong>，防止影响进行中的业务</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-gray">已停用</span></td>
+            <td>放款比例、车辆评估选项、评估平台</td>
+            <td>其余字段（所属市场、渠道名称、所属金融公司）不可修改</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/07_编辑资金渠道_启用状态.png" alt="编辑资金渠道（启用状态）">
+        <div class="screenshot-cap">图 4-3：编辑资金渠道弹窗（渠道启用时，放款比例等字段为只读状态）</div>
+      </div>
+
+      <div class="tip">如需修改放款比例或评估方式，请先点击「停用」暂停该渠道，修改完成后再点击「启用」恢复使用。</div>
+    </div>
+
+    <div class="subsection" id="ch-stop">
+      <h3><span class="num">4</span>停用 / 启用资金渠道</h3>
+
+      <p><strong>停用操作：</strong></p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">在列表中找到目标渠道，点击操作列 <strong>「停用」</strong> 按钮（红色）</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">弹出确认弹窗，内容为"确认停用该资金渠道吗？"</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">点击 <strong>「确定」</strong> 完成停用；渠道状态变更为<span class="tag tag-gray" style="margin:0 4px;">停用</span></div></div>
+      </div>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/08_停用确认弹窗.png" alt="停用确认弹窗">
+        <div class="screenshot-cap">图 4-4：点击「停用」时弹出二次确认弹窗，防止误操作</div>
+      </div>
+
+      <p style="margin-top:16px;"><strong>启用操作：</strong></p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">找到处于停用状态的渠道，点击操作列 <strong>「启用」</strong> 按钮（蓝色）</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">无需二次确认，渠道立即恢复为<span class="tag tag-green" style="margin:0 4px;">启用</span>状态</div></div>
+      </div>
+
+      <div class="warn">停用后该渠道将暂停对外可用，车商将无法选择该渠道发起用款申请，请提前与相关方沟通后再操作。</div>
+    </div>
+
+    <div class="subsection" id="ch-delete">
+      <h3><span class="num">5</span>删除资金渠道</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">点击目标渠道操作列中的 <strong>「删除」</strong> 按钮（红色）</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">弹出确认弹窗，确认后点击 <strong>「确定」</strong> 完成删除</div></div>
+      </div>
+      <div class="warn">删除操作<strong>不可恢复</strong>，请确认该渠道已无正在进行的用款业务后再删除。建议优先使用「停用」代替删除。</div>
+    </div>
+
+    <div class="subsection" id="ch-log">
+      <h3><span class="num">6</span>查看操作日志</h3>
+      <p>每条资金渠道都记录了完整的操作历史，点击操作列 <strong>「操作日志」</strong> 按钮查看。</p>
+
+      <div class="screenshot-wrap">
+        <img src="manual-assets/09_操作日志.png" alt="操作日志弹窗">
+        <div class="screenshot-cap">图 4-5：操作日志弹窗（记录新建、编辑、启用、停用等所有变更）</div>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>日志类型</th><th>触发时机</th></tr></thead>
+        <tbody>
+          <tr><td>新建</td><td>首次创建渠道时</td></tr>
+          <tr><td>编辑</td><td>修改渠道任意字段后保存</td></tr>
+          <tr><td>启用</td><td>将渠道从停用状态切换为启用</td></tr>
+          <tr><td>停用</td><td>将渠道从启用状态切换为停用</td></tr>
+          <tr><td>删除</td><td>执行删除操作时</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 5. 标准操作流程 ===== -->
+<div class="section" id="workflow">
+  <div class="section-header">
+    <h2>五、标准操作流程总览</h2>
+    <p>开通一个市场金融服务的完整操作路径</p>
+  </div>
+  <div class="section-body">
+
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:12px;color:#374151;">开通流程</h3>
+    <div class="flow">
+      <div class="flow-item">① 市场列表<br><small style="opacity:.8;">找到目标市场</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item">② 配置市场<br><small style="opacity:.8;">开启金融系统、设置前缀</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item">③ 新增金融公司<br><small style="opacity:.8;">录入机构信息</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item">④ 新增资金渠道<br><small style="opacity:.8;">配置贷款产品参数</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item">✅ 完成初始化<br><small style="opacity:.8;">车商可发起用款申请</small></div>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:600;margin:24px 0 12px;color:#374151;">修改渠道参数流程</h3>
+    <div class="flow">
+      <div class="flow-item">① 找到目标渠道</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item">② 点击「停用」<br><small style="opacity:.8;">确认弹窗后停用</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item">③ 点击「编辑」<br><small style="opacity:.8;">修改放款比例等参数</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item">④ 保存修改</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item">⑤ 点击「启用」<br><small style="opacity:.8;">恢复渠道服务</small></div>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:600;margin:24px 0 12px;color:#374151;">常见问题</h3>
+    <table class="data-table">
+      <thead><tr><th>问题</th><th>原因</th><th>解决方法</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>编辑渠道时放款比例是灰色无法修改</td>
+          <td>该渠道处于「启用」状态，核心参数被锁定</td>
+          <td>先点击「停用」，再重新进入编辑</td>
+        </tr>
+        <tr>
+          <td>新增渠道时找不到想要的金融公司</td>
+          <td>对应金融公司尚未录入，或未关联该市场</td>
+          <td>先在金融公司列表新增该公司（关联正确市场）</td>
+        </tr>
+        <tr>
+          <td>车商反馈无法选择某渠道申请用款</td>
+          <td>渠道可能处于「停用」状态</td>
+          <td>查看渠道状态列，如为「停用」则点击「启用」恢复</td>
+        </tr>
+        <tr>
+          <td>未估价车辆无法提交用款申请</td>
+          <td>市场配置中「未估价车辆可申请用款」设置为关闭</td>
+          <td>确认是否需要开启该开关，与市场管理方确认后更改配置</td>
+        </tr>
+        <tr>
+          <td>金融订单编号前缀需要更改</td>
+          <td>前缀一旦保存后系统锁定，不允许修改</td>
+          <td>该字段设计上不支持更改，请在初次配置时谨慎填写</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- 版脚 -->
+<div style="text-align:center;color:#9ca3af;font-size:12px;margin-top:40px;padding:20px 0;border-top:1px solid #e5e7eb;">
+  智慧车市 · 内部培训文档 · 如有疑问请联系产品团队
+</div>
+
+</div><!-- /container -->
+</body>
+</html>

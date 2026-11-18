@@ -1,0 +1,114 @@
+{
+  "_annotation": "#AI:mgmt:file",
+  "package": "信车PC端设计规范_20261027",
+  "snapshot_date": "2026-10-27",
+  "scope": "信车PC管理后台",
+  "files": [
+    {
+      "package_path": "业务模块说明/冻结车管理业务说明.md",
+      "source_path": "xinche-pc/冻结车_二期/冻结车管理_设计规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "1ff16b45714a914215f8418a9bcac1a25db518c99c8603e63b65b6f7a69062bb",
+      "package_sha256": "79803e1275c7b229949845cda2a100c262c7f00399a3162312264379b5080e0a",
+      "export_changes": "仅包内相对链接调整"
+    },
+    {
+      "package_path": "业务模块说明/资金渠道管理业务说明.md",
+      "source_path": "xinche-pc/资金渠道管理/资金渠道管理页面规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "6852e9d6c84d1f78c1df5da41deb9040708fdd3845109acf2f73da1027b721f7",
+      "package_sha256": "3b705b6e19d4292707785607e1b24354132fbb96fb497088ed6002aef2a97d29",
+      "export_changes": "仅包内相对链接调整"
+    },
+    {
+      "package_path": "业务模块说明/金融初始化业务说明.md",
+      "source_path": "xinche-pc/capital-channel-prototype/金融初始化/金融初始化页面规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "b55585df643f092caab0fef41fd84cd387a729c5c1963020d40f481371d75488",
+      "package_sha256": "6de095a1762533612cd64bdaaec7760902715f4774ee135ffe1c0257c24de0ff",
+      "export_changes": "仅包内相对链接调整"
+    },
+    {
+      "package_path": "公共规范/INDEX.md",
+      "source_path": "xinche-pc/PC端设计规范/INDEX.md",
+      "source": "工作区现行索引，2026-10-27取样",
+      "source_sha256": "9e3dbdc70eda944be0352939b54b944c55dabf596bcca8ff812344d9d3d90330",
+      "package_sha256": "acac0a1150b16a02e7f6502c17e4e8df71eddff73ea3397b997f6a0ebcc7023b",
+      "export_changes": "仅调整包内链接、增加导出说明、省略历史快照入口及本机目录树；不改写规范条款"
+    },
+    {
+      "package_path": "公共规范/tab筛选组件规范.md",
+      "source_path": "xinche-pc/PC端设计规范/tab筛选组件规范.md",
+      "source": "本地Git已存档正式文件；当前工作目录缺失；仅导出，不恢复工作区",
+      "commit": "a9d2add34029432f8382e4f0ec1f00b78cb2a177",
+      "commit_date": "2026-10-13T17:53:38+08:00",
+      "source_sha256": "191e760c2db03241c7738be6385f1f889d923c3d8fe26d3201919d071ad1cdba",
+      "package_sha256": "191e760c2db03241c7738be6385f1f889d923c3d8fe26d3201919d071ad1cdba",
+      "export_changes": "原文导出"
+    },
+    {
+      "package_path": "公共规范/侧边栏组件规范.md",
+      "source_path": "xinche-pc/PC端设计规范/侧边栏组件规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "4240e53018c7e359a2880b549caba69f9cfa88e1debc52cb966eaee0135d8afa",
+      "package_sha256": "4240e53018c7e359a2880b549caba69f9cfa88e1debc52cb966eaee0135d8afa",
+      "export_changes": "原文复制"
+    },
+    {
+      "package_path": "公共规范/全局视觉规范.md",
+      "source_path": "xinche-pc/PC端设计规范/全局视觉规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "0ea618efa1b513ed6788b59f4d2a6e2d1eed97dd0b9de5f28fff3b82364a8580",
+      "package_sha256": "0ea618efa1b513ed6788b59f4d2a6e2d1eed97dd0b9de5f28fff3b82364a8580",
+      "export_changes": "原文复制"
+    },
+    {
+      "package_path": "公共规范/弹窗与抽屉规范.md",
+      "source_path": "xinche-pc/PC端设计规范/弹窗与抽屉规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "5acc52a045f05e28cd418f729dde1639c1be50ba95cc98f5d2cfe0ca7135ddd5",
+      "package_sha256": "5acc52a045f05e28cd418f729dde1639c1be50ba95cc98f5d2cfe0ca7135ddd5",
+      "export_changes": "原文复制"
+    },
+    {
+      "package_path": "公共规范/按钮组件规范.md",
+      "source_path": "xinche-pc/PC端设计规范/按钮组件规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "d51b13f763ba5ac7fb580169cabb89dd780bc2a697556d404eb5d3dbf48ffbbd",
+      "package_sha256": "d51b13f763ba5ac7fb580169cabb89dd780bc2a697556d404eb5d3dbf48ffbbd",
+      "export_changes": "原文复制"
+    },
+    {
+      "package_path": "公共规范/标签组件规范.md",
+      "source_path": "xinche-pc/PC端设计规范/标签组件规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "dd6773713faf1761dcb9975ba1d381d237a0406f6d5bcc65841789b8381201f4",
+      "package_sha256": "dd6773713faf1761dcb9975ba1d381d237a0406f6d5bcc65841789b8381201f4",
+      "export_changes": "原文复制"
+    },
+    {
+      "package_path": "公共规范/表单组件规范.md",
+      "source_path": "xinche-pc/PC端设计规范/表单组件规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "cc0c89580e0cf8935b8c69b4e4d19f5a90021e0a0f63bcd99b2ad70628c6a1ba",
+      "package_sha256": "cc0c89580e0cf8935b8c69b4e4d19f5a90021e0a0f63bcd99b2ad70628c6a1ba",
+      "export_changes": "原文复制"
+    },
+    {
+      "package_path": "公共规范/表格组件规范.md",
+      "source_path": "xinche-pc/PC端设计规范/表格组件规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "b52c3e4c85913540073cf6e7f64b5e9c50a18c1badd4b92d7a711fd05d59cc2c",
+      "package_sha256": "b52c3e4c85913540073cf6e7f64b5e9c50a18c1badd4b92d7a711fd05d59cc2c",
+      "export_changes": "原文复制"
+    },
+    {
+      "package_path": "公共规范/页面整体布局规范.md",
+      "source_path": "xinche-pc/PC端设计规范/页面整体布局规范.md",
+      "source": "工作区现行文件，2026-10-27取样",
+      "source_sha256": "d50ea12baf2bb93d1977e2aea34485bb899d8d6c8f3bc58e01f5789df4b38ea5",
+      "package_sha256": "d50ea12baf2bb93d1977e2aea34485bb899d8d6c8f3bc58e01f5789df4b38ea5",
+      "export_changes": "原文复制"
+    }
+  ]
+}

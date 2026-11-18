@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>钥匙柜地址变更 · 交互预览</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* ===== 设计规范 tokens（详见 ../设计规范-钥匙柜地址变更.md，均直接取自 Figma，按 /2 比例换算） ===== */
+  :root{
+    --rail-bg:#ffffff;
+    --page-bg:#eef0f4;
+    --panel-border:#e2e5ec;
+    --rail-ink:#1d2c4f;
+    --rail-muted:#6b7285;
+    --rail-faint:#9298a8;
+    --rail-track:#e9ebf1;
+
+    /* app（手机内容）配色 —— 严格取自 Figma */
+    --accent:#FD5530;
+    --teal:#00A780;
+    --blue:#618DFF;
+    --ink:#333333;
+    --ink-strong:#000000;
+    --muted:#8D8D8D;
+    --faint:#999999;
+    --chip-bg:#F0F3FA;
+    --tag-bg:#F3F5FC;
+    --tag-ink:#1E3670;
+    --split-border:#B6C8EF;
+    --split-ink:#1D2C4F;
+    --border:#EDEDED;
+    --page-app-bg:#F7F8FA;
+    --navy-1:#1D2C4F;
+    --navy-2:#303974;
+    --accent-soft:#FFF1EE;
+    --accent-soft-border:#FFD2C4;
+    --radio-off:#CBD2E3;
+
+    --shadow: 0 1px 2px rgba(29,44,79,.06), 0 8px 24px rgba(29,44,79,.08);
+  }
+  :root[data-theme="dark"]{
+    --page-bg:#12131a; --rail-bg:#191b23; --panel-border:#2a2d38;
+    --rail-ink:#e9ebf3; --rail-muted:#a2a8ba; --rail-faint:#767c8e; --rail-track:#2a2d38;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.45);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --page-bg:#12131a; --rail-bg:#191b23; --panel-border:#2a2d38;
+      --rail-ink:#e9ebf3; --rail-muted:#a2a8ba; --rail-faint:#767c8e; --rail-track:#2a2d38;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.45);
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:var(--page-bg);color:var(--rail-ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI","Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;}
+
+  .app-shell{min-height:100vh;}
+
+  /* ---------- Stage ---------- */
+  .stage{display:flex;align-items:flex-start;justify-content:center;padding:36px 24px 60px;overflow-y:auto;}
+  .phone{width:375px;flex:none;}
+  .phone-screen{background:var(--page-app-bg);border-radius:20px;overflow:hidden;height:800px;position:relative;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+
+  /* 顶部整体导航模块严格取自 Figma：750×176(=375×88px)，其中状态栏 750×88(=375×44px)；整块白底 */
+  /* 状态栏文字/图标严格按 Figma 750x92 状态栏（"9:41" 30px SF Pro Semibold）/2 还原为 15px，此前按未换算的比例缩小了一倍 */
+  .statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:15px;font-weight:600;letter-spacing:-0.2px;color:#000;flex:none;background:#fff;}
+  .statusbar .icons{display:flex;align-items:center;gap:5px;}
+  .statusbar .icons svg{display:block;}
+  .statusbar .battery{width:22px;height:11px;border:1px solid #000;border-radius:3px;position:relative;opacity:.95;}
+  .statusbar .battery::before{content:"";position:absolute;inset:1.5px;width:16px;background:#000;border-radius:1px;}
+  .statusbar .battery::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:5px;background:#000;border-radius:0 1px 1px 0;}
+
+  /* 导航栏严格取自 Figma "Nva" 组件（节点1:82）：图标框 48×48(=24×24px)，图标本身 18×32(=9×16px) 居中，非拉伸 */
+  .navbar{flex:none;display:flex;align-items:center;justify-content:center;position:relative;height:44px;background:#fff;border-bottom:1px solid var(--border);}
+  .scene[data-scene-panel="list"] .navbar{border-bottom:none;}
+  .navbar .back{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:none;background:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .navbar .back img{width:9px;height:16px;display:block;}
+  .navbar .title{font-size:16px;font-weight:600;color:rgba(0,0,0,.9);}
+
+  .screen-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .screen-body::-webkit-scrollbar{width:0;}
+  .scene{display:none;flex-direction:column;height:100%;}
+  .scene.active{display:flex;}
+
+
+  /* ===== 列表页（严格对照 iOS 导航规范 + Figma 列表头部：Tab / 筛选行 / 结果计数） ===== */
+  .list-tabs{flex:none;background:#fff;display:flex;padding-top:10px;}
+  .list-tab{flex:1;text-align:center;border:none;background:none;cursor:pointer;font-size:14px;font-weight:400;color:#4c4c4c;padding:0 0 8px;position:relative;}
+  .list-tab.active{font-weight:600;color:var(--accent);}
+  .list-tab.active::after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:20px;height:2px;border-radius:2px;background:var(--accent);}
+  .filter-row{flex:none;background:#fff;display:flex;justify-content:space-between;padding:12px 10px;border-bottom:1px solid var(--border);}
+  .filter-item{display:inline-flex;align-items:center;gap:2px;font-size:12px;color:#4c4c4c;white-space:nowrap;}
+  .filter-item img{width:7px;height:4.5px;}
+  /* 上方距筛选行、下方距首张卡片均为 20(设计稿)→10px；下方间距由 .list-body 的 padding-top 提供，此处不重复加底部padding，避免叠加成20px */
+  .count-row{flex:none;background:var(--page-app-bg);display:flex;align-items:center;gap:16px;padding:10px 14px 0;}
+  .count-row .line{flex:1;height:1px;background:#d9d9d9;}
+  .count-row .count-text{flex:none;font-size:12px;color:#666;}
+  .list-body{padding:10px 10px 24px;display:flex;flex-direction:column;gap:10px;background:var(--page-app-bg);}
+  .list-body[hidden]{display:none;}
+
+  .order-card{background:#fff;border-radius:12px;padding:12px;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(29,44,79,.05);cursor:pointer;}
+  .top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:9px;}
+  .split-pill{display:inline-flex;height:18px;border:1px solid var(--split-border);border-radius:2px;overflow:hidden;flex:none;}
+  .split-pill .seg{display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:500;color:var(--split-ink);white-space:nowrap;}
+  .split-pill .seg.k{background:var(--tag-bg);}
+  .split-pill .seg.v{background:#fff;}
+  .status-text{font-size:11px;font-weight:600;color:var(--accent);white-space:nowrap;text-align:right;}
+
+  .tag-row{display:flex;gap:6px;margin-bottom:9px;}
+  .type-tag{font-size:10px;font-weight:500;padding:2px 4px;border-radius:3px;background:var(--tag-bg);color:var(--tag-ink);white-space:nowrap;}
+
+  .title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:9px;}
+  .model{font-size:13px;font-weight:600;color:var(--ink-strong);line-height:1.4;}
+  .urgent-flag{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#fff;background:var(--accent);padding:0 6px;height:18px;border-radius:9px;flex:none;}
+  .urgent-flag[hidden]{display:none;}
+  .urgent-flag img{width:11px;height:11px;}
+
+  .stat-boxes{display:flex;flex-direction:column;gap:6px;position:absolute;right:12px;top:44px;}
+  .stat-box{width:78px;border-radius:6px;overflow:hidden;text-align:center;background:#fff;}
+  .stat-box .hd{font-size:11px;font-weight:600;color:#fff;padding:3px 0;display:flex;align-items:center;justify-content:center;gap:2px;}
+  .stat-box .hd img{width:9px;height:12px;}
+  .stat-box .val{padding:5px 0 6px;font-variant-numeric:tabular-nums;}
+  .stat-box.cab{height:45px;border:1px solid var(--accent);}
+  .stat-box.cab .hd{background:var(--accent);height:19.5px;}
+  .stat-box.cab .val{color:var(--accent);font-size:16px;font-weight:600;}
+  .stat-box.slot{height:39px;border:1px solid var(--blue);}
+  .stat-box.slot .hd{background:var(--blue);height:19.5px;}
+  .stat-box.slot .val{color:var(--blue);font-size:11px;font-weight:400;}
+
+  .info-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:9px;}
+  .info-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink);}
+  .info-row .k{flex:none;background:var(--chip-bg);color:var(--ink);font-size:10px;padding:2.5px 6px;border-radius:3px;}
+  .meta-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink);margin-bottom:9px;gap:8px;}
+  .meta-row span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .meta-row span:last-child{flex:none;}
+
+  /* 按钮宽度固定 136(Figma)→68px，"更多"贴左，其余按钮组贴右、打开柜门在最右 */
+  .card-actions{display:flex;align-items:center;justify-content:space-between;gap:6px;padding-top:8px;border-top:1px solid var(--border);}
+  .card-actions button{
+    width:68px;flex:none;min-width:0;height:28px;border-radius:5px;font-size:12px;font-weight:500;
+    border:1px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;padding:0 3px;
+  }
+  .card-actions button:active{transform:scale(.97);}
+  .card-actions button.solid{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .card-actions button.teal{background:var(--teal);color:#fff;border-color:var(--teal);}
+  .card-actions .right-group{display:flex;gap:6px;}
+  .card-actions .locked-note{font-size:10.5px;color:var(--faint);display:flex;align-items:center;}
+  .card-actions button[hidden]{display:none;}
+
+  /* ===== 详情页 ===== */
+  .detail-hero{flex:none;background:linear-gradient(160deg,var(--navy-2) 0%, var(--navy-1) 100%);padding:16px 16px 34px;color:#fff;}
+  .detail-hero .title{font-size:23px;font-weight:600;}
+  .detail-card{background:#fff;border-radius:12px;margin:-15px 14px 0;position:relative;z-index:1;overflow:hidden;}
+  .detail-card h3{margin:0;padding:14px 14px 4px;font-size:13px;font-weight:700;color:#111;}
+  /* 行间距按下划线间距 98(Figma)→49px 还原；下划线左右各内缩 28(Figma)→14px，不贴卡片边缘 */
+  .detail-row{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:16px 14px;font-size:12px;}
+  .detail-row::before{content:"";position:absolute;left:14px;right:14px;top:0;height:1px;background:var(--border);}
+  .detail-row:first-child::before{display:none;}
+  .detail-row .k{color:var(--muted);flex:none;}
+  .detail-row .v{color:var(--ink);text-align:right;}
+  .detail-row .v.multiline{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+  .detail-row .v .chip-sm{background:var(--tag-bg);color:var(--tag-ink);font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:6px;}
+
+  .timeline-card{background:#fff;border-radius:12px;margin:12px 14px 0;box-shadow:0 4px 14px rgba(29,44,79,.06);}
+  .timeline-card h3{margin:0;padding:14px 14px 6px;font-size:13px;font-weight:700;color:#111;}
+  .timeline{list-style:none;margin:0;padding:2px 14px 14px;display:flex;flex-direction:column;gap:13px;}
+  .timeline li{display:flex;gap:9px;}
+  .timeline .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:6px;flex:none;box-shadow:0 0 0 3px #eaf0ff;}
+  .timeline .body b{display:block;font-size:12px;color:#111;}
+  .timeline .body span{font-size:10.5px;color:var(--faint);}
+  .timeline li.new .dot{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  .timeline li.new .body b{color:var(--accent);}
+
+  .bottombar{flex:none;background:#fff;border-top:1px solid var(--border);display:flex;padding:8px 16px 16px;}
+  .bottombar .action{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;}
+  .bottombar .action[hidden]{display:none;}
+  .bottombar .action .ic{display:flex;align-items:center;justify-content:center;}
+  .bottombar .action .ic svg{width:20px;height:20px;}
+  .bottombar .action span{font-size:11px;color:var(--ink);}
+  .bottombar .action.primary span{color:var(--accent);font-weight:600;}
+
+  /* ===== 表单类页面（变更钥匙地址 / 存入钥匙） ===== */
+  .scene[data-scene-panel="deposit"]{background:#fff;}
+  .scene[data-scene-panel="change"]{background:#fff;}
+  .form-section{background:#fff;margin:14px 14px 0;border-radius:12px;overflow:hidden;}
+  /* 页面背景改为白色后，"当前钥匙柜地址"独立成卡片，用品牌主色描边+5%透明度橘色底色与页面区分 */
+  .current-cabinet-card{border:1px solid var(--accent);background:rgba(253,85,48,.05);}
+  .current-cabinet-card .field:last-child{border-bottom:none;}
+  /* 文案上下留白改为对称（17/17，总高与原24/10一致），使文案在卡片矩形内垂直居中 */
+  .current-cabinet-card .field{padding:17px 14px;}
+  /* 字段行距：标题距上 24px，取值距下方分隔线 10px */
+  .field{padding:24px 14px 10px;border-top:1px solid var(--border);}
+  .field:first-child{border-top:none;}
+  .form-section .field:last-child{border-bottom:1px solid var(--border);}
+  .field .label{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+  .field .label .req{color:var(--accent);}
+  .field .value-row{display:flex;align-items:center;justify-content:space-between;font-size:14px;}
+  .field .value{color:var(--ink);}
+  .field .value.placeholder{color:var(--faint);}
+  .field .unit{color:var(--ink-strong);font-weight:700;flex:none;}
+  .field.readonly .value{color:var(--muted);}
+  .field.disabled-field .value-row{opacity:.5;}
+  /* fanhui.svg 导出尺寸 32×32 是 750 画布(2倍图)下的原始像素，页面按 1倍(375) 展示需 /2 → 16×16 */
+  .chevron-ic{width:16px;height:16px;flex:none;}
+  .field.tappable{cursor:pointer;}
+
+  /* 底部按钮统一规范：距上方分隔线 6px，距页面底部 40px，与 .sheet-footer 一致，所有底部按钮沿用同一套数值 */
+  .primary-cta{margin-top:auto;flex:none;background:#fff;border-top:1px solid var(--border);padding:6px 20px 40px;}
+  .primary-cta button{width:100%;height:44px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+  .primary-cta button:disabled{background:#f5c2b3;cursor:not-allowed;}
+
+  .textarea-field{background:#fff;border:1px solid var(--border);border-radius:6px;padding:12px;margin:14px 14px 0;}
+  .textarea-field .label{font-size:14px;font-weight:500;margin-bottom:6px;color:var(--ink);}
+  .textarea-field .ph{color:var(--faint);font-size:14px;}
+
+  /* ===== 存入钥匙页专属精修 ===== */
+  .scene[data-scene-panel="deposit"] .navbar{border-bottom:none;}
+  /* 设计稿标注 36px 内容边距（2倍图）/2 = 18px 实际代码尺寸；只在 field 一处收口，不再让 form-section 的外边距重复叠加一层 */
+  .scene[data-scene-panel="deposit"] .form-section{margin:10px 0 0;}
+  /* 设计稿：模块间距40→20px，取值距下划线(红)12→6px，标题距取值(蓝)28→14px，两者相加=20px 模块间距，吻合 */
+  .scene[data-scene-panel="deposit"] .field{position:relative;padding:14px 18px 6px;border-top:none;}
+  .scene[data-scene-panel="deposit"] .field:first-child{padding-top:0;}
+  .scene[data-scene-panel="deposit"] .field::before{content:"";position:absolute;left:18px;right:18px;top:0;height:1px;background:var(--border);}
+  .scene[data-scene-panel="deposit"] .field:first-child::before{display:none;}
+  .scene[data-scene-panel="deposit"] .form-section .field:last-child{border-bottom:none;}
+  .scene[data-scene-panel="deposit"] .form-section .field:last-child::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:1px;background:var(--border);}
+  .scene[data-scene-panel="deposit"] .field .label{gap:2px;margin-bottom:14px;}
+  .scene[data-scene-panel="deposit"] .field .label .req{margin-left:-8px;}
+  .scene[data-scene-panel="deposit"] .field.tappable{cursor:pointer;}
+  .inline-edit-input{border:none;outline:none;background:transparent;font-size:14px;font-family:inherit;color:var(--ink);width:100%;padding:0;}
+
+  /* 打开柜门确认弹窗（Figma node 152:413「对话框」，数值均 /2 换算） */
+  .modal-overlay{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:0 32px;}
+  .modal-overlay.open{display:flex;}
+  .confirm-modal{width:100%;max-width:311px;background:#fff;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;align-items:center;}
+  .confirm-modal-content{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 24px 0;text-align:center;width:100%;}
+  .confirm-modal-title{margin:0;font-size:16px;font-weight:600;color:rgba(0,0,0,.9);width:100%;}
+  .confirm-modal-subtitle{margin:0;font-size:14px;font-weight:400;color:rgba(0,0,0,.6);line-height:1.7;width:100%;}
+  .confirm-modal-footer{display:flex;gap:12px;align-items:center;justify-content:center;width:100%;padding:24px 24px 20px;}
+  .confirm-modal-btn{flex:1;border:none;border-radius:6px;padding:8px 16px;font-size:14px;cursor:pointer;}
+  .confirm-modal-btn.cancel{background:rgba(253,85,48,.1);color:var(--accent);font-weight:400;}
+  .confirm-modal-btn.confirm{background:var(--accent);color:#fff;font-weight:600;}
+
+  /* ===== overlays ===== */
+  .overlay{position:absolute;inset:0;background:rgba(0,0,0,0);pointer-events:none;display:flex;align-items:flex-end;z-index:30;transition:background .22s ease;}
+  .overlay.open{background:rgba(0,0,0,.6);pointer-events:auto;}
+  .sheet{width:100%;background:#fff;border-radius:16px 16px 0 0;padding:16px 0 0;transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);max-height:80%;display:flex;flex-direction:column;}
+  .overlay.open .sheet{transform:translateY(0);}
+  .sheet .sheet-title{font-size:16px;font-weight:600;text-align:center;color:#111;padding:0 20px 14px;}
+  /* 设计稿：选项间距32→16px，距底部80→40px（2倍图换算） */
+  .sheet .sheet-options{overflow-y:auto;padding:0 14px 40px;display:flex;flex-direction:column;gap:16px;}
+  .sheet-option{display:flex;align-items:center;gap:10px;padding:0 14px;height:36px;border-radius:8px;background:var(--page-app-bg);font-size:14px;color:var(--ink);cursor:pointer;}
+  .sheet-option img{width:16px;height:16px;flex:none;}
+  .sheet-option.selected{background:var(--accent-soft);color:var(--accent);font-weight:600;}
+  .sheet-option.disabled{opacity:.5;cursor:not-allowed;}
+  .sheet-option .note{margin-left:auto;font-size:10.5px;color:var(--faint);}
+  /* 底部按钮统一规范：距上方分隔线 6px，距页面/弹层底部 40px（与 .primary-cta 一致，后续所有底部按钮沿用） */
+  .sheet-footer{padding:6px 20px 40px;border-top:1px solid var(--border);}
+  .sheet-footer button{width:100%;height:44px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:16px;font-weight:600;cursor:pointer;}
+  .sheet-footer button:disabled{background:#f5c2b3;}
+
+  /* ===== 日期选择底部弹窗 ===== */
+  .date-sheet .sheet-header{position:relative;display:flex;align-items:center;justify-content:center;padding:0 20px 14px;}
+  .date-sheet .sheet-header .sheet-title{padding:0;}
+  .date-sheet .sheet-close{position:absolute;right:20px;top:0;width:20px;height:20px;border:none;background:none;padding:0;cursor:pointer;color:var(--faint);font-size:20px;line-height:20px;}
+  .month-nav{display:flex;align-items:center;justify-content:center;gap:16px;padding:2px 20px 16px;}
+  .month-nav button{border:none;background:none;font-size:15px;color:var(--faint);cursor:pointer;padding:4px;}
+  .month-nav .month-label{font-size:17px;font-weight:700;color:#111;min-width:108px;text-align:center;}
+  .weekday-row{display:flex;padding:0 14px;color:var(--faint);font-size:12px;}
+  .weekday-row span{flex:1;text-align:center;}
+  .day-grid{position:relative;display:flex;flex-wrap:wrap;padding:8px 14px 0;overflow:hidden;}
+  .day-grid .watermark{position:absolute;right:16px;top:-6px;font-size:88px;font-weight:800;color:#eef0f4;line-height:1;z-index:0;pointer-events:none;}
+  .day-cell{width:14.2857%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+  .day-cell:not(.empty){cursor:pointer;}
+  .day-cell .num{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:16px;color:#111;}
+  .day-cell.selected .num{background:var(--accent);color:#fff;font-weight:700;}
+  .date-home-indicator{width:134px;height:5px;border-radius:3px;background:#000;opacity:.85;margin:14px auto 0;}
+
+  .action-sheet-list{padding:0 14px;display:flex;flex-direction:column;}
+  .action-sheet-item{padding:15px 0;font-size:14px;color:var(--ink);cursor:pointer;text-align:center;border-bottom:1px solid var(--border);}
+  .action-sheet-item:last-child{border-bottom:none;}
+  .sheet-cancel{margin:8px 14px 18px;height:44px;border-radius:10px;border:none;background:var(--page-app-bg);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;}
+
+  .remark-modal{padding:16px 16px 0;}
+  .remark-modal textarea{width:100%;min-height:88px;border:1px solid var(--border);border-radius:6px;padding:12px;font-size:14px;font-family:inherit;color:var(--ink);resize:none;}
+  .remark-modal .counter{text-align:right;font-size:11px;color:var(--faint);margin-top:6px;}
+  .remark-modal .counter.limit{color:var(--accent);}
+  .remark-modal .btn-row{display:flex;gap:10px;padding:16px 0 18px;}
+  .remark-modal .btn-row button{flex:1;height:44px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--ink);}
+  .remark-modal .btn-row button.solid{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  .toast{position:absolute;left:50%;top:110px;transform:translate(-50%,-8px);background:rgba(20,22,30,.92);color:#fff;font-size:12px;padding:9px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:50;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+
+  @media (prefers-reduced-motion:reduce){ *{transition-duration:.001ms !important;} }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <main class="stage">
+    <div class="phone">
+      <div class="phone-screen">
+
+        <!-- ============ SCENE 1: 列表页 ============ -->
+        <section class="scene active" data-scene-panel="list">
+          <div class="statusbar"><span>9:41</span><span class="icons"><svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="0.8" fill="#000"/><rect x="5" y="5" width="3" height="7" rx="0.8" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="0.8" fill="#000"/><rect x="15" y="0" width="3" height="12" rx="0.8" fill="#000"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 10.2a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6Z" fill="#000"/><path d="M4.7 6.9a4.8 4.8 0 0 1 6.6 0" stroke="#000" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M2 4.1a8.6 8.6 0 0 1 12 0" stroke="#000" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><span class="battery"><i></i></span></span></div>
+          <div class="navbar">
+            <button class="back" data-toast="已返回上一级（示例）"><img src="assets/icons/nav-back-arrow.svg" alt="返回"></button>
+            <span class="title">钥匙柜管理</span>
+          </div>
+          <div class="list-tabs">
+            <button class="list-tab active" data-list-tab="unfinished">未完成</button>
+            <button class="list-tab" data-list-tab="finished">已完成</button>
+          </div>
+          <div class="filter-row">
+            <span class="filter-item">状态<img src="assets/icons/dropdown-chevron.svg" alt=""></span>
+            <span class="filter-item">类型<img src="assets/icons/dropdown-chevron.svg" alt=""></span>
+            <span class="filter-item">VIN<img src="assets/icons/dropdown-chevron.svg" alt=""></span>
+            <span class="filter-item">柜号<img src="assets/icons/dropdown-chevron.svg" alt=""></span>
+            <span class="filter-item">时间<img src="assets/icons/dropdown-chevron.svg" alt=""></span>
+          </div>
+          <div class="screen-body">
+            <div class="count-row"><span class="line"></span><span class="count-text">共找到18个</span><span class="line"></span></div>
+            <!-- 未完成：按开门次数分别演示 首次存入 / 非首次存入(奇数) / 取出(偶数) -->
+            <div class="list-body" data-tab-body="unfinished">
+
+              <!-- Card 1：首次存入（第1次开门） -->
+              <div class="order-card" id="card-1" data-card-tap="detail">
+                <div class="top-row">
+                  <div class="split-pill"><span class="seg k">检测订单</span><span class="seg v">5597842BD9</span></div>
+                  <span class="status-text">待检测&nbsp;&nbsp;车商待存入</span>
+                </div>
+                <div class="tag-row"><span class="type-tag">初检</span><span class="type-tag">事故排查初检</span></div>
+                <div class="title-row">
+                  <span class="model">宝马3系330i</span>
+                  <span class="urgent-flag" data-urgent-flag><img src="assets/icons/urgent-bolt.svg" alt="">加急</span>
+                </div>
+                <div class="info-rows">
+                  <div class="info-row"><span class="k">车架号</span><span>WAUAGD4L2ED02255</span></div>
+                  <div class="info-row"><span class="k">钥匙柜</span><span>B区3楼钥匙柜</span></div>
+                  <div class="info-row"><span class="k">检测师</span><span>刘老根</span></div>
+                </div>
+                <div class="meta-row"><span>锦和二手车城/恒嘉二手车行</span><span>2024-04-06 20:32</span></div>
+                <!-- 车商待存入：钥匙尚未首次存入任何钥匙柜，无原柜地址可变更，不展示"变更柜门" -->
+                <div class="card-actions">
+                  <button data-open="sheet-more-1">更多</button>
+                  <div class="right-group">
+                    <button data-urgent-btn data-urgent="true">取消加急</button>
+                    <button class="teal" data-open-deposit="1">打开柜门</button>
+                  </div>
+                </div>
+                <div class="stat-boxes">
+                  <div class="stat-box cab"><div class="hd"><img src="assets/icons/pin-icon.svg" alt="">柜门号</div><div class="val">--</div></div>
+                  <div class="stat-box slot"><div class="hd"><img src="assets/icons/pin-icon.svg" alt="">车位号</div><div class="val">--</div></div>
+                </div>
+              </div>
+
+              <!-- Card 2：非首次存入（第3次开门，奇数，选择存放钥匙柜置灰） -->
+              <div class="order-card" data-card-tap="detail">
+                <div class="top-row">
+                  <div class="split-pill"><span class="seg k">检测订单</span><span class="seg v">5597842AD9</span></div>
+                  <span class="status-text">待检测&nbsp;&nbsp;车商已存/检测师待取</span>
+                </div>
+                <div class="tag-row"><span class="type-tag">初检</span></div>
+                <div class="title-row">
+                  <span class="model">奥迪 A6L 45 TFSI</span>
+                  <span class="urgent-flag" data-urgent-flag hidden><img src="assets/icons/urgent-bolt.svg" alt="">加急</span>
+                </div>
+                <div class="info-rows">
+                  <div class="info-row"><span class="k">车架号</span><span>WAUAGD4L2ED09931</span></div>
+                  <div class="info-row"><span class="k">钥匙柜</span><span>新能源中心钥匙柜</span></div>
+                  <div class="info-row"><span class="k">检测师</span><span>王老五</span></div>
+                </div>
+                <div class="meta-row"><span>严小二精品车行</span><span>2024-04-07 20:32</span></div>
+                <div class="card-actions">
+                  <button data-open="sheet-more-2">更多</button>
+                  <div class="right-group">
+                    <button data-urgent-btn data-urgent="false">设为加急</button>
+                    <button data-goto-scene="change" class="solid">变更柜门</button>
+                    <button class="teal" data-open-deposit="3">打开柜门</button>
+                  </div>
+                </div>
+                <div class="stat-boxes">
+                  <div class="stat-box cab"><div class="hd"><img src="assets/icons/pin-icon.svg" alt="">柜门号</div><div class="val">288</div></div>
+                  <div class="stat-box slot"><div class="hd"><img src="assets/icons/pin-icon.svg" alt="">车位号</div><div class="val">56</div></div>
+                </div>
+              </div>
+
+              <!-- Card 3：取出（第2次开门，偶数，弹窗询问） -->
+              <div class="order-card" data-card-tap="detail">
+                <div class="top-row">
+                  <div class="split-pill"><span class="seg k">检测订单</span><span class="seg v">5597842AD2</span></div>
+                  <span class="status-text">待检测&nbsp;&nbsp;车商已存/检测师待取</span>
+                </div>
+                <div class="tag-row"><span class="type-tag">复检</span></div>
+                <div class="title-row">
+                  <span class="model">奔驰 GLC300L</span>
+                  <span class="urgent-flag" data-urgent-flag hidden><img src="assets/icons/urgent-bolt.svg" alt="">加急</span>
+                </div>
+                <div class="info-rows">
+                  <div class="info-row"><span class="k">车架号</span><span>WAUAGD4L2ED03311</span></div>
+                  <div class="info-row"><span class="k">钥匙柜</span><span>A区10楼新能源汽车钥匙柜</span></div>
+                </div>
+                <div class="meta-row"><span>恒嘉二手车行</span><span>2024-03-28 11:02</span></div>
+                <div class="card-actions">
+                  <button data-open="sheet-more-3">更多</button>
+                  <div class="right-group">
+                    <button data-urgent-btn data-urgent="false">设为加急</button>
+                    <button data-goto-scene="change" class="solid">变更柜门</button>
+                    <button class="teal" data-open-deposit="2">打开柜门</button>
+                  </div>
+                </div>
+                <div class="stat-boxes">
+                  <div class="stat-box cab"><div class="hd"><img src="assets/icons/pin-icon.svg" alt="">柜门号</div><div class="val">132</div></div>
+                  <div class="stat-box slot"><div class="hd"><img src="assets/icons/pin-icon.svg" alt="">车位号</div><div class="val">27</div></div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- 已完成：检测状态=检测完成/检测不通过/检测取消；车商已取出的一律不展示"打开柜门" -->
+            <div class="list-body" data-tab-body="finished" hidden>
+
+              <!-- Card F1：检测完成，车商待取（车商来取车/取钥匙 = 取出动作，开门次数按偶数处理，点击直接弹窗确认） -->
+              <div class="order-card" data-card-tap="detail">
+                <div class="top-row">
+                  <div class="split-pill"><span class="seg k">检测订单</span><span class="seg v">5597842CF1</span></div>
+                  <span class="status-text">检测完成&nbsp;&nbsp;车商待取</span>
+                </div>
+                <div class="tag-row"><span class="type-tag">初检</span></div>
+                <div class="title-row"><span class="model">丰田 凯美瑞</span></div>
+                <div class="info-rows">
+                  <div class="info-row"><span class="k">车架号</span><span>WAUAGD4L2ED07711</span></div>
+                  <div class="info-row"><span class="k">钥匙柜</span><span>负二楼钥匙柜</span></div>
+                  <div class="info-row"><span class="k">检测师</span><span>刘老根</span></div>
+                </div>
+                <div class="meta-row"><span>锦和二手车城</span><span>2024-04-05 09:12</span></div>
+                <div class="card-actions">
+                  <button data-open="sheet-more-4">更多</button>
+                  <div class="right-group">
+                    <button data-goto-scene="change" class="solid">变更柜门</button>
+                    <button class="teal" data-open-deposit="4">打开柜门</button>
+                  </div>
+                </div>
+                <div class="stat-boxes">
+                  <div class="stat-box cab"><div class="hd"><img src="assets/icons/pin-icon.svg" alt="">柜门号</div><div class="val">156</div></div>
+                  <div class="stat-box slot"><div class="hd"><img src="assets/icons/pin-icon.svg" alt="">车位号</div><div class="val">18</div></div>
+                </div>
+              </div>
+
+              <!-- Card F2：检测不通过，车商已取出 -->
+              <div class="order-card" data-card-tap="detail" data-taken="true">
+                <div class="top-row">
+                  <div class="split-pill"><span class="seg k">检测订单</span><span class="seg v">5597842CF2</span></div>
+                  <span class="status-text">检测不通过&nbsp;&nbsp;车商已取出</span>
+                </div>
+                <div class="tag-row"><span class="type-tag">复检</span></div>
+                <div class="title-row"><span class="model">大众 帕萨特</span></div>
+                <div class="info-rows">
+                  <div class="info-row"><span class="k">车架号</span><span>WAUAGD4L2ED08822</span></div>
+                  <div class="info-row"><span class="k">钥匙柜</span><span>新能源中心钥匙柜</span></div>
+                </div>
+                <div class="meta-row"><span>恒嘉二手车行</span><span>2024-03-30 16:40</span></div>
+                <div class="card-actions">
+                  <button data-open="sheet-more-5">更多</button>
+                  <button data-view-detail>查看详情</button>
+                </div>
+              </div>
+
+              <!-- Card F3：检测取消，车商已取出 -->
+              <div class="order-card" data-card-tap="detail" data-taken="true">
+                <div class="top-row">
+                  <div class="split-pill"><span class="seg k">检测订单</span><span class="seg v">5597842CF3</span></div>
+                  <span class="status-text">检测取消&nbsp;&nbsp;车商已取出</span>
+                </div>
+                <div class="tag-row"><span class="type-tag">初检</span></div>
+                <div class="title-row"><span class="model">本田 CR-V</span></div>
+                <div class="info-rows">
+                  <div class="info-row"><span class="k">车架号</span><span>WAUAGD4L2ED09933</span></div>
+                  <div class="info-row"><span class="k">钥匙柜</span><span>A区10楼新能源汽车钥匙柜</span></div>
+                </div>
+                <div class="meta-row"><span>严小二精品车行</span><span>2024-03-22 10:05</span></div>
+                <div class="card-actions">
+                  <button data-open="sheet-more-6">更多</button>
+                  <button data-view-detail>查看详情</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="overlay" data-overlay="sheet-more-1">
+            <div class="sheet">
+              <div class="sheet-title">更多操作</div>
+              <div class="action-sheet-list">
+                <div class="action-sheet-item" data-close data-toast="已拨打车商联系电话（示例）">联系车商</div>
+                <div class="action-sheet-item" data-close data-toast="已打开分配订单面板（示例）">分配订单</div>
+              </div>
+              <button class="sheet-cancel" data-close>取消</button>
+            </div>
+          </div>
+          <div class="overlay" data-overlay="sheet-more-2">
+            <div class="sheet">
+              <div class="sheet-title">更多操作</div>
+              <div class="action-sheet-list">
+                <div class="action-sheet-item" data-close data-toast="已拨打车商联系电话（示例）">联系车商</div>
+                <div class="action-sheet-item" data-close data-toast="已打开分配订单面板（示例）">分配订单</div>
+              </div>
+              <button class="sheet-cancel" data-close>取消</button>
+            </div>
+          </div>
+          <div class="overlay" data-overlay="sheet-more-3">
+            <div class="sheet">
+              <div class="sheet-title">更多操作</div>
+              <div class="action-sheet-list">
+                <div class="action-sheet-item" data-close data-toast="已拨打车商联系电话（示例）">联系车商</div>
+                <div class="action-sheet-item" data-close data-toast="已打开分配订单面板（示例）">分配订单</div>
+              </div>
+              <button class="sheet-cancel" data-close>取消</button>
+            </div>
+          </div>
+          <div class="overlay" data-overlay="sheet-more-4">
+            <div class="sheet">
+              <div class="sheet-title">更多操作</div>
+              <div class="action-sheet-list">
+                <div class="action-sheet-item" data-close data-toast="已拨打车商联系电话（示例）">联系车商</div>
+                <div class="action-sheet-item" data-close data-toast="已打开分配订单面板（示例）">分配订单</div>
+              </div>
+              <button class="sheet-cancel" data-close>取消</button>
+            </div>
+          </div>
+          <div class="overlay" data-overlay="sheet-more-5">
+            <div class="sheet">
+              <div class="sheet-title">更多操作</div>
+              <div class="action-sheet-list">
+                <div class="action-sheet-item" data-close data-toast="已拨打车商联系电话（示例）">联系车商</div>
+              </div>
+              <button class="sheet-cancel" data-close>取消</button>
+            </div>
+          </div>
+          <div class="overlay" data-overlay="sheet-more-6">
+            <div class="sheet">
+              <div class="sheet-title">更多操作</div>
+              <div class="action-sheet-list">
+                <div class="action-sheet-item" data-close data-toast="已拨打车商联系电话（示例）">联系车商</div>
+              </div>
+              <button class="sheet-cancel" data-close>取消</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SCENE 2: 详情页 ============ -->
+        <section class="scene" data-scene-panel="detail">
+          <div class="statusbar"><span>9:41</span><span class="icons"><svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="0.8" fill="#000"/><rect x="5" y="5" width="3" height="7" rx="0.8" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="0.8" fill="#000"/><rect x="15" y="0" width="3" height="12" rx="0.8" fill="#000"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 10.2a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6Z" fill="#000"/><path d="M4.7 6.9a4.8 4.8 0 0 1 6.6 0" stroke="#000" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M2 4.1a8.6 8.6 0 0 1 12 0" stroke="#000" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><span class="battery"><i></i></span></span></div>
+          <div class="navbar"><button class="back" data-goto-scene="list"><img src="assets/icons/nav-back-arrow.svg" alt="返回"></button><span class="title">订单详情</span></div>
+          <div class="screen-body">
+            <div class="detail-hero"><div class="title" id="detail-status-title">市场已存入</div></div>
+            <div class="detail-card">
+              <h3>订单信息</h3>
+              <div class="detail-row"><span class="k">质押订单号</span><span class="v">XCJR20251016002<span class="chip-sm">待放款</span></span></div>
+              <div class="detail-row"><span class="k">抵押车辆VIN</span><span class="v multiline"><span>WAUAGD4L2ED02255</span><span>WAUAGD4L2ED02255</span></span></div>
+              <div class="detail-row"><span class="k">申请车商</span><span class="v">严小二精品车行</span></div>
+              <div class="detail-row"><span class="k">联系电话</span><span class="v">18700992566</span></div>
+              <div class="detail-row"><span class="k">柜门号</span><span class="v">018</span></div>
+              <div class="detail-row"><span class="k">钥匙柜地址</span><span class="v">新能源2楼</span></div>
+              <div class="detail-row"><span class="k">钥匙柜状态</span><span class="v">已关闭</span></div>
+              <div class="detail-row"><span class="k">存入时间</span><span class="v">2024-04-07 20:32</span></div>
+              <div class="detail-row"><span class="k">创建时间</span><span class="v">2024-04-06 20:32</span></div>
+              <div class="detail-row"><span class="k">备注</span><span class="v" id="remark-value">-</span></div>
+            </div>
+
+            <div class="timeline-card">
+              <h3>订单流转</h3>
+              <ul class="timeline" id="timeline-list">
+                <li><div class="dot"></div><div class="body"><b>打开柜门</b><span>2026-01-12 13:43 · 市场管理员：王五</span></div></li>
+                <li><div class="dot"></div><div class="body"><b>生成订单</b><span>2026-01-12 11:32</span></div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="bottombar">
+            <button class="action" data-toast="已拨打车商联系电话（示例）">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4h3l1.5 4-2 1.5a11 11 0 0 0 5.5 5.5L16 13l4 1.5v3a2 2 0 0 1-2.18 2A17 17 0 0 1 4.5 6.18 2 2 0 0 1 6.5 4Z" stroke="#465178" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+              <span>联系车商</span>
+            </button>
+            <button class="action" id="detail-open-door-btn" data-open-deposit="1">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#00A780" stroke-width="1.6" stroke-linecap="round"/><rect x="5" y="11" width="14" height="9" rx="2" stroke="#00A780" stroke-width="1.6"/></svg></span>
+              <span>打开柜门</span>
+            </button>
+            <button class="action primary" id="edit-remark-btn" data-open="sheet-remark">
+              <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M15.5 4.5 19.5 8.5 8 20H4V16L15.5 4.5Z" stroke="#FD5530" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+              <span>编辑备注</span>
+            </button>
+          </div>
+
+          <div class="overlay" data-overlay="sheet-remark">
+            <div class="sheet">
+              <div class="sheet-title">编辑备注</div>
+              <div class="remark-modal">
+                <textarea id="remark-input" maxlength="20" placeholder="请输入内容，20字以内"></textarea>
+                <div class="counter" id="remark-counter">0/20</div>
+                <div class="btn-row"><button data-close>取消</button><button class="solid" id="remark-save">保存</button></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SCENE 3: 变更钥匙地址 ============ -->
+        <section class="scene" data-scene-panel="change">
+          <div class="statusbar"><span>9:41</span><span class="icons"><svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="0.8" fill="#000"/><rect x="5" y="5" width="3" height="7" rx="0.8" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="0.8" fill="#000"/><rect x="15" y="0" width="3" height="12" rx="0.8" fill="#000"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 10.2a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6Z" fill="#000"/><path d="M4.7 6.9a4.8 4.8 0 0 1 6.6 0" stroke="#000" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M2 4.1a8.6 8.6 0 0 1 12 0" stroke="#000" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><span class="battery"><i></i></span></span></div>
+          <div class="navbar"><button class="back" data-goto-scene="list"><img src="assets/icons/nav-back-arrow.svg" alt="返回"></button><span class="title">变更钥匙地址</span></div>
+          <div class="screen-body">
+            <div class="form-section current-cabinet-card">
+              <div class="field readonly">
+                <div class="label">当前钥匙柜地址</div>
+                <div class="value-row"><span class="value" id="change-current">负二楼钥匙柜 · 018号柜门</span></div>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="field tappable" data-open="sheet-cabinet-change">
+                <div class="label"><span class="req">*</span>选择新的存放钥匙柜</div>
+                <div class="value-row">
+                  <span class="value placeholder" id="change-new-value">请选择存放钥匙柜</span>
+                  <img class="chevron-ic" src="assets/icons/fanhui.svg" alt="">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="primary-cta"><button id="change-confirm-btn" disabled>变更柜门</button></div>
+
+          <div class="overlay" data-overlay="sheet-cabinet-change">
+            <div class="sheet">
+              <div class="sheet-title">请选择存放钥匙柜</div>
+              <div class="sheet-options">
+                <div class="sheet-option disabled"><img src="assets/icons/circle-unselected.svg" alt=""><span>负二楼钥匙柜</span><span class="note">当前钥匙柜</span></div>
+                <div class="sheet-option" data-select-cabinet="新能源中心钥匙柜"><img class="radio-ic" src="assets/icons/circle-unselected.svg" alt=""><span>新能源中心钥匙柜</span></div>
+                <div class="sheet-option" data-select-cabinet="A区10楼新能源汽车钥匙柜"><img class="radio-ic" src="assets/icons/circle-unselected.svg" alt=""><span>A区10楼新能源汽车钥匙柜</span></div>
+                <div class="sheet-option disabled"><img src="assets/icons/circle-unselected.svg" alt=""><span>B区3楼钥匙柜</span><span class="note">已无空余柜门</span></div>
+              </div>
+              <div class="sheet-footer"><button data-close>确定</button></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SCENE 4: 存入钥匙 ============ -->
+        <section class="scene" data-scene-panel="deposit">
+          <div class="statusbar"><span>9:41</span><span class="icons"><svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="0.8" fill="#000"/><rect x="5" y="5" width="3" height="7" rx="0.8" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="0.8" fill="#000"/><rect x="15" y="0" width="3" height="12" rx="0.8" fill="#000"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 10.2a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6Z" fill="#000"/><path d="M4.7 6.9a4.8 4.8 0 0 1 6.6 0" stroke="#000" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M2 4.1a8.6 8.6 0 0 1 12 0" stroke="#000" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><span class="battery"><i></i></span></span></div>
+          <div class="navbar"><button class="back" data-goto-scene="list"><img src="assets/icons/nav-back-arrow.svg" alt="返回"></button><span class="title">存入钥匙</span></div>
+
+          <div class="screen-body" id="deposit-form-wrap">
+            <div class="form-section">
+              <div class="field tappable" data-editable="deposit-price" data-input-type="number">
+                <div class="label"><span class="req">*</span>车辆零售价</div>
+                <div class="value-row"><span class="value" id="deposit-price" data-filled="13" data-placeholder="请输入车辆零售价">请输入车辆零售价</span><span class="unit">万元</span></div>
+              </div>
+              <div class="field tappable" data-editable="deposit-phone" data-input-type="tel">
+                <div class="label"><span class="req">*</span>联系电话</div>
+                <div class="value-row"><span class="value" id="deposit-phone" data-filled="17600195188" data-placeholder="请输入联系电话">请输入联系电话</span></div>
+              </div>
+              <div class="field tappable" data-open="sheet-date-picker">
+                <div class="label"><span class="req">*</span>上牌日期</div>
+                <div class="value-row"><span class="value" id="deposit-date" data-filled="2025-03-10" data-placeholder="请选择上牌日期">请选择上牌日期</span><img class="chevron-ic" src="assets/icons/fanhui.svg" alt=""></div>
+              </div>
+              <div class="field tappable" data-editable="deposit-slot" data-input-type="text">
+                <div class="label"><span class="req">*</span>停车位号</div>
+                <div class="value-row"><span class="value" id="deposit-slot" data-filled="329" data-placeholder="请输入停车位号">请输入停车位号</span></div>
+              </div>
+              <div class="field tappable" id="deposit-cabinet-field" data-open="sheet-cabinet-deposit">
+                <div class="label"><span class="req">*</span>选择存放钥匙柜</div>
+                <div class="value-row"><span class="value" id="deposit-cabinet-value" data-filled="负二楼钥匙柜" data-placeholder="请选择钥匙柜地址">请选择钥匙柜地址</span><img class="chevron-ic" id="deposit-chevron" src="assets/icons/fanhui.svg" alt=""></div>
+              </div>
+            </div>
+            <div class="textarea-field"><div class="label">备注</div><div class="ph">请输入内容，20字以内</div></div>
+          </div>
+          <div class="primary-cta" id="deposit-cta-wrap"><button>打开柜门</button></div>
+
+          <div class="overlay" data-overlay="sheet-cabinet-deposit">
+            <div class="sheet">
+              <div class="sheet-title">请选择存放钥匙柜</div>
+              <div class="sheet-options">
+                <div class="sheet-option selected" data-select-cabinet="负二楼钥匙柜" data-target="deposit"><img class="radio-ic" src="assets/icons/check-circle-filled.svg" alt=""><span>负二楼钥匙柜</span></div>
+                <div class="sheet-option" data-select-cabinet="新能源中心钥匙柜" data-target="deposit"><img class="radio-ic" src="assets/icons/circle-unselected.svg" alt=""><span>新能源中心钥匙柜</span></div>
+              </div>
+              <div class="sheet-footer"><button data-close>确定</button></div>
+            </div>
+          </div>
+
+          <div class="overlay" data-overlay="sheet-date-picker">
+            <div class="sheet date-sheet">
+              <div class="sheet-header">
+                <div class="sheet-title">选择日期</div>
+                <button class="sheet-close" data-close>×</button>
+              </div>
+              <div class="month-nav">
+                <button data-toast="示例：跳转上一年">«</button>
+                <button data-toast="示例：切换上一月">‹</button>
+                <span class="month-label">2026年7月</span>
+                <button data-toast="示例：切换下一月">›</button>
+                <button data-toast="示例：跳转下一年">»</button>
+              </div>
+              <div class="weekday-row"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+              <div class="day-grid">
+                <span class="watermark">7</span>
+                <span class="day-cell empty"></span>
+                <span class="day-cell empty"></span>
+                <span class="day-cell empty"></span>
+                <span class="day-cell" data-day="1"><span class="num">1</span></span>
+                <span class="day-cell" data-day="2"><span class="num">2</span></span>
+                <span class="day-cell" data-day="3"><span class="num">3</span></span>
+                <span class="day-cell" data-day="4"><span class="num">4</span></span>
+                <span class="day-cell" data-day="5"><span class="num">5</span></span>
+                <span class="day-cell" data-day="6"><span class="num">6</span></span>
+                <span class="day-cell" data-day="7"><span class="num">7</span></span>
+                <span class="day-cell" data-day="8"><span class="num">8</span></span>
+                <span class="day-cell" data-day="9"><span class="num">9</span></span>
+                <span class="day-cell" data-day="10"><span class="num">10</span></span>
+                <span class="day-cell" data-day="11"><span class="num">11</span></span>
+                <span class="day-cell" data-day="12"><span class="num">12</span></span>
+                <span class="day-cell" data-day="13"><span class="num">13</span></span>
+                <span class="day-cell" data-day="14"><span class="num">14</span></span>
+                <span class="day-cell" data-day="15"><span class="num">15</span></span>
+                <span class="day-cell" data-day="16"><span class="num">16</span></span>
+                <span class="day-cell" data-day="17"><span class="num">17</span></span>
+                <span class="day-cell" data-day="18"><span class="num">18</span></span>
+                <span class="day-cell" data-day="19"><span class="num">19</span></span>
+                <span class="day-cell selected" data-day="20"><span class="num">20</span></span>
+                <span class="day-cell" data-day="21"><span class="num">21</span></span>
+                <span class="day-cell" data-day="22"><span class="num">22</span></span>
+                <span class="day-cell" data-day="23"><span class="num">23</span></span>
+                <span class="day-cell" data-day="24"><span class="num">24</span></span>
+                <span class="day-cell" data-day="25"><span class="num">25</span></span>
+                <span class="day-cell" data-day="26"><span class="num">26</span></span>
+                <span class="day-cell" data-day="27"><span class="num">27</span></span>
+                <span class="day-cell" data-day="28"><span class="num">28</span></span>
+                <span class="day-cell" data-day="29"><span class="num">29</span></span>
+                <span class="day-cell" data-day="30"><span class="num">30</span></span>
+                <span class="day-cell" data-day="31"><span class="num">31</span></span>
+                <span class="day-cell empty"></span>
+              </div>
+              <div class="date-home-indicator"></div>
+              <div class="sheet-footer"><button id="date-picker-confirm">确定</button></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="toast" id="toast"></div>
+
+        <!-- 打开柜门确认弹窗（严格参照 Figma node 152:413「对话框」） -->
+        <div class="modal-overlay" id="open-cabinet-overlay">
+          <div class="confirm-modal">
+            <div class="confirm-modal-content">
+              <p class="confirm-modal-title">打开钥匙柜</p>
+              <p class="confirm-modal-subtitle">您确定要打开柜子吗</p>
+            </div>
+            <div class="confirm-modal-footer">
+              <button class="confirm-modal-btn cancel" id="open-cabinet-cancel">取消</button>
+              <button class="confirm-modal-btn confirm" id="open-cabinet-confirm">确定</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=> t.classList.remove('show'), 1800);
+  }
+
+  const scenePanels = document.querySelectorAll('.scene');
+  function setScene(name){
+    scenePanels.forEach(p => p.classList.toggle('active', p.dataset.scenePanel === name));
+    document.querySelectorAll('.scene .screen-body').forEach(sb => sb.scrollTop = 0);
+  }
+  document.querySelectorAll('[data-goto-scene]').forEach(b => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setScene(b.dataset.gotoScene);
+  }));
+  // 详情页顶部状态跟随所点击卡片的状态字段；车商已取出的卡片不展示"打开柜门/编辑备注"
+  const detailStatusTitle = document.getElementById('detail-status-title');
+  const detailOpenDoorBtn = document.getElementById('detail-open-door-btn');
+  const detailEditRemarkBtn = document.getElementById('edit-remark-btn');
+  function openDetailFromCard(card){
+    const statusText = card.querySelector('.status-text');
+    if(statusText) detailStatusTitle.textContent = statusText.textContent;
+    const taken = card.dataset.taken === 'true';
+    detailOpenDoorBtn.hidden = taken;
+    detailEditRemarkBtn.hidden = taken;
+    setScene('detail');
+  }
+  document.querySelectorAll('[data-card-tap]').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if(e.target.closest('.card-actions') || e.target.closest('.stat-boxes')) return;
+      openDetailFromCard(card);
+    });
+  });
+  document.querySelectorAll('[data-view-detail]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openDetailFromCard(btn.closest('[data-card-tap]'));
+    });
+  });
+
+  document.querySelectorAll('.list-tab').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.list-tab').forEach(x => x.classList.toggle('active', x === b));
+    document.querySelectorAll('.list-body').forEach(lb => lb.hidden = lb.dataset.tabBody !== b.dataset.listTab);
+  }));
+
+  document.querySelectorAll('[data-urgent-btn]').forEach(btn => {
+    const card = btn.closest('.order-card');
+    const flag = card.querySelector('[data-urgent-flag]');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const urgent = btn.dataset.urgent !== 'true';
+      btn.dataset.urgent = String(urgent);
+      btn.textContent = urgent ? '取消加急' : '设为加急';
+      if(flag) flag.hidden = !urgent;
+      toast(urgent ? '已标记为加急' : '已取消加急');
+    });
+  });
+
+  document.querySelectorAll('[data-open]').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const key = trigger.dataset.open;
+      const overlay = trigger.closest('.scene').querySelector(`.overlay[data-overlay="${key}"]`);
+      if(overlay) overlay.classList.add('open');
+    });
+  });
+  document.querySelectorAll('.overlay').forEach(ov => {
+    ov.addEventListener('click', (e) => { if(e.target === ov) ov.classList.remove('open'); });
+  });
+  document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', () => {
+      const ov = el.closest('.overlay');
+      if(ov) ov.classList.remove('open');
+      if(el.dataset.toast) toast(el.dataset.toast);
+    });
+  });
+
+  const remarkInput = document.getElementById('remark-input');
+  const remarkCounter = document.getElementById('remark-counter');
+  const remarkValue = document.getElementById('remark-value');
+  const timelineList = document.getElementById('timeline-list');
+  const overlayRemark = document.querySelector('.overlay[data-overlay="sheet-remark"]');
+  document.getElementById('edit-remark-btn').addEventListener('click', () => {
+    remarkInput.value = remarkValue.textContent === '-' ? '' : remarkValue.textContent;
+    updateCounter();
+    setTimeout(()=>remarkInput.focus(), 260);
+  });
+  function updateCounter(){
+    const len = remarkInput.value.length;
+    remarkCounter.textContent = `${len}/20`;
+    remarkCounter.classList.toggle('limit', len >= 20);
+  }
+  remarkInput.addEventListener('input', updateCounter);
+  document.getElementById('remark-save').addEventListener('click', () => {
+    const val = remarkInput.value.trim();
+    remarkValue.textContent = val || '-';
+    overlayRemark.classList.remove('open');
+    const li = document.createElement('li');
+    li.className = 'new';
+    const now = new Date();
+    const ts = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    li.innerHTML = `<div class="dot"></div><div class="body"><b>编辑备注</b><span>${ts} · 市场管理员：张三</span></div>`;
+    timelineList.prepend(li);
+    toast('备注已更新');
+  });
+
+  const changeNewValue = document.getElementById('change-new-value');
+  const changeConfirmBtn = document.getElementById('change-confirm-btn');
+  document.querySelectorAll('[data-select-cabinet]').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if(opt.classList.contains('disabled')) return;
+      const target = opt.dataset.target;
+      if(target === 'deposit'){
+        document.querySelectorAll('.overlay[data-overlay="sheet-cabinet-deposit"] .sheet-option').forEach(o=>{
+          o.classList.remove('selected');
+          o.querySelector('img').src = 'assets/circle-unselected.svg';
+        });
+        opt.classList.add('selected');
+        opt.querySelector('img').src = 'assets/check-circle-filled.svg';
+        document.getElementById('deposit-cabinet-value').textContent = opt.dataset.selectCabinet;
+        return;
+      }
+      document.querySelectorAll('.overlay[data-overlay="sheet-cabinet-change"] .sheet-option').forEach(o=>{
+        if(!o.classList.contains('disabled')){ o.classList.remove('selected'); o.querySelector('.radio-ic').src = 'assets/circle-unselected.svg'; }
+      });
+      opt.classList.add('selected');
+      opt.querySelector('.radio-ic').src = 'assets/check-circle-filled.svg';
+      changeNewValue.textContent = opt.dataset.selectCabinet;
+      changeNewValue.classList.remove('placeholder');
+      changeConfirmBtn.disabled = false;
+      document.querySelector('.overlay[data-overlay="sheet-cabinet-change"]').classList.remove('open');
+    });
+  });
+  const changeCurrentValue = document.getElementById('change-current');
+  changeConfirmBtn.addEventListener('click', () => {
+    if(changeConfirmBtn.disabled) return;
+    const oldAddress = changeCurrentValue.textContent;
+    const newAddress = changeNewValue.textContent + ' · 056号柜门';
+    changeConfirmBtn.textContent = '开锁中…';
+    changeConfirmBtn.disabled = true;
+    setTimeout(() => {
+      toast('已变更柜门');
+      changeCurrentValue.textContent = newAddress;
+      changeNewValue.textContent = '请选择存放钥匙柜';
+      changeNewValue.classList.add('placeholder');
+      changeConfirmBtn.textContent = '变更柜门';
+      document.querySelectorAll('.overlay[data-overlay="sheet-cabinet-change"] .sheet-option:not(.disabled)').forEach(o=>{
+        o.classList.remove('selected'); o.querySelector('.radio-ic').src = 'assets/circle-unselected.svg';
+      });
+      // 订单流转：原钥匙柜记录"结束使用"，新钥匙柜按普通"打开柜门"记录格式追加
+      const now = new Date();
+      const ts = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      const liEnd = document.createElement('li');
+      liEnd.className = 'new';
+      liEnd.innerHTML = `<div class="dot"></div><div class="body"><b>结束使用</b><span>${oldAddress} · ${ts} · 市场管理员：张三</span></div>`;
+      const liOpen = document.createElement('li');
+      liOpen.className = 'new';
+      liOpen.innerHTML = `<div class="dot"></div><div class="body"><b>打开柜门</b><span>${newAddress} · ${ts} · 市场管理员：张三</span></div>`;
+      timelineList.prepend(liEnd);
+      timelineList.prepend(liOpen);
+    }, 900);
+  });
+
+  const depositCabinetField = document.getElementById('deposit-cabinet-field');
+  const depositChevron = document.getElementById('deposit-chevron');
+  const depositFieldIds = ['deposit-price','deposit-phone','deposit-date','deposit-slot','deposit-cabinet-value'];
+
+  // 每张卡片/详情页的"打开柜门"携带该订单当前累计开门次数（PRD 7：奇数=存入表单，偶数=取出；仅第1次可编辑选择存放钥匙柜）
+  function renderDoor(doorCount){
+    const firstTime = doorCount === 1;
+    depositFieldIds.forEach(id => {
+      const el = document.getElementById(id);
+      el.textContent = firstTime ? el.dataset.placeholder : el.dataset.filled;
+      el.classList.toggle('placeholder', firstTime);
+    });
+    if(firstTime){
+      depositCabinetField.classList.add('tappable');
+      depositCabinetField.classList.remove('disabled-field');
+      depositChevron.style.display = '';
+    } else {
+      depositCabinetField.classList.remove('tappable');
+      depositCabinetField.classList.add('disabled-field');
+      depositChevron.style.display = 'none';
+    }
+  }
+  document.getElementById('deposit-cabinet-field').addEventListener('click', (e) => {
+    if(depositCabinetField.classList.contains('disabled-field')) e.stopImmediatePropagation();
+  }, true);
+
+  // 打开柜门：奇数（存入）直接进入表单页；偶数（取出）先弹确认框，确定后取出
+  const openCabinetOverlay = document.getElementById('open-cabinet-overlay');
+  let pendingDoorCount = null;
+  document.querySelectorAll('[data-open-deposit]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const doorCount = parseInt(btn.dataset.openDeposit, 10);
+      if(doorCount % 2 === 1){
+        renderDoor(doorCount);
+        setScene('deposit');
+      } else {
+        pendingDoorCount = doorCount;
+        openCabinetOverlay.classList.add('open');
+      }
+    });
+  });
+  document.getElementById('open-cabinet-cancel').addEventListener('click', () => {
+    openCabinetOverlay.classList.remove('open');
+    pendingDoorCount = null;
+  });
+  document.getElementById('open-cabinet-confirm').addEventListener('click', () => {
+    openCabinetOverlay.classList.remove('open');
+    if(pendingDoorCount == null) return;
+    toast('柜门已打开，请取出钥匙');
+    pendingDoorCount = null;
+  });
+  renderDoor(1);
+
+  // 上牌日期底部弹窗：点选日期 -> 点击确定回填字段
+  const depositDateValue = document.getElementById('deposit-date');
+  const dateCells = document.querySelectorAll('.day-cell[data-day]');
+  dateCells.forEach(cell => {
+    cell.addEventListener('click', () => {
+      dateCells.forEach(c => c.classList.remove('selected'));
+      cell.classList.add('selected');
+    });
+  });
+  document.getElementById('date-picker-confirm').addEventListener('click', () => {
+    const selected = document.querySelector('.day-cell.selected[data-day]');
+    if(selected){
+      depositDateValue.textContent = `2026-07-${selected.dataset.day.padStart(2,'0')}`;
+      depositDateValue.classList.remove('placeholder');
+    }
+    document.querySelector('.overlay[data-overlay="sheet-date-picker"]').classList.remove('open');
+  });
+
+  // 车辆零售价 / 联系电话 / 停车位号：点击原地转为可编辑输入框
+  document.querySelectorAll('[data-editable]').forEach(field => {
+    const valueEl = document.getElementById(field.dataset.editable);
+    field.addEventListener('click', () => {
+      if(field.querySelector('.inline-edit-input')) return;
+      const current = valueEl.classList.contains('placeholder') ? '' : valueEl.textContent;
+      const input = document.createElement('input');
+      input.className = 'inline-edit-input';
+      input.type = field.dataset.inputType || 'text';
+      input.value = current;
+      input.placeholder = valueEl.dataset.placeholder;
+      valueEl.insertAdjacentElement('beforebegin', input);
+      valueEl.style.display = 'none';
+      input.focus();
+      const commit = () => {
+        const v = input.value.trim();
+        valueEl.textContent = v || valueEl.dataset.placeholder;
+        valueEl.classList.toggle('placeholder', !v);
+        if(v) valueEl.dataset.filled = v;
+        input.remove();
+        valueEl.style.display = '';
+      };
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') input.blur(); });
+    });
+  });
+
+  document.querySelectorAll('[data-toast]:not([data-close]):not(.action-sheet-item)').forEach(el=>{
+    el.addEventListener('click', ()=> toast(el.dataset.toast));
+  });
+})();
+</script>
+</body>
+</html>

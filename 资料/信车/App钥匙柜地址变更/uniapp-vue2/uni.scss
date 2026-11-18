@@ -1,0 +1,35 @@
+/**
+ * 全局设计变量（取自 设计规范-钥匙柜地址变更.md，与 Figma "20260717锦和钥匙柜变更地址" 一致）
+ * uni-app 会自动将本文件注入每个页面/组件的 <style lang="scss">，无需手动 @import。
+ * 尺寸单位统一使用 rpx：Figma 画布 750 宽 = 750rpx，所以 rpx 数值可直接取 Figma 标注的原始像素，
+ * 不需要像 HTML 原型那样再手动 /2（HTML 原型用的是 css px，此处 rpx 会自动按屏宽换算）。
+ * 唯一例外：border 描边宽度按 UI 惯例用字面 px（1px），不要写成 rpx，否则可能出现次像素被抹掉的问题。
+ */
+
+// 主品牌色
+$accent: #FD5530; // 信车App主色调，全局唯一橘色来源，新增页面直接引用，不要新起色值
+$accent-soft: #FFF1EE;
+$accent-soft-border: #FFD2C4;
+$accent-5: rgba(253, 85, 48, 0.05);
+$accent-10: rgba(253, 85, 48, 0.1);
+
+// 功能色
+$teal: #00A780;
+$blue: #618DFF;
+
+// 文字色
+$ink: #333333;
+$ink-strong: #000000;
+$muted: #8D8D8D;
+$faint: #999999;
+
+// 背景/边框
+$chip-bg: #F0F3FA;
+$tag-bg: #F3F5FC;
+$tag-ink: #1E3670;
+$split-border: #B6C8EF;
+$split-ink: #1D2C4F;
+$border: #EDEDED;
+$page-app-bg: #F7F8FA;
+$navy-1: #1D2C4F;
+$navy-2: #303974;

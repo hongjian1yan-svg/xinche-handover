@@ -1,0 +1,29 @@
+{
+  "_comment": "本文件只是路由片段示例，接入时把 pages 数组里的 4 条记录合并进项目已有 pages.json 的 pages 数组即可，不要整份覆盖。",
+  "pages": [
+    {
+      "path": "pages/keyCabinet/list",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/keyCabinet/detail",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/keyCabinet/change",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/keyCabinet/deposit",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    }
+  ]
+}

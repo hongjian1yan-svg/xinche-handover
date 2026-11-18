@@ -1,0 +1,827 @@
+<!-- #AI:design:file -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大风车绑定管理 - 智慧车市</title>
+  <style>
+    /* #AI:design:start */
+    :root {
+      --primary: #409eff;
+      --success: #67c23a;
+      --warning: #e6a23c;
+      --danger: #f56c6c;
+      --text-primary: #303133;
+      --text-regular: #606266;
+      --text-secondary: #909399;
+      --text-placeholder: #c0c4cc;
+      --border-base: #dcdfe6;
+      --border-light: #ebeef5;
+      --bg-page: #f2f4f5;
+      --fill-light: #f5f7fa;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-width: 1200px;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font: 14px/1.5 "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    .app { display: flex; min-width: 1200px; min-height: 100vh; }
+    .sidebar {
+      width: 180px;
+      flex: 0 0 180px;
+      min-height: 100vh;
+      background: #fff;
+      box-shadow: 2px 0 8px rgba(29, 35, 41, .05);
+      z-index: 2;
+    }
+    .brand {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-bottom: 1px solid #f2f6fc;
+      white-space: nowrap;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border: 3px solid #409eff;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #48528e;
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1;
+    }
+    .brand-name { color: #0444a6; font-size: 19px; }
+    .side-menu { padding: 8px 0; }
+    .side-group-title, .side-link {
+      width: 100%;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border: 0;
+      background: transparent;
+      color: #66798c;
+      text-align: left;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .side-group-title:hover, .side-link:hover { background: #f2f7ff; color: var(--primary); }
+    /* #AI:design:start */
+    .side-group-title.context-only { cursor: default; }
+    .side-group-title.context-only:hover { background: transparent; color: #66798c; }
+    /* #AI:design:end */
+    .side-icon { width: 18px; color: #8b9bab; text-align: center; font-size: 15px; }
+    .side-chevron { margin-left: auto; color: #c0c4cc; transition: transform .15s; }
+    .side-group-title[aria-expanded="true"] .side-chevron { transform: rotate(90deg); }
+    .side-submenu { overflow: hidden; }
+    .side-link { height: 48px; padding-left: 46px; font-size: 14px; }
+    .side-link.active { background: #48528e; color: #fff; }
+    .main-area { min-width: 0; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar {
+      height: 60px;
+      flex: 0 0 60px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .market-name { color: #333; font-weight: 600; }
+    /* #AI:design:start */
+    .header-account { height: 60px; display: flex; align-items: center; gap: 24px; }
+    .header-notice { width: 60px; height: 60px; display: grid; place-items: center; border-right: 1px solid #f0f0f0; border-left: 1px solid #f0f0f0; color: #909399; font-size: 17px; }
+    /* #AI:design:end */
+    .user-box { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: #48528e; font-weight: 600; }
+    .user-name { color: #000; font-size: 16px; font-weight: 600; }
+    .role-tag { height: 20px; padding: 0 8px; line-height: 20px; border-radius: 4px; background: #d0e2f2; color: #1d2c4f; font-size: 12px; }
+    .user-arrow { width: 20px; height: 20px; border-radius: 4px; display: grid; place-items: center; background: #f3f5fc; color: #909399; }
+    .main-scroll { flex: 1; min-height: 0; overflow: auto; padding: 15px; background: var(--bg-page); }
+    .content { min-height: 100%; padding: 20px 12px; background: #f9fafb; }
+    .page-view[hidden] { display: none; }
+    .page-head { min-height: 40px; margin: 0 0 16px; display: flex; align-items: center; justify-content: space-between; }
+    /* #AI:design:start */
+    .price-banner { margin: 0 0 16px; padding: 14px 20px 12px; border: 1px solid var(--border-light); border-radius: 4px; background: #fff; }
+    .price-banner .setting-row { min-height: 36px; padding: 0; border: 0; }
+    .price-banner .setting-label { width: 250px; flex-basis: 250px; }
+    .price-banner .feature-copy { margin: 4px 0 0 250px; }
+    /* #AI:design:end */
+    .breadcrumb { color: var(--text-secondary); font-size: 13px; }
+    .breadcrumb strong { color: var(--text-primary); font-weight: 500; }
+    .page-title { margin: 0; font-size: 18px; font-weight: 600; }
+    .btn {
+      height: 32px;
+      min-width: 64px;
+      padding: 0 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      border: 1px solid var(--border-base);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--text-regular);
+      font-size: 14px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .btn:hover { color: var(--primary); border-color: #b3d8ff; background: #ecf5ff; }
+    .btn-primary { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .btn-primary:hover { border-color: #66b1ff; background: #66b1ff; color: #fff; }
+    .btn-large { height: 40px; padding: 0 19px; }
+    .btn-small { height: 24px; min-width: 0; padding: 0 12px; font-size: 12px; }
+    .btn-danger-plain { border-color: #fbc4c4; color: var(--danger); background: #fff; }
+    .btn-danger-plain:hover { border-color: var(--danger); color: #fff; background: var(--danger); }
+    .icon-plus { font-size: 18px; line-height: 1; font-weight: 300; }
+    .tabs { height: 40px; display: flex; align-items: stretch; }
+    .tab {
+      min-width: 90px;
+      height: 40px;
+      padding: 0 18px;
+      border: 1px solid #e3e4e5;
+      border-bottom: 0;
+      background: #f9fafb;
+      color: #303133;
+      cursor: pointer;
+    }
+    .tab + .tab { border-left: 0; }
+    .tab.active { background: #f2f2f2; font-weight: 500; }
+    .tab:hover { color: var(--primary); background: #ecf5ff; }
+    .filters { padding: 20px 12px; background: #f2f2f2; }
+    .filter-grid { display: grid; grid-template-columns: repeat(5, minmax(210px, 1fr)); gap: 16px 18px; align-items: center; }
+    .filter-item { min-width: 0; display: flex; align-items: center; }
+    .filter-label { width: 82px; flex: 0 0 82px; margin-right: 10px; color: var(--text-regular); text-align: right; white-space: nowrap; }
+    .control, .filter-select {
+      width: 100%;
+      height: 40px;
+      min-width: 0;
+      padding: 0 12px;
+      border: 1px solid var(--border-base);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--text-primary);
+      outline: none;
+    }
+    .control::placeholder { color: var(--text-placeholder); }
+    .control:focus, .filter-select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(64, 158, 255, .1); }
+    .filter-select { appearance: none; padding-right: 30px; background-image: linear-gradient(45deg, transparent 50%, #c0c4cc 50%), linear-gradient(135deg, #c0c4cc 50%, transparent 50%); background-position: calc(100% - 14px) 17px, calc(100% - 9px) 17px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+    .date-range { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .date-range input { min-width: 0; width: 50%; }
+    .date-dash { color: var(--text-placeholder); }
+    .filter-actions { display: flex; align-items: center; gap: 12px; }
+    .filter-actions .btn { height: 40px; }
+    .table-wrap { margin-top: 20px; overflow-x: auto; background: #fff; border: 1px solid var(--border-light); }
+    /* #AI:design:start */
+    .pagination { min-height: 60px; padding: 12px 16px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; background: #fff; color: var(--text-regular); font-size: 13px; }
+    .page-size { width: 100px; height: 32px; padding: 0 10px; border: 1px solid var(--border-base); border-radius: 4px; background: #fff; color: var(--text-regular); }
+    .page-number { width: 28px; height: 28px; border: 0; border-radius: 3px; background: transparent; color: var(--text-primary); font-weight: 600; cursor: pointer; }
+    .page-number.active { color: var(--primary); }
+    .page-number:disabled { color: var(--text-placeholder); cursor: default; }
+    .page-jump { width: 44px; height: 28px; border: 1px solid var(--border-base); border-radius: 4px; text-align: center; }
+    /* #AI:design:end */
+    table { width: 100%; min-width: 1060px; border-collapse: collapse; table-layout: fixed; }
+    .binding-list-table { min-width: 0; }
+    th, td { border-right: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); }
+    th:last-child, td:last-child { border-right: 0; }
+    th { height: 54px; padding: 0 8px; background: #f5f7fa; color: var(--text-secondary); font-size: 14px; font-weight: 600; text-align: center; }
+    td { height: 82px; padding: 10px 8px; color: var(--text-primary); text-align: center; vertical-align: middle; overflow-wrap: anywhere; line-height: 1.55; }
+    tbody tr:hover td { background: #f5f7fa; }
+    .merchant-name { font-weight: 500; }
+    .subtext { display: block; margin-top: 2px; color: var(--text-secondary); font-size: 13px; }
+    .status-tag { display: inline-block; padding: 1px 10px; border: 1px solid #b3e19d; border-radius: 4px; background: #f0f9eb; color: #67c23a; line-height: 20px; font-size: 12px; white-space: nowrap; }
+    .status-tag.virtual { border-color: #c6e2ff; background: #ecf5ff; color: #409eff; }
+    .row-actions { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .more-wrap { position: relative; }
+    .more-btn { height: 28px; padding: 0 11px; border: 1px solid var(--border-base); border-radius: 4px; background: #fff; color: var(--text-regular); cursor: pointer; white-space: nowrap; }
+    .more-btn:hover { color: var(--primary); border-color: #b3d8ff; }
+    .more-menu { display: none; position: absolute; top: 31px; left: 50%; z-index: 10; min-width: 112px; transform: translateX(-50%); padding: 4px 0; border: 1px solid var(--border-light); border-radius: 4px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.1); text-align: left; }
+    .more-wrap.open .more-menu { display: block; }
+    .more-item { width: 100%; padding: 7px 12px; border: 0; background: #fff; color: var(--text-regular); text-align: left; cursor: pointer; }
+    .more-item:hover { background: #f2f7ff; color: var(--primary); }
+    .empty-state { display: none; padding: 48px 0; color: var(--text-secondary); text-align: center; }
+
+    /* #AI:design:start */
+    /* 市场配置：沿用截图中的车辆管理行式表单与分段开关 */
+    .settings-page { padding: 0 12px 36px; }
+    .settings-head { margin: 8px 0 18px; }
+    .settings-panel { max-width: 1230px; margin: 0 auto; padding: 16px 20px 24px; background: #f9fafb; }
+    .setting-section-title { margin: 0 0 4px; padding: 12px 0 8px; border-bottom: 1px solid #e6e6e6; font-size: 15px; font-weight: 600; }
+    .setting-row { min-height: 54px; display: flex; align-items: center; }
+    .setting-label { width: 310px; flex: 0 0 310px; padding-right: 18px; color: var(--text-regular); text-align: right; }
+    .setting-control { min-width: 0; width: 560px; display: flex; align-items: center; gap: 10px; }
+    .segmented { display: inline-flex; align-items: center; }
+    .segment {
+      min-width: 64px;
+      height: 34px;
+      margin-left: -1px;
+      padding: 0 18px;
+      border: 1px solid var(--border-base);
+      background: #fff;
+      color: var(--text-regular);
+      cursor: pointer;
+    }
+    .segment:first-child { margin-left: 0; border-radius: 4px 0 0 4px; }
+    .segment:last-child { border-radius: 0 4px 4px 0; }
+    .segment.active { position: relative; z-index: 1; border-color: var(--primary); background: var(--primary); color: #fff; }
+    .switch-control { width: 38px; height: 20px; position: relative; border: 0; border-radius: 10px; background: #c0c4cc; cursor: pointer; transition: background .18s; }
+    .switch-control::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.18); transition: transform .18s; }
+    .switch-control[aria-checked="true"] { background: var(--primary); }
+    .switch-control[aria-checked="true"]::after { transform: translateX(18px); }
+    .switch-copy { margin-left: 9px; color: var(--text-regular); font-size: 14px; }
+    .setting-note { color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+    .feature-copy { margin: 4px 0 12px 310px; color: var(--text-regular); }
+    .feature-options { display: none; margin: 0 0 10px; padding: 10px 0 12px; border-bottom: 1px solid #ebeef5; }
+    .feature-options.is-visible { display: block; }
+    .amount-input { width: 280px; }
+    .price-direction .segment { min-width: 72px; }
+    .section-divider { margin: 16px 0 0; padding: 12px 0; border-top: 1px dashed #dcdfe6; border-bottom: 1px dashed #dcdfe6; font-weight: 600; }
+    .section-toggle { margin-left: 12px; vertical-align: middle; }
+    .market-footer { max-width: 1230px; margin: 18px auto 0; color: var(--text-secondary); font-size: 12px; text-align: right; }
+    /* #AI:design:end */
+
+    /* #AI:design:start */
+    /* 新增绑定：仅在绑定流程加入市场采用选择，不扩展到详情字段 */
+    .binding-form-card { min-height: 560px; padding: 20px 18px; background: #f9fafb; }
+    .binding-fields { max-width: 840px; }
+    .form-row { display: flex; min-height: 60px; align-items: center; }
+    .form-label { width: 120px; flex: 0 0 120px; padding-right: 12px; color: var(--text-regular); text-align: right; }
+    .required-mark { margin-right: 4px; color: var(--danger); }
+    .form-control { width: 420px; }
+    .subsection-bar { height: 40px; margin: 12px 0 14px; padding: 0 12px; display: flex; align-items: center; background: #f2f2f2; font-size: 15px; font-weight: 600; }
+    .subsection-bar::before { content: "✎"; margin-right: 8px; color: var(--text-regular); font-size: 15px; }
+    .verification-group { width: 420px; display: flex; }
+    .verification-group .form-control { flex: 1; width: auto; border-radius: 4px 0 0 4px; }
+    .verification-group .btn { height: 40px; border-radius: 0 4px 4px 0; }
+    .adopt-group { padding: 8px 0 10px; }
+    .adopt-options { display: flex; align-items: center; gap: 8px; }
+    .choice-btn { min-width: 76px; height: 34px; padding: 0 16px; border: 1px solid var(--border-base); border-radius: 4px; background: #fff; color: var(--text-regular); cursor: pointer; }
+    .choice-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .adopt-help { margin: 4px 0 0 132px; color: var(--text-secondary); font-size: 12px; }
+    .form-error { display: none; margin: 2px 0 0 132px; color: var(--danger); font-size: 12px; }
+    .form-error.show { display: block; }
+    .form-control.invalid { border-color: var(--danger); }
+    .form-actions { display: flex; align-items: center; gap: 14px; margin: 24px 0 0 132px; }
+    /* #AI:design:end */
+
+    /* #AI:design:start */
+    /* 绑定详情抽屉：字段以截图为准，模拟个人/商户资料均为演示值 */
+    .drawer-mask { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.56); }
+    .drawer-mask.open { display: block; }
+    .drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 80vw;
+      min-width: 900px;
+      max-width: calc(100vw - 180px);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(0,0,0,.12);
+    }
+    .drawer-head { height: 56px; flex: 0 0 56px; padding: 0 28px 0 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ebeef5; }
+    .drawer-title { margin: 0; font-size: 18px; font-weight: 600; }
+    .icon-close { width: 32px; height: 32px; border: 0; background: transparent; color: #909399; font-size: 22px; cursor: pointer; }
+    .drawer-body { flex: 1; min-height: 0; overflow: auto; padding: 18px 32px 32px; }
+    .detail-merchant-title { margin: 0 0 16px; font-size: 18px; font-weight: 600; }
+    .link-summary { min-height: 76px; display: flex; align-items: center; justify-content: center; gap: 16px; margin: 0 0 18px; }
+    .link-brand { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 600; }
+    .link-brand-icon { width: 42px; height: 42px; display: grid; place-items: center; border: 2px solid #d9e5f5; border-radius: 50%; color: #235f9b; background: #f7fbff; font-size: 16px; }
+    .link-brand-icon.windmill { color: #e97132; border-color: #fae4d7; }
+    .link-chain { color: #78bfa8; font-size: 22px; }
+    .detail-grid { width: 100%; min-width: 0; border: 1px solid #e5e7eb; border-collapse: collapse; table-layout: fixed; }
+    .detail-grid td { height: 48px; padding: 10px 20px; border: 1px solid #e5e7eb; color: var(--text-regular); text-align: left; overflow-wrap: anywhere; }
+    .detail-grid td.full { width: 100%; }
+    .detail-label { margin-right: 8px; color: var(--text-regular); }
+    .sync-title { margin: 22px 0 12px; padding-left: 10px; border-left: 3px solid var(--primary); font-size: 16px; font-weight: 600; }
+    .sync-table { width: 100%; min-width: 0; border: 1px solid #e7edf5; table-layout: fixed; }
+    .sync-table th { height: 44px; padding: 8px 10px; background: #f5f8fc; color: var(--text-regular); font-size: 14px; font-weight: 600; text-align: center; }
+    .sync-table td { height: 48px; padding: 8px 10px; border: 1px solid #e7edf5; text-align: center; }
+    .sync-state { display: inline-flex; align-items: center; gap: 8px; color: var(--text-regular); white-space: nowrap; }
+    .sync-state .switch-control { transform: scale(.92); }
+    .sync-state .on-label { color: var(--primary); }
+    .sync-table.links td { height: 60px; text-align: left; }
+    .source-link { color: var(--primary); text-decoration: none; cursor: pointer; }
+    .source-link:hover { text-decoration: underline; }
+    .drawer-note { margin-top: 16px; color: var(--text-secondary); font-size: 12px; }
+    .toast { position: fixed; top: 22px; left: 50%; z-index: 80; transform: translate(-50%, -12px); padding: 10px 18px; border: 1px solid #e1f3d8; border-radius: 4px; background: #f0f9eb; color: #529b2e; box-shadow: 0 2px 10px rgba(0,0,0,.08); opacity: 0; pointer-events: none; transition: all .18s; }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .drawer-unbind { margin-left: auto; }
+    @media (max-width: 1450px) {
+      .filter-grid { grid-template-columns: repeat(3, minmax(210px, 1fr)); }
+      .drawer { width: calc(100vw - 180px); }
+      .drawer-body { padding-right: 20px; padding-left: 20px; }
+      .setting-label { width: 250px; flex-basis: 250px; }
+      .feature-copy { margin-left: 250px; }
+    }
+    @media (max-width: 1240px) {
+      .drawer { min-width: 0; width: calc(100vw - 180px); }
+      .drawer-body { padding-right: 14px; padding-left: 14px; }
+      .setting-label { width: 210px; flex-basis: 210px; }
+      .feature-copy { margin-left: 210px; }
+    }
+    /* #AI:design:end */
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="业务导航">
+      <div class="brand"><div class="brand-mark">智</div><div class="brand-name">智慧车市</div></div>
+      <nav class="side-menu">
+        <!-- #AI:design:start -->
+        <div class="side-group-title context-only" aria-label="客户管理模块">
+          <span class="side-icon">♧</span><span>客户管理</span>
+        </div>
+        <button class="side-group-title" type="button" aria-expanded="true" data-group="windmill">
+          <span class="side-icon">▧</span><span>大风车管理</span><span class="side-chevron">›</span>
+        </button>
+        <div class="side-submenu" data-submenu="windmill">
+          <button class="side-link active" type="button" data-view="list">绑定列表</button>
+        </div>
+        <!-- #AI:design:end -->
+        <button class="side-group-title" type="button" aria-expanded="false" data-group="market">
+          <span class="side-icon">▤</span><span>市场管理</span><span class="side-chevron">›</span>
+        </button>
+        <div class="side-submenu" data-submenu="market" hidden>
+          <button class="side-link" type="button" data-view="market">市场配置</button>
+        </div>
+</nav>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div class="market-name">【信车智慧车市】</div>
+        <div class="header-account">
+          <div class="header-notice" aria-hidden="true">☷</div>
+          <div class="user-box" aria-label="演示管理员">
+            <div class="avatar">演</div><div class="user-name">演示管理员</div><div class="role-tag">演示角色</div><div class="user-arrow">▾</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-scroll">
+        <div class="content">
+          <section class="page-view" id="marketView" hidden>
+            <div class="page-head settings-head">
+              <div class="breadcrumb"><span>市场管理</span><span>　›　</span><strong>市场配置</strong></div>
+              <h1 class="page-title">市场配置</h1>
+            </div>
+            <div class="settings-page">
+              <div class="settings-panel">
+                <h2 class="setting-section-title">车辆管理</h2>
+                <div class="setting-row"><div class="setting-label">新增车辆</div><div class="setting-control"></div></div>
+                <div class="setting-row">
+                  <div class="setting-label">交易类型</div>
+                  <div class="setting-control"><div class="segmented" data-segment-group="tradeType"><button class="segment active" type="button">开</button><button class="segment" type="button">关</button></div></div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">未缴停车费禁止录车</div>
+                  <div class="setting-control"><button class="switch-control" type="button" role="switch" aria-checked="false" aria-label="未缴停车费禁止录车"></button></div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">商户自助移库</div>
+                  <div class="setting-control"><button class="switch-control" type="button" role="switch" aria-checked="true" aria-label="商户自助移库"></button></div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">移库审核</div>
+                  <div class="setting-control"><button class="switch-control" type="button" role="switch" aria-checked="true" aria-label="移库审核"></button></div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">二手车参考价展示</div>
+                  <div class="setting-control"><button class="switch-control" type="button" role="switch" aria-checked="false" aria-label="二手车参考价展示"></button></div>
+                </div>
+
+                <!-- #AI:design:start -->
+                <div class="feature-options" id="priceOptions" aria-hidden="true">
+                  <div class="setting-row">
+                    <div class="setting-label">调价方向</div>
+                    <div class="setting-control">
+                      <div class="segmented price-direction" role="group" aria-label="调价方向">
+                        <button class="segment" type="button" data-direction="increase">增加</button>
+                        <button class="segment" type="button" data-direction="decrease">减少</button>
+                      </div>
+                      <span class="setting-note">方向默认值待确认</span>
+                    </div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label">固定金额</div>
+                    <div class="setting-control">
+                      <input class="control amount-input" id="marketAmount" type="text" autocomplete="off" aria-label="固定金额" placeholder="金额配置口径待确认">
+                      <span class="setting-note">单位、精度、范围与校验方式待确认</span>
+                    </div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-label"></div>
+                    <div class="setting-control setting-note">规则按市场统一配置；是否采用由绑定时的市场人员选择。</div>
+                  </div>
+                </div>
+                <!-- #AI:design:end -->
+
+                <div class="section-divider">积分商城系统 <button class="switch-control section-toggle" type="button" role="switch" aria-checked="true" aria-label="积分商城系统"></button></div>
+                <div class="setting-row">
+                  <div class="setting-label">无库存商品</div>
+                  <div class="setting-control"><div class="segmented" data-segment-group="stockEmpty"><button class="segment" type="button">自动下架</button><button class="segment active" type="button">手动下架</button></div></div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">可用积分清零机制</div>
+                  <div class="setting-control"><select class="control" style="width:560px" aria-label="可用积分清零机制"><option>每年清零</option></select></div>
+                </div>
+              </div>
+              <div class="market-footer">此页面为原型预览，未保存或提交真实市场配置。</div>
+            </div>
+          </section>
+
+          <section class="page-view" id="listView">
+            <div class="page-head">
+              <div class="breadcrumb"><span>大风车管理</span><span>　›　</span><strong>绑定列表</strong></div>
+              <button class="btn btn-primary btn-large" type="button" id="addBindingBtn"><span class="icon-plus">＋</span>新增绑定</button>
+            </div>
+            <!-- #AI:design:start -->
+            <section class="price-banner" aria-label="大风车同步车辆价格自动调整">
+              <div class="setting-row" id="windmillPriceRow">
+                <div class="setting-label">大风车车辆价格自动调整</div>
+                <div class="setting-control">
+                  <button class="switch-control" id="marketPriceSwitch" type="button" role="switch" aria-checked="false" aria-label="大风车车辆价格自动调整"></button>
+                  <span class="switch-copy" id="marketSwitchState">关闭</span>
+                </div>
+              </div>
+              <div class="feature-copy">开启后，大风车同步的车辆自动调整车辆价格</div>
+            </section>
+            <!-- #AI:design:end -->
+            <div class="tabs" role="tablist" aria-label="绑定类型">
+              <button class="tab active" role="tab" aria-selected="true" data-tab="all">全部</button>
+              <button class="tab" role="tab" aria-selected="false" data-tab="real">真实绑定</button>
+              <button class="tab" role="tab" aria-selected="false" data-tab="virtual">虚拟绑定</button>
+            </div>
+            <div class="filters">
+              <div class="filter-grid">
+                <label class="filter-item"><span class="filter-label">所属市场</span><select class="filter-select" id="filterMarket"><option value="">请选择市场</option><option>演示市场 01</option></select></label>
+                <label class="filter-item"><span class="filter-label">所属商户</span><select class="filter-select" id="filterMerchant"><option value="">请选择车商</option></select></label>
+                <label class="filter-item"><span class="filter-label">负责人</span><input class="control" id="filterOwner" placeholder="请输入负责人"></label>
+                <label class="filter-item"><span class="filter-label">负责人手机号</span><input class="control" id="filterPhone" placeholder="请输入负责人手机号"></label>
+                <label class="filter-item"><span class="filter-label">绑定来源</span><select class="filter-select" id="filterSource"><option value="">请选择绑定来源</option><option>风车绑定</option><option>信车绑定</option></select></label>
+                <div class="filter-item"><span class="filter-label">绑定时间</span><div class="date-range"><input class="control" id="dateStart" type="date" aria-label="开始日期"><span class="date-dash">-</span><input class="control" id="dateEnd" type="date" aria-label="结束日期"></div></div>
+                <div class="filter-item filter-actions"><button class="btn btn-primary" type="button" id="searchBtn">⌕ 查询</button><button class="btn" type="button" id="resetBtn">↻ 重置</button><button class="btn btn-primary" type="button" id="exportBtn">查询数据导出</button></div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="binding-list-table" aria-label="大风车账号绑定列表">
+                <colgroup><col style="width:9%"><col style="width:13%"><col style="width:11%"><col style="width:12%"><col style="width:13%"><col style="width:9%"><col style="width:13%"><col style="width:8%"><col style="width:12%"></colgroup>
+                <thead><tr><th>所属市场</th><th>商户信息</th><th>负责人电话</th><th>绑定账号</th><th>大风车店铺</th><th>绑定来源</th><th>绑定时间</th><th>绑定状态</th><th>操作</th></tr></thead>
+                <tbody id="bindingRows"></tbody>
+              </table>
+              <div class="empty-state" id="emptyState">暂无匹配记录</div>
+            </div>
+            <!-- #AI:design:start -->
+            <div class="pagination" aria-label="分页">
+              <span>共 3819 条</span>
+              <select class="page-size" aria-label="每页条数"><option>10条/页</option></select>
+              <button class="page-number" type="button" disabled aria-label="上一页">‹</button>
+              <button class="page-number active" type="button" aria-current="page">1</button>
+              <button class="page-number" type="button">2</button><button class="page-number" type="button">3</button><button class="page-number" type="button">4</button><button class="page-number" type="button">5</button>
+              <span>…</span><button class="page-number" type="button">382</button><button class="page-number" type="button" aria-label="下一页">›</button>
+              <span>前往</span><input class="page-jump" type="text" aria-label="跳转页码" value="1"><span>页</span>
+            </div>
+            <!-- #AI:design:end -->
+          </section>
+
+          <section class="page-view" id="addView" hidden>
+            <div class="page-head">
+              <div class="breadcrumb"><button class="source-link" type="button" data-view="list">绑定列表</button><span>　›　</span><strong>新增绑定</strong></div>
+              <h1 class="page-title">新增绑定</h1>
+            </div>
+            <div class="binding-form-card">
+              <form id="bindingForm" novalidate>
+                <div class="binding-fields">
+                  <div class="form-row"><label class="form-label" for="newMarket"><span class="required-mark">*</span>所属市场</label><select class="control form-control" id="newMarket"><option value="">请选择市场</option><option>演示市场 01</option></select></div>
+                  <div class="form-error" id="marketError">请选择所属市场</div>
+                  <div class="form-row"><label class="form-label" for="newMerchant"><span class="required-mark">*</span>所属车商</label><select class="control form-control" id="newMerchant"><option value="">请选择车商</option><option>演示商户 01</option><option>演示商户 02</option><option>演示商户 03</option></select></div>
+                  <div class="form-error" id="merchantError">请选择所属车商</div>
+                  <div class="subsection-bar">大风车账号</div>
+                  <div class="form-row"><label class="form-label" for="accountPhone"><span class="required-mark">*</span>手机号码</label><input class="control form-control" id="accountPhone" type="text" inputmode="tel" autocomplete="off" placeholder="请输入演示手机号"></div>
+                  <div class="form-error" id="phoneError">请输入手机号码</div>
+                  <div class="form-row"><label class="form-label" for="verifyCode"><span class="required-mark">*</span>验证码</label><div class="verification-group"><input class="control" id="verifyCode" autocomplete="off" placeholder="请输入验证码"><button class="btn" type="button" id="sendCodeBtn">发送验证码</button></div></div>
+                  <div class="form-error" id="codeError">请输入验证码</div>
+                  <!-- #AI:design:start -->
+                  <div class="subsection-bar">市场调价规则</div>
+                  <div class="form-row adopt-group">
+                    <div class="form-label"><span class="required-mark">*</span>是否采用</div>
+                    <div class="adopt-options" role="group" aria-label="是否采用市场调价规则" aria-required="true">
+                      <button class="choice-btn" type="button" data-adopt="yes">采用</button>
+                      <button class="choice-btn" type="button" data-adopt="no">不采用</button>
+                    </div>
+                  </div>
+                  <div class="adopt-help">仅在市场调价开关开启时生效。</div>
+                  <div class="form-error" id="adoptError">请选择是否采用市场调价规则</div>
+                  <!-- #AI:design:end -->
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-primary" type="submit">绑定</button>
+                  <button class="btn" type="button" data-view="list">返回列表</button>
+                  <button class="btn" type="reset" id="resetFormBtn">重置</button>
+                </div>
+              </form>
+              <div class="drawer-note">原型预览：验证码不会发送，绑定操作不会提交到系统。</div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="drawer-mask" id="drawerMask" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer-head"><h2 class="drawer-title" id="drawerTitle">绑定详情</h2><button class="btn btn-danger-plain btn-small drawer-unbind" type="button" id="unbindBtn">解除绑定</button><button class="icon-close" type="button" id="closeDrawer" aria-label="关闭">×</button></div>
+      <div class="drawer-body">
+        <h3 class="detail-merchant-title" id="detailMerchantTitle">演示商户 01</h3>
+        <div class="link-summary">
+          <div class="link-brand"><span class="link-brand-icon">智</span><span>智慧车市</span></div>
+          <span class="link-chain">↔</span>
+          <div class="link-brand"><span id="detailStoreTitle">演示大风车店铺 01</span><span class="link-brand-icon windmill">风</span></div>
+        </div>
+        <table class="detail-grid" aria-label="绑定详情信息">
+          <tbody>
+            <tr><td><span class="detail-label">所属市场：</span><span id="detailMarket">演示市场 01</span></td><td><span class="detail-label">商户名称：</span><span id="detailMerchant">演示商户 01</span></td></tr>
+            <tr><td><span class="detail-label">负责人：</span><span id="detailOwner">演示联系人 01</span></td><td><span class="detail-label">负责人电话：</span><span id="detailPhone">00000000001</span></td></tr>
+            <tr><td><span class="detail-label">绑定账号：</span><span id="detailAccount">demo_account_01</span></td><td><span class="detail-label">大风车店铺：</span><span id="detailStore">演示大风车店铺 01</span></td></tr>
+            <tr><td><span class="detail-label">绑定时间：</span><span id="detailTime">2026-10-14 10:00:00</span></td><td><span class="detail-label">绑定状态：</span><span class="status-tag">已绑定</span></td></tr>
+            <tr><td class="full" colspan="2"><span class="detail-label">绑定来源：</span><span id="detailSource">风车绑定</span></td></tr>
+          </tbody>
+        </table>
+        <h3 class="sync-title">同步设置</h3>
+        <table class="sync-table" aria-label="同步设置">
+          <thead><tr><th>车源自动同步(信车→大风车)</th><th>车源自动同步(信车←大风车)</th><th>新增微店潜客自动同步(信车→大风车)</th><th>268V检测同步</th><th>大风车营销工具</th></tr></thead>
+          <tbody><tr>
+            <td><span class="sync-state"><span>关闭</span><button class="switch-control" type="button" role="switch" aria-checked="true" aria-label="车源自动同步（信车到大风车）"></button><span class="on-label">开启</span></span></td>
+            <td><span class="sync-state"><span>关闭</span><button class="switch-control" type="button" role="switch" aria-checked="true" aria-label="车源自动同步（信车来自大风车）"></button><span class="on-label">开启</span></span></td>
+            <td><span class="sync-state"><span>关闭</span><button class="switch-control" type="button" role="switch" aria-checked="true" aria-label="新增微店潜客自动同步"></button><span class="on-label">开启</span></span></td>
+            <td><span class="sync-state"><span>关闭</span><button class="switch-control" type="button" role="switch" aria-checked="true" aria-label="268V检测同步"></button><span class="on-label">开启</span></span></td>
+            <td><span class="sync-state"><span>关闭</span><button class="switch-control" type="button" role="switch" aria-checked="true" aria-label="大风车营销工具"></button><span class="on-label">开启</span></span></td>
+          </tr></tbody>
+        </table>
+        <table class="sync-table links" style="margin-top:14px" aria-label="同步来源设置">
+          <thead><tr><th>车辆照片同步</th><th>车辆信息同步</th><th>车辆出库同步</th></tr></thead>
+          <tbody><tr><td><a class="source-link" href="javascript:void(0)">大风车为准　›</a></td><td><a class="source-link" href="javascript:void(0)">信车为准　›</a></td><td><a class="source-link" href="javascript:void(0)">大风车为准　›</a></td></tr></tbody>
+        </table>
+        <p class="drawer-note">以上联系人、账号与店铺均为虚构演示数据。</p>
+      </div>
+    </aside>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // #AI:design:start
+    const initialRows = [
+      { market: "演示市场 01", merchant: "演示商户 01", owner: "演示联系人 01", phone: "00000000001", account: "demo_account_01", store: "演示大风车店铺 01", source: "风车绑定", time: "2026-10-14 10:00:00", status: "已绑定", kind: "real" },
+      { market: "演示市场 01", merchant: "演示商户 02", owner: "演示联系人 02", phone: "00000000002", account: "demo_account_02", store: "演示大风车店铺 02", source: "信车绑定", time: "2026-10-13 15:47:17", status: "已绑定", kind: "virtual" },
+      { market: "演示市场 01", merchant: "演示商户 03", owner: "演示联系人 03", phone: "00000000003", account: "demo_account_03", store: "演示大风车店铺 03", source: "信车绑定", time: "2026-10-12 11:46:45", status: "已绑定", kind: "virtual" },
+      { market: "演示市场 01", merchant: "演示商户 04", owner: "演示联系人 04", phone: "00000000004", account: "demo_account_04", store: "演示大风车店铺 04", source: "风车绑定", time: "2026-10-11 09:41:02", status: "已绑定", kind: "real" },
+      { market: "演示市场 01", merchant: "演示商户 05", owner: "演示联系人 05", phone: "00000000005", account: "demo_account_05", store: "演示大风车店铺 05", source: "信车绑定", time: "2026-10-10 19:53:28", status: "已绑定", kind: "virtual" },
+      { market: "演示市场 01", merchant: "演示商户 06", owner: "演示联系人 06", phone: "00000000006", account: "demo_account_06", store: "演示大风车店铺 06", source: "信车绑定", time: "2026-10-09 16:38:43", status: "已绑定", kind: "virtual" },
+      { market: "演示市场 01", merchant: "演示商户 07", owner: "演示联系人 07", phone: "00000000007", account: "demo_account_07", store: "演示大风车店铺 07", source: "风车绑定", time: "2026-10-08 11:40:00", status: "已绑定", kind: "real" },
+      { market: "演示市场 01", merchant: "演示商户 08", owner: "演示联系人 08", phone: "00000000008", account: "demo_account_08", store: "演示大风车店铺 08", source: "信车绑定", time: "2026-10-07 10:47:19", status: "已绑定", kind: "virtual" },
+      { market: "演示市场 01", merchant: "演示商户 09", owner: "演示联系人 09", phone: "00000000009", account: "demo_account_09", store: "演示大风车店铺 09", source: "信车绑定", time: "2026-10-06 16:12:02", status: "已绑定", kind: "virtual" },
+      { market: "演示市场 01", merchant: "演示商户 10", owner: "演示联系人 10", phone: "00000000010", account: "demo_account_10", store: "演示大风车店铺 10", source: "风车绑定", time: "2026-10-05 09:12:02", status: "已绑定", kind: "real" }
+    ];
+    let rows = initialRows.slice();
+    let activeTab = "all";
+    let selectedAdoption = "";
+    let toastTimer = 0;
+
+    const byId = id => document.getElementById(id);
+    const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    function showToast(message) {
+      const toast = byId("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function switchView(name) {
+      document.querySelectorAll(".page-view").forEach(view => { view.hidden = true; });
+      const target = ({ market: "marketView", list: "listView", add: "addView" })[name];
+      if (target) byId(target).hidden = false;
+      document.querySelectorAll(".side-link[data-view]").forEach(link => link.classList.toggle("active", link.dataset.view === (name === "add" ? "list" : name)));
+      document.querySelectorAll(".side-group-title").forEach(group => {
+        const expanded = group.dataset.group === (name === "market" ? "market" : "windmill");
+        group.setAttribute("aria-expanded", String(expanded));
+        const submenu = document.querySelector(`[data-submenu="${group.dataset.group}"]`);
+        submenu.hidden = !expanded;
+      });
+      document.querySelector(".main-scroll").scrollTop = 0;
+    }
+
+    function activeFilters() {
+      return {
+        market: byId("filterMarket").value,
+        merchant: byId("filterMerchant").value,
+        owner: byId("filterOwner").value.trim(),
+        phone: byId("filterPhone").value.trim(),
+        source: byId("filterSource").value,
+        start: byId("dateStart").value,
+        end: byId("dateEnd").value
+      };
+    }
+    function renderRows() {
+      const filters = activeFilters();
+      const filtered = rows.filter(row => {
+        if (activeTab !== "all" && row.kind !== activeTab) return false;
+        if (filters.market && row.market !== filters.market) return false;
+        if (filters.merchant && row.merchant !== filters.merchant) return false;
+        if (filters.owner && !row.owner.includes(filters.owner)) return false;
+        if (filters.phone && !row.phone.includes(filters.phone)) return false;
+        if (filters.source && row.source !== filters.source) return false;
+        const day = row.time.slice(0, 10);
+        if (filters.start && day < filters.start) return false;
+        if (filters.end && day > filters.end) return false;
+        return true;
+      });
+      byId("bindingRows").innerHTML = filtered.map((row, index) => `
+        <tr>
+          <td>${escapeHtml(row.market)}</td>
+          <td><span class="merchant-name">${escapeHtml(row.merchant)}</span><span class="subtext">负责人：${escapeHtml(row.owner)}</span></td>
+          <td>${escapeHtml(row.phone)}</td>
+          <td>${escapeHtml(row.account)}</td>
+          <td>${escapeHtml(row.store)}</td>
+          <td>${escapeHtml(row.source)}</td>
+          <td>${escapeHtml(row.time)}</td>
+          <td><span class="status-tag ${row.kind === "virtual" ? "virtual" : ""}">${escapeHtml(row.status)}</span></td>
+          <td><div class="row-actions"><button class="btn btn-primary btn-small view-detail" type="button" data-row="${rows.indexOf(row)}">查看</button><div class="more-wrap"><button class="more-btn" type="button" aria-expanded="false">更多操作　⌄</button><div class="more-menu"><button class="more-item view-more" type="button" data-row="${rows.indexOf(row)}">查看详情</button></div></div></div></td>
+        </tr>`).join("");
+      byId("emptyState").style.display = filtered.length ? "none" : "block";
+    }
+
+    function setDetail(row) {
+      byId("detailMerchantTitle").textContent = row.merchant;
+      byId("detailMarket").textContent = row.market;
+      byId("detailMerchant").textContent = row.merchant;
+      byId("detailOwner").textContent = row.owner;
+      byId("detailPhone").textContent = row.phone;
+      byId("detailAccount").textContent = row.account;
+      byId("detailStore").textContent = row.store;
+      byId("detailStoreTitle").textContent = row.store;
+      byId("detailTime").textContent = row.time;
+      byId("detailSource").textContent = row.source;
+    }
+    function openDrawer(row) {
+      setDetail(row);
+      byId("drawerMask").classList.add("open");
+      byId("drawerMask").setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+    function closeDrawer() {
+      byId("drawerMask").classList.remove("open");
+      byId("drawerMask").setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    function markError(field, errorId, isError) {
+      const fieldEl = byId(field);
+      const errorEl = byId(errorId);
+      if (fieldEl) fieldEl.classList.toggle("invalid", isError);
+      errorEl.classList.toggle("show", isError);
+      return !isError;
+    }
+
+    document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => switchView(button.dataset.view)));
+    document.querySelectorAll(".side-group-title").forEach(button => button.addEventListener("click", () => {
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      button.setAttribute("aria-expanded", String(!expanded));
+      document.querySelector(`[data-submenu="${button.dataset.group}"]`).hidden = expanded;
+    }));
+    document.querySelectorAll("[data-segment-group]").forEach(group => group.addEventListener("click", event => {
+      const button = event.target.closest(".segment");
+      if (button) { group.querySelectorAll(".segment").forEach(segment => segment.classList.toggle("active", segment === button)); }
+    }));
+    document.querySelectorAll(".switch-control").forEach(button => button.addEventListener("click", () => {
+      const next = button.getAttribute("aria-checked") !== "true";
+      button.setAttribute("aria-checked", String(next));
+      if (button.id === "marketPriceSwitch") {
+        byId("marketSwitchState").textContent = next ? "开启" : "关闭";
+        byId("priceOptions").classList.toggle("is-visible", next);
+        byId("priceOptions").setAttribute("aria-hidden", String(!next));
+      }
+    }));
+    document.querySelectorAll(".price-direction .segment").forEach(button => button.addEventListener("click", () => {
+      document.querySelectorAll(".price-direction .segment").forEach(segment => segment.classList.toggle("active", segment === button));
+    }));
+
+    const merchantOptions = ["演示商户 01", "演示商户 02", "演示商户 03", "演示商户 04", "演示商户 05", "演示商户 06", "演示商户 07", "演示商户 08", "演示商户 09", "演示商户 10"];
+    merchantOptions.forEach(name => {
+      const option = document.createElement("option"); option.textContent = name; option.value = name; byId("filterMerchant").appendChild(option);
+    });
+    document.querySelectorAll("[data-tab]").forEach(tab => tab.addEventListener("click", () => {
+      activeTab = tab.dataset.tab;
+      document.querySelectorAll("[data-tab]").forEach(item => { item.classList.toggle("active", item === tab); item.setAttribute("aria-selected", String(item === tab)); });
+      renderRows();
+    }));
+    byId("searchBtn").addEventListener("click", renderRows);
+    byId("resetBtn").addEventListener("click", () => {
+      ["filterMarket", "filterMerchant", "filterSource", "dateStart", "dateEnd"].forEach(id => { byId(id).value = ""; });
+      ["filterOwner", "filterPhone"].forEach(id => { byId(id).value = ""; });
+      activeTab = "all";
+      document.querySelectorAll("[data-tab]").forEach(tab => { tab.classList.toggle("active", tab.dataset.tab === "all"); tab.setAttribute("aria-selected", String(tab.dataset.tab === "all")); });
+      renderRows();
+    });
+    byId("exportBtn").addEventListener("click", () => showToast("演示预览：未导出文件"));
+    byId("addBindingBtn").addEventListener("click", () => switchView("add"));
+    byId("bindingRows").addEventListener("click", event => {
+      const view = event.target.closest(".view-detail, .view-more");
+      if (view) { openDrawer(rows[Number(view.dataset.row)]); return; }
+      const more = event.target.closest(".more-btn");
+      if (more) {
+        const wrapper = more.closest(".more-wrap");
+        document.querySelectorAll(".more-wrap.open").forEach(item => { if (item !== wrapper) { item.classList.remove("open"); item.querySelector(".more-btn").setAttribute("aria-expanded", "false"); } });
+        wrapper.classList.toggle("open");
+        more.setAttribute("aria-expanded", String(wrapper.classList.contains("open")));
+      }
+    });
+    document.addEventListener("click", event => {
+      if (!event.target.closest(".more-wrap")) document.querySelectorAll(".more-wrap.open").forEach(item => { item.classList.remove("open"); item.querySelector(".more-btn").setAttribute("aria-expanded", "false"); });
+    });
+    byId("closeDrawer").addEventListener("click", closeDrawer);
+    byId("unbindBtn").addEventListener("click", () => showToast("演示原型：未执行解除绑定"));
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeDrawer(); });
+
+    document.querySelectorAll("[data-adopt]").forEach(button => button.addEventListener("click", () => {
+      selectedAdoption = button.dataset.adopt;
+      document.querySelectorAll("[data-adopt]").forEach(option => option.classList.toggle("active", option === button));
+      byId("adoptError").classList.remove("show");
+    }));
+    byId("sendCodeBtn").addEventListener("click", () => {
+      if (!byId("accountPhone").value.trim()) {
+        markError("accountPhone", "phoneError", true);
+        byId("accountPhone").focus();
+        return;
+      }
+      markError("accountPhone", "phoneError", false);
+      showToast("演示预览：验证码不会实际发送");
+    });
+    byId("accountPhone").addEventListener("input", () => markError("accountPhone", "phoneError", false));
+    byId("newMarket").addEventListener("change", () => markError("newMarket", "marketError", false));
+    byId("newMerchant").addEventListener("change", () => markError("newMerchant", "merchantError", false));
+    byId("verifyCode").addEventListener("input", () => markError("verifyCode", "codeError", false));
+    byId("bindingForm").addEventListener("reset", () => {
+      setTimeout(() => {
+        selectedAdoption = "";
+        document.querySelectorAll("[data-adopt]").forEach(option => option.classList.remove("active"));
+        ["marketError", "merchantError", "phoneError", "codeError", "adoptError"].forEach(id => byId(id).classList.remove("show"));
+        document.querySelectorAll("#bindingForm .invalid").forEach(field => field.classList.remove("invalid"));
+      }, 0);
+    });
+    byId("bindingForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const valid = [
+        markError("newMarket", "marketError", !byId("newMarket").value),
+        markError("newMerchant", "merchantError", !byId("newMerchant").value),
+        markError("accountPhone", "phoneError", !byId("accountPhone").value.trim()),
+        markError("verifyCode", "codeError", !byId("verifyCode").value.trim())
+      ].every(Boolean);
+      if (!selectedAdoption) byId("adoptError").classList.add("show");
+      if (!valid || !selectedAdoption) return;
+      const merchant = byId("newMerchant").value;
+      const phone = byId("accountPhone").value.trim();
+      const row = {
+        market: byId("newMarket").value,
+        merchant,
+        owner: "演示联系人",
+        phone,
+        account: `demo_${phone}`,
+        store: `演示大风车店铺 ${rows.length + 1}`,
+        source: "风车绑定",
+        time: "2026-10-14 10:00:00",
+        status: "已绑定",
+        kind: "real",
+        adoptsMarketRule: selectedAdoption === "yes"
+      };
+      rows.unshift(row);
+      activeTab = "all";
+      document.querySelectorAll("[data-tab]").forEach(tab => { tab.classList.toggle("active", tab.dataset.tab === "all"); tab.setAttribute("aria-selected", String(tab.dataset.tab === "all")); });
+      renderRows();
+      switchView("list");
+      showToast("演示绑定记录已加入列表，未提交至系统");
+      byId("bindingForm").reset();
+    });
+
+    renderRows();
+    // #AI:design:end
+  </script>
+</body>
+</html>

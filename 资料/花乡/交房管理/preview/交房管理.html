@@ -1,0 +1,1428 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>花乡交房管理 · 交房交接原型</title>
+<style>
+/* #AI:design:start */
+:root{--green:#1ABA6C;--green-light:#E8F9F0;--red:#FA2B2D;--orange:#F19204;--page:#F7F8FC;--text:#333;--sub:#666;--hint:#999;--line:#E7E7E7;--card:#fff}
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text)}
+button,input,select{font:inherit}button{cursor:pointer}
+.workbench{height:100dvh;background:#333333;display:flex;flex-direction:column;overflow:hidden}
+.head{height:58px;flex:0 0 58px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--line)}
+.identity-controls{display:flex;align-items:center;gap:10px;min-width:0}.role-control{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:12px;color:#555}.role-control select{height:32px;max-width:150px;border:1px solid #d8dfe0;border-radius:6px;background:#fff;color:#333;padding:0 8px;font-size:13px}
+.head-title{font-size:16px;font-weight:600}.head-sub{font-size:12px;color:var(--hint);margin-left:12px}.demo-stamp{font-size:12px;color:#168a4f;background:var(--green-light);border-radius:14px;padding:6px 10px}
+.workarea{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 286px;gap:22px;padding:18px 22px;overflow:hidden}
+.device-stage{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:clip}
+.phone{width:375px;height:812px;flex:none;position:relative;background:var(--page);border:0;padding:0;border-radius:34px;box-shadow:0 16px 45px rgba(25,35,48,.20);overflow:hidden;display:flex;flex-direction:column;transform:scale(var(--phone-scale,1));transform-origin:center}
+.phone::before{content:"";position:absolute;left:-5px;top:0;width:770px;height:271px;transform:scale(.5);transform-origin:top left;background-image:url("./assets/figma/list-fbc01.svg");background-size:770px 271px;pointer-events:none;z-index:0}
+.statusbar{height:46px;flex:none;position:relative;z-index:1;background:#fff;padding:0;overflow:hidden}
+.statusbar-art{display:block;width:375px;height:46px}
+.statusbar-time{position:absolute;left:30px;top:14px;width:64px;height:36px;transform:scale(.5);transform-origin:top left}
+.statusbar-symbols{position:absolute;right:14px;top:16px;width:136px;height:28px;transform:scale(.5);transform-origin:top right}
+.navbar{height:48px;flex:none;position:relative;z-index:1;display:flex;align-items:center;background:#fff;padding:0 12px;border:0}
+.nav-back{width:32px;height:32px;flex:none;padding:4px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.nav-back img{display:block;width:18px;height:32px;transform:scale(.5)}
+.nav-back:disabled{cursor:default}
+.nav-title{position:absolute;left:50%;transform:translateX(-50%);text-align:center;font-size:16px;line-height:1.25;font-weight:600;color:rgba(0,0,0,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wechat-pill{width:174px;height:64px;flex:none;display:flex;align-items:center;justify-content:center;gap:26px;padding:0 26px;border:2px solid #e7e7e7;border-radius:32px;line-height:0;margin-left:auto;transform:scale(.5);transform-origin:right center}
+.wechat-more{display:block;width:36px;height:12px;flex:none}
+.wechat-divider{width:2px;height:64px;flex:none;display:flex;align-items:center;justify-content:center}
+.wechat-divider img{display:block;width:40px;height:1px;transform:rotate(90deg)}
+.wechat-circle{display:block;width:32px;height:32px;flex:none}
+.statusbar,.navbar,#screen,#bottom{position:relative;z-index:1}
+#screen{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding-bottom:12px;scrollbar-width:thin}
+#bottom{flex:none;background:#fff;border-top:1px solid #EDEDED;padding:8px 18px calc(8px + env(safe-area-inset-bottom))}
+.page-pad{padding:14px}
+.eyebrow{font-size:11px;letter-spacing:.4px;color:var(--hint);margin:0 0 8px}
+.page-heading{font-size:18px;font-weight:600;margin:0 0 5px}
+.page-desc{font-size:12px;line-height:1.55;color:var(--sub);margin:0 0 14px}
+.card{background:var(--card);border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.035)}
+.card-title{font-size:14px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:7px}
+.card-title:before{content:"";width:4px;height:18px;border-radius:0 4px 4px 0;background:var(--green)}
+.label{display:block;font-size:14px;font-weight:500;margin:0 0 7px;color:#333}
+.required{color:var(--red);padding-right:3px}
+.field{width:100%;height:42px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:0 11px;color:var(--text);font-size:13px;outline:none}
+.field:focus{border-color:var(--green)}
+.hint{font-size:11px;line-height:1.5;color:var(--hint);margin-top:6px}
+.warning{background:#fff8e9;color:#ad7000;border-radius:7px;padding:10px 11px;font-size:11px;line-height:1.55;margin-bottom:10px}
+.info{background:#f0fbf5;color:#247d4c;border-radius:7px;padding:9px 10px;font-size:11px;line-height:1.55;margin:8px 0}
+.error{color:var(--red);font-size:11px;margin-top:5px;line-height:1.4}
+.contract{width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px;margin-bottom:8px;color:var(--text)}
+.contract.selected{border:1.5px solid var(--green);background:#f7fdf9}
+.contract.disabled{background:#f8f8f8;color:#9a9a9a;cursor:not-allowed}
+.contract-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600}
+.contract-meta{font-size:11px;color:var(--sub);line-height:1.6;margin-top:5px}
+.badge{font-size:10px;padding:3px 7px;border-radius:10px;background:#f3f4f6;color:#666;white-space:nowrap}
+.badge.green{background:var(--green-light);color:#18834e}.badge.gray{background:#f1f1f1;color:#888}.badge.red{color:var(--red);background:#fff0f0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid #ddd;background:#fff;border-radius:18px;padding:8px 11px;font-size:12px;color:#555}
+.chip.on{color:#168a4f;border-color:var(--green);background:var(--green-light)}
+.readonly{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px}
+.readonly:last-child{border:0;padding-bottom:0}.readonly span:first-child{color:var(--hint);flex:none}.readonly strong{text-align:right;font-weight:500;overflow-wrap:anywhere}
+.bottom-btn{width:100%;height:44px;border:0;border-radius:6px;background:var(--green);color:#fff;font-size:15px;font-weight:600}
+.bottom-btn:disabled{background:#b8e6cd;color:#fff;cursor:not-allowed}
+.bottom-row{display:flex;gap:10px}.bottom-row .bottom-btn{flex:1}
+.outline-btn{height:44px;padding:0 13px;border:1px solid var(--green);border-radius:6px;background:#fff;color:var(--green);font-size:13px}
+.text-btn{border:0;background:none;color:var(--green);font-size:12px;padding:5px}
+.dept-card{border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:9px;background:#fff}
+.dept-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dept-name{font-size:13px;font-weight:600}
+.dept-progress{font-size:10px;color:#9b6a12;background:#fff8e9;padding:4px 7px;border-radius:9px}
+.dept-progress.done{color:#18834e;background:var(--green-light)}
+.dept-progress.return{color:var(--red);background:#fff0f0}
+.dept-action{width:100%;margin-top:10px}
+.step-line{height:3px;background:#e8e8e8;border-radius:3px;margin:9px 0 3px;overflow:hidden}
+.step-fill{height:100%;width:50%;background:var(--green);border-radius:3px}
+.project-item{border-top:1px solid #eee;padding:12px 0}
+.project-item:first-of-type{border-top:0}
+.project-title{font-size:13px;font-weight:600;margin-bottom:8px}
+.upload{width:100%;min-height:76px;border:1px dashed #cfd6d2;border-radius:8px;background:#fbfdfc;color:#168a4f;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.upload .plus{font-size:22px;font-weight:300}
+.upload.done{border-style:solid;background:var(--green-light)}
+.upload.invalid{border-color:var(--red)}
+.upload-note{font-size:10px;color:var(--hint);margin-top:5px}
+.status-options{display:flex;gap:6px;margin-top:9px}
+.status-option{flex:1;border:1px solid #e4e4e4;border-radius:5px;padding:8px 3px;text-align:center;background:#f7f7f7;color:#666;font-size:11px}
+.status-option.on{color:#168a4f;border-color:var(--green);background:var(--green-light)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mini-field .field{height:36px;font-size:12px;padding:0 8px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.progress-list{display:flex;flex-direction:column;gap:9px}
+.progress-row{display:flex;align-items:center;gap:9px;font-size:11px;color:var(--sub)}
+.dot{height:8px;width:8px;border-radius:50%;background:#d2d2d2;flex:none}
+.dot.on{background:var(--green)}.dot.wait{background:var(--orange)}
+.stage-note{font-size:11px;color:var(--sub);line-height:1.55;margin-top:8px}
+
+/* #AI:design:start */
+.phone[data-view="create"]::before,.phone[data-view="assign"]::before,.phone[data-view="fill"]::before,.phone[data-view="recheck"]::before,.phone[data-view="review"]::before,.phone[data-view="legal"]::before,.phone[data-view="done"]::before{display:none}
+.phone[data-view="handover"]::before,.phone[data-view="project"]::before{display:none}
+.phone[data-view="create"] .statusbar,.phone[data-view="create"] .navbar{background:#fff}
+#screen.figma-screen{padding:0;background:#f7f8fc;scrollbar-width:none}
+#screen.figma-screen::-webkit-scrollbar{display:none}
+#screen.figma-create{background:#fff}
+#bottom.figma-footer{height:90px;flex:0 0 90px;position:relative;padding:6px 20px 40px;background:#fff;border-top:0;overflow:hidden}
+#bottom.figma-footer::before{content:"";position:absolute;left:-2px;top:-2px;width:758px;height:188px;transform:scale(.5);transform-origin:top left;background:url("./assets/figma/create-396c7.svg") no-repeat 0 0;pointer-events:none}
+#bottom.figma-footer .bottom-btn{position:relative;z-index:1;height:44px;border-radius:6px;font-size:16px}
+#bottom.figma-footer .bottom-btn:disabled{background:var(--green);opacity:.3;color:#fff}
+.list-page{min-height:100%;background:#f7f8fc}
+.list-tabs-wrap{height:40px;position:sticky;top:0;z-index:3;overflow:hidden;background:linear-gradient(to bottom,#fff 0,#fff 31.5px,#f7f8fc 31.5px,#f7f8fc 100%)}
+.list-tabs{height:25.5px;margin-top:6px;display:flex;align-items:stretch;gap:16px;overflow-x:auto;overflow-y:hidden;padding:0 14px;white-space:nowrap;scrollbar-width:none}
+.list-tabs::-webkit-scrollbar{display:none}
+.list-tab{height:19.5px;flex:none;position:relative;display:flex;align-items:center;gap:3px;padding:0;border:0;background:transparent;color:#666;font-size:14px;line-height:20px}
+.list-tab.active{color:var(--green);font-weight:600}
+.list-tab.active::after{content:"";position:absolute;left:50%;bottom:-6px;width:20px;height:2px;transform:translateX(-50%);background:var(--green)}
+.list-count-badge{min-width:14px;height:14px;padding:0 4px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;background:#fa2b2d;color:#fff;font-size:10px;line-height:12px}
+.list-tabs-fade{position:absolute;right:0;top:6px;width:20px;height:25.5px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff);pointer-events:none}
+.result-count{height:22px;padding:5.5px 14px 0;background:transparent;color:#999;font-size:12.5px;line-height:17.5px}
+.list-cards{padding:7px 14px 12px;display:flex;flex-direction:column;gap:10px}
+/* #AI:design 长标题自然换行，卡片与背景随内容增长。 */
+.list-card{min-height:261.5px;flex:none;position:relative;padding:12px 14px 0;color:#333;cursor:pointer}
+.list-card-surface{position:absolute;left:-6px;top:-5px;width:calc(100% + 12px);height:calc(100% + 12px);pointer-events:none}
+.list-card-content{position:relative;min-height:249.5px;display:flex;flex-direction:column;z-index:1}
+.list-card-title{margin:0 0 6px;color:#1aba6c;font-size:14px;font-weight:600;line-height:19.5px;overflow-wrap:anywhere}
+.list-card-name{margin:0;color:#333;font-size:12px;font-weight:600;line-height:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-metrics{width:289px;height:40.5px;margin:8px 0 0 15px;display:flex;justify-content:space-between;align-items:start}
+.list-metric{width:48px;flex:none;position:relative;text-align:center;padding-top:0}
+.list-metric+.list-metric::before{content:"";position:absolute;left:-36.5px;top:5px;width:.5px;height:30px;background:#d9d9d9}
+.list-metric strong{display:block;color:#111;font-size:14px;font-weight:600;line-height:19.5px;white-space:nowrap}
+.list-metric span{display:block;margin-top:4px;color:#666;font-size:12px;line-height:17px;white-space:nowrap}
+.list-card-meta{margin-top:8px;display:flex;flex-direction:column;gap:6px;font-size:12px;line-height:17px;color:#666}
+.list-card-meta p{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-card-divider{margin: auto 2px 0;height:2px;flex:none;overflow:hidden;opacity:.9}
+.list-card-divider img{display:block;width:629px;height:2px;transform:scale(.5,1);transform-origin:top left}
+.list-card-actions{align-self:flex-end;margin:9.25px 0 12px;display:flex;align-items:center;gap:5px}
+.list-action{width:72px;height:28px;padding:0;border-radius:6px;font-size:12px;font-weight:600;line-height:16px;white-space:nowrap}
+.list-action.outline{border:1px solid #1aba6c;background:#fff;color:#1aba6c}
+.list-action.primary{border:1px solid #1aba6c;background:#1aba6c;color:#fff}
+.list-action:disabled{opacity:1;cursor:default}
+.form-page{min-height:100%;padding:10px 18px 18px 10px;background:#fff}
+.form-field-label{height:19.5px;margin-left:8px;display:flex;align-items:center;gap:2px;color:#333;font-size:14px;font-weight:500;line-height:19.5px}
+.form-field-label img{display:block;width:12px;height:12px;transform:scale(.5);transform-origin:center}
+.form-types{width:341px;height:36px;margin:8px 0 0 8px;padding:0;display:flex;gap:10px}
+.form-type{width:104px;height:36px;flex:none;padding:0;border:1px solid transparent;border-radius:5px;background:#f7f7f7;color:#333;font-size:14px;font-weight:400}
+.form-type:first-child{width:105px}
+.form-type.selected{border-color:#1aba6c;background:rgba(26,186,108,.05);color:#1aba6c;font-weight:600}
+.form-type:disabled{cursor:default;opacity:1}
+.form-field-group{height:54.5px;position:relative;padding-top:0;margin-bottom:20px}
+.form-field-group.first{margin-top:20px}
+.form-field-group:not(.first){margin-top:0}
+.form-select-row{width:calc(100% - 8px);height:23px;margin:12px 0 0 8px;padding:0;display:flex;align-items:center;justify-content:space-between;border:0;background:transparent;color:#999;text-align:left;font-size:12px;line-height:17px}
+.form-select-row.has-value{color:#111}
+.form-select-row img{display:block;width:32px;height:32px;transform:rotate(180deg) scale(.5);transform-origin:center;flex:none}
+.form-field-line{position:absolute;left:8px;bottom:0;width:678px;height:1px;transform:scale(.5);transform-origin:bottom left}
+.basic-info{width:347px;height:253.5px;position:relative;margin:-10px 0 20px 4px;padding:10px 10px 10px;overflow:hidden}
+.basic-info-surface{position:absolute;inset:0;width:694px;height:507px;transform:scale(.5);transform-origin:top left;pointer-events:none}
+.basic-info-content{position:relative;z-index:1}
+.basic-info-title{height:19.5px;margin:0 0 12px 0;padding-left:0;position:relative;font-size:14px;font-weight:600;line-height:19.5px}
+.basic-info-title::before{content:"";position:absolute;left:-10px;top:0;width:4px;height:18px;border-radius:0 4px 4px 0;background:#1aba6c}
+.basic-info-row{height:18px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;line-height:17px;white-space:nowrap}
+.basic-info-row span{color:#666}
+.basic-info-row strong{color:#111;font-weight:400}
+/* #AI:design 新签商户租金提示位于基本信息之后。 */
+.rent-warning{margin:-10px 0 20px 4px;color:#FA2B2D;font-size:12px;line-height:18px}
+.house-info{width:347px;height:193.5px;position:relative;margin:-10px 0 20px 4px;padding:10px 10px 14px;overflow:hidden}
+.house-info-surface{position:absolute;left:0;top:0;width:694px;height:387px;transform:scale(.5);transform-origin:top left;pointer-events:none}
+.house-info-content{position:relative;z-index:1}
+.house-info-title{height:19.5px;margin:0 0 12px;position:relative;font-size:14px;font-weight:600;line-height:19.5px}
+.house-info-title::before{content:"";position:absolute;left:-10px;top:.5px;width:4px;height:18px;border-radius:0 4px 4px 0;background:#1aba6c}
+.house-info-row{width:287.5px;height:18px;margin:0 0 12px 14px;display:flex;align-items:center;gap:4px;font-size:13px;line-height:18px}
+.house-info-row:last-child{margin-bottom:0}
+.house-info-row span{width:91px;flex:none;text-align:right;color:#666;white-space:nowrap}
+.house-info-row strong{min-width:0;flex:1;color:#000;font-weight:400;white-space:nowrap}
+.create-department-option.selected{border-color:#1aba6c;background:rgba(26,186,108,.05);color:#1aba6c;font-weight:600}
+.house-sheet{position:absolute;left:0;right:0;bottom:0;height:282px;padding:20px 20px 12px;overflow:hidden;background:#fff;border-radius:12px 12px 0 0}
+.house-options{position:relative;z-index:1;margin-top:18px;display:flex;flex-direction:column;gap:8px}
+/* #AI:design 房屋候选支持名称搜索并在面板内滚动。 */
+.house-sheet{height:340px}.house-options{max-height:150px;overflow-y:auto}.house-search{width:100%;height:32px;margin-top:10px;padding:0 10px;border:1px solid #e7e7e7;border-radius:5px}
+.house-option{min-height:34px;padding:8px 12px;border:1px solid transparent;border-radius:5px;background:#f7f7f7;color:#333;text-align:left;font-size:14px;line-height:18px}
+.house-option.selected{border-color:#1aba6c;background:rgba(26,186,108,.05);color:#1aba6c;font-weight:600}
+.house-options-empty{position:relative;z-index:1;margin:22px 0;color:#999;text-align:center;font-size:12px}
+.form-select-row:disabled{color:#ccc;cursor:default;opacity:1}
+.selection-mask{position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.6)}
+.department-sheet{position:absolute;left:0;right:0;bottom:0;height:282px;padding:20px 20px 12px;overflow:hidden;background:#fff;border-radius:12px 12px 0 0}
+.department-sheet-surface{position:absolute;left:0;top:0;width:750px;height:564px;transform:scale(.5);transform-origin:top left;pointer-events:none}
+.department-sheet::after{content:"";position:absolute;left:-2px;bottom:-2px;width:758px;height:188px;transform:scale(.5);transform-origin:bottom left;background:url("./assets/figma/create-396c7.svg") no-repeat 0 0;pointer-events:none}
+/* #AI:design 交接部门与类别级联选择 */
+.created-project-item{padding:12px 0;border-bottom:1px solid #eee}
+.created-project-item h3{font-size:14px}
+.created-project-item label,[data-created-form] label{display:block;margin:10px 0;font-size:13px}
+.created-project-item input,[data-created-form] textarea{display:block;max-width:100%;margin-top:7px}
+[data-created-form] textarea{width:100%;min-height:56px;border:1px solid #e5e5e5;border-radius:5px;padding:8px}
+.category-sheet{height:440px;padding:20px 20px 76px;display:flex;flex-direction:column}
+.category-sheet::after{display:none}
+.category-scroll{overflow:auto;flex:1;margin-top:16px}
+.category-depts{display:flex;flex-wrap:wrap;gap:8px}
+.category-depts .department-option{padding:0 14px}
+.category-group{margin-top:18px}
+.category-group-title{margin:0 0 10px;font-size:14px;font-weight:600;color:#333}
+.category-options{display:flex;flex-wrap:wrap;gap:8px}
+.category-option{min-height:36px;padding:7px 12px;border:1px solid transparent;border-radius:5px;background:#f7f7f7;color:#333;font-size:14px}
+.category-option.selected{border-color:#1aba6c;background:rgba(26,186,108,.05);color:#1aba6c}
+.category-empty{font-size:12px;color:#999}
+.category-sheet .sheet-confirm{bottom:20px}
+.form-field-group.category-value{height:auto;min-height:54.5px;padding-bottom:8px}
+.category-value .form-select-row{height:auto;min-height:23px;line-height:19px}
+.category-value-text{flex:1;white-space:normal;overflow-wrap:anywhere}
+.selection-title{position:relative;z-index:1;margin:0;text-align:center;font-size:16px;font-weight:600;line-height:26px;color:rgba(0,0,0,.9)}
+.phone[data-view="detail"]::before,.phone[data-view="assign"]::before{display:none}
+#screen.figma-detail,#screen.figma-assign{padding:0;background:#f7f8fc;scrollbar-width:none}
+#screen.figma-detail::-webkit-scrollbar,#screen.figma-assign::-webkit-scrollbar{display:none}
+#screen.figma-handover,#screen.figma-project{padding:0;background:#f7f8fc;scrollbar-width:none}
+#screen.figma-handover::-webkit-scrollbar,#screen.figma-project::-webkit-scrollbar{display:none}
+#bottom.figma-detail-footer,#bottom.figma-assign-footer{height:90px;flex:0 0 90px;position:relative;padding:6px 20px 40px;background:#fff;border-top:0;overflow:hidden}
+#bottom.figma-handover-footer,#bottom.figma-project-footer{height:90px;flex:0 0 90px;position:relative;padding:6px 20px 40px;background:#fff;border-top:0;overflow:hidden}
+#bottom.figma-handover-footer::before,#bottom.figma-project-footer::before{content:"";position:absolute;inset:0;background:#fff;pointer-events:none}
+#bottom.figma-handover-footer .bottom-btn,#bottom.figma-project-footer .bottom-btn{position:relative;z-index:1;height:44px;border-radius:6px;font-size:16px}
+#bottom.figma-handover-footer .bottom-btn:disabled{background:#b9e9d2;color:#fff;opacity:1;cursor:default}
+#bottom.figma-detail-footer::before,#bottom.figma-assign-footer::before{content:"";position:absolute;inset:0;background:#fff;pointer-events:none}
+#bottom.figma-detail-footer .bottom-row,#bottom.figma-assign-footer .bottom-row{position:relative;z-index:1;display:flex;gap:14px;height:44px}
+#bottom.figma-detail-footer .bottom-btn,#bottom.figma-assign-footer .bottom-btn{height:44px;border-radius:6px;font-size:16px}
+#bottom.figma-detail-footer .outline-btn,#bottom.figma-assign-footer .outline-btn{flex:1;height:44px;border-radius:6px;font-size:16px}
+#bottom.figma-assign-footer .bottom-btn{flex:1}
+#bottom.single-action-detail-footer .bottom-row{gap:0}
+#bottom.single-action-detail-footer .bottom-btn{flex:1}
+#bottom.detail-footer-hidden{display:none}
+/* #AI:design 待复验详情沿用小程序单主按钮规范 */
+#bottom.figma-recheck-detail-footer{padding:6px 18px 40px;border-top:.5px solid #ededed}
+#bottom.ongoing-detail-footer::before{background:url("./assets/figma/ongoing-detail-footer.svg") no-repeat 0 0;width:750px;height:180px;transform:scale(.5);transform-origin:top left}
+.detail-page{min-height:100%;padding:16px 14px 12px;background:#f7f8fc}
+.detail-card{position:relative;margin:0 0 10px;padding:16px 12px 9px;border:1px solid #e7e7e7;border-radius:5px;background:#fafafa}
+.detail-card-title{height:19px;margin:0 0 12px;position:relative;font-size:14px;line-height:19px;font-weight:600;color:#333}
+.detail-card-title::before{content:"";position:absolute;left:-12px;top:0;width:4px;height:18px;border-radius:0 4px 4px 0;background:#1aba6c}
+.detail-info{display:flex;flex-direction:column;gap:0}
+.detail-info-row{min-height:30px;display:grid;grid-template-columns:112px minmax(0,1fr);align-items:center;font-size:13px;line-height:18px}
+.detail-info-row span{text-align:right;color:#666;white-space:nowrap}
+.detail-info-row strong{padding-left:10px;color:#111;font-weight:400;overflow-wrap:anywhere}
+.detail-project{padding:12px 12px 6px;background:#fafafa}
+.detail-project>.detail-card-title{margin-bottom:14px}
+.detail-project-item{width:calc(100% + 2px);padding:0;margin:0;border:0}
+.detail-project-item:not(:last-child){padding-bottom:10px}
+.detail-project-head{height:19px;display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0}
+.detail-project-title-group{display:flex;align-items:center;gap:4px;min-width:0}
+.detail-project-name{font-size:14px;line-height:19px;font-weight:600;color:#111}
+.detail-tag{font-size:10px;line-height:16px;padding:0 4px;border:1px solid #bcebd2;border-radius:2px;color:#1aba6c;background:#e8f9f0;white-space:nowrap}
+.detail-tag.pending{border-color:#ffd4d4;color:#fa2b2d;background:#fff5f5}
+.detail-subprojects{display:flex;flex-direction:column;gap:4px;padding-left:0;margin-top:10px}
+.detail-project .detail-project-desc{margin:0;font-size:13px;line-height:18px;font-weight:600;color:#333}
+.detail-subprojects .ongoing-project-name{margin:0}
+.detail-project-dept{margin:0;font-size:13px;line-height:18px;color:#666}
+.detail-project-dept span{margin-right:4px;color:#666}
+.handover-page{position:relative;width:375px;height:628px;overflow:hidden;background:#f7f8fc}
+.handover-projects{position:absolute;inset:0}
+.handover-project{position:absolute;left:14px;width:347px;height:80px;padding:0;border:0;border-radius:8px;background:#fff;box-shadow:0 6px 8px rgba(222,227,240,.2);text-align:left;color:#333}
+.handover-project:nth-child(1){top:16px}.handover-project:nth-child(2){top:106px}.handover-project:nth-child(3){top:196px}
+.handover-project-name{position:absolute;left:36px;top:30.5px;font-size:14px;line-height:19.5px;font-weight:600;white-space:nowrap}
+.handover-project-icon{position:absolute;left:12px;top:30px;width:20px;height:20px;display:block}
+.handover-project-icon img{display:block;width:20px;height:20px}
+.handover-status{position:absolute;left:0;top:0;width:57px;height:19.5px;padding-left:12px;display:flex;align-items:center;border-radius:0 0 8px 0;background:#e8f9f0;color:#1aba6c;font-size:11px;line-height:15.5px}
+/* #AI:design 待复验标记沿用项目卡片位置，使用 Figma 警示色 */
+.handover-status.recheck{background:#fff5f5;color:#fa2b2d}
+.handover-project-action{position:absolute;left:247px;top:24px;width:88px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid #1aba6c;border-radius:6px;background:#1aba6c;color:#fff;font-size:12px;line-height:17px;font-weight:600}
+.handover-project.is-done .handover-project-name{top:30.5px}
+.handover-project.is-done .handover-project-action{background:#fff;color:#1aba6c}
+.handover-project.is-done .handover-status{left:0}
+.project-page{position:relative;width:375px;overflow:hidden;background:#f7f8fc}
+.project-canvas{position:absolute;left:0;top:-94px;width:750px;transform:scale(.5);transform-origin:top left;font-family:"PingFang SC",-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;color:#333}
+.project-meter{height:712px}.project-meter .project-canvas{height:1792px}
+.project-meter.with-receipt{height:863px}.project-meter.with-receipt .project-canvas{height:2094px}
+.project-keys{height:374.5px}.project-keys .project-canvas{height:1117px}
+/* #AI:design 消防系统选择“否”时收起复验日期与备注后的页面尺寸 */
+.project-fire{height:1042px}.project-fire .project-canvas{height:2163px}
+.project-fire.project-fire-no{height:833px}.project-fire.project-fire-no .project-canvas{height:1760px}.project-fire.project-fire-no .project-panel{height:1540px}
+.project-panel{position:absolute;left:28px;top:220px;background:#fff;border-radius:12px}
+.fx-text{position:absolute;overflow:visible;white-space:nowrap;font-size:28px;line-height:39px;font-weight:400;color:#333}
+.fx-green-title{color:#1aba6c;font-weight:600}
+.fx-intro{font-size:24px;line-height:34px;color:#666}
+.fx-section-title{font-weight:600}
+.fx-medium{font-weight:500}
+.fx-placeholder{color:#999;font-size:26px;line-height:36px}
+.fx-receipt-value{color:#000;font-size:26px;line-height:36px}
+/* #AI:design 收房历史演示日期与读数同行右对齐 */
+.fx-receipt-date{color:#999999;font-size:26px;line-height:36px;text-align:right}
+.fx-water-tag{display:flex;align-items:center;justify-content:center;height:36px;padding:4px 9px;border:1px solid rgba(26,186,108,.3);border-radius:4px;background:#e8f9f0;color:#1aba6c;font-size:20px;line-height:28px;font-weight:500;white-space:nowrap}
+.fx-water-header{position:absolute;display:flex;align-items:center;gap:16px;font-size:28px;line-height:39px;font-weight:600;color:#333;white-space:nowrap}
+.fx-small-placeholder{color:#999;font-size:24px;line-height:34px}
+.fx-required{position:absolute;display:block;width:12px;height:12px}
+.fx-section-marker{position:absolute;width:8px;height:36px;border-radius:0 8px 8px 0;background:#1aba6c}
+.fx-divider{position:absolute;height:1px;background:#e6e6e6}
+.fx-photo{position:absolute;overflow:hidden;background:#f7f8fc}
+.fx-photo img{display:block;width:320px;height:270px}
+.fx-photo-cover{position:absolute;left:0;top:216px;width:320px;height:54px;background:#4778f5}
+.fx-photo-caption{position:absolute;top:226px;z-index:2;height:34px;color:#fff;text-align:center;font-size:24px;line-height:34px;font-weight:400;pointer-events:none}
+.fx-control{position:absolute;background:#fff;border:2px solid #e6e6e6;border-radius:8px;color:#333}
+.fx-counter-btn{position:absolute;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:32px;line-height:32px;font-weight:400}
+.fx-counter-value{position:absolute;width:120px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;line-height:39px;font-weight:500;color:#000}
+.fx-choice{position:absolute;display:flex;align-items:center;justify-content:center;border:2px solid transparent;border-radius:8px;background:#f7f7f7;color:#333;font-size:24px;line-height:34px;font-weight:400}
+.fx-choice.selected-good{border-color:#1aba6c;background:#f7fdf9;color:#1aba6c;font-weight:600}
+.fx-choice.selected-bad{border-color:#fa2b2d;background:#fff;color:#fa2b2d;font-weight:600}
+/* #AI:design 无此项选中态沿用中性灰；设计稿未给出选中样式，待确认 */
+.fx-choice.selected-na{border-color:#8a8a8a;background:#f2f2f2;color:#4d4d4d;font-weight:600}
+.fx-input-row{position:absolute;background:transparent}
+.fx-input-row .fx-divider{left:16px;right:0;bottom:0}
+.fx-arrow{position:absolute;left:702px;width:32px;height:32px;transform:rotate(180deg)}
+.fx-select-arrow{position:absolute;left:0;top:0;width:32px;height:32px}
+.fx-note-box{position:absolute;border:1px solid #e6e6e6;border-radius:8px;background:#fff}
+.fx-field-input{position:absolute;padding:0;border:0;background:transparent;color:#333;font-size:26px;line-height:36px;outline:none;resize:none}
+.fx-field-input::placeholder{color:#999;opacity:1}
+.fx-readonly-button{position:absolute;padding:0;border:0;background:transparent;text-align:left;color:#999;font-size:24px;line-height:34px}
+.fx-project-input-row{position:absolute;left:48px;width:654px;height:111px}
+.fx-project-input-row .fx-divider{left:0;right:0;bottom:0}
+.fx-project-input-row input[type=number]{appearance:textfield;-moz-appearance:textfield}
+.fx-project-input-row input[type=number]::-webkit-inner-spin-button,.fx-project-input-row input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.fx-project-input-row.is-invalid .fx-divider,.fx-project-select-row.is-invalid .fx-divider{height:2px;background:#fa2b2d}
+.fx-project-select-row{position:absolute;left:48px;width:654px;height:51px}
+.fx-project-select{position:absolute;left:0;top:5px;width:620px;height:34px;padding:0 4px 0 0;border:0;outline:0;background:transparent;color:#333;font-size:24px;line-height:34px;appearance:none;text-align:left;cursor:pointer}
+.fx-project-select.is-placeholder{color:#999}
+.fx-project-select option{color:#333}
+.fx-project-select-arrow{left:auto;right:0;top:9px;pointer-events:none}
+.project-receiver-options{position:relative;z-index:1;margin-top:24px;display:grid;grid-template-columns:107px 106px 106px;gap:10px 8px}
+.project-receiver-option{min-width:0;padding:0 2px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:normal;line-height:16px}
+.fx-project-date-wrap{position:absolute;left:48px;top:1842px;width:620px;height:34px}
+/* #AI:design 消防日期整行复用新增任务的底部日历选择器 */
+.fx-project-date-trigger{position:absolute;left:0;top:0;width:100%;height:51px;padding:0;border:0;background:transparent;opacity:0;cursor:pointer;z-index:2}
+.fx-project-date-text{position:absolute;inset:0;display:flex;align-items:center;color:#999;font-size:24px;line-height:34px;pointer-events:none}
+.fx-project-date-text.has-value{color:#333}
+.fx-validation-message{position:absolute;color:#fa2b2d;font-size:20px;line-height:28px;white-space:nowrap}
+.fx-photo.fx-project-photo{cursor:pointer;border-radius:16px}
+.fx-project-photo .fx-photo-image{width:320px;height:270px;object-fit:cover}
+.fx-project-photo .fx-photo-input{position:absolute;left:-2px;top:-2px;width:2px;height:2px;opacity:0;pointer-events:none}
+.fx-project-photo .fx-photo-target{position:absolute;inset:0;z-index:2;cursor:pointer;border:0;background:transparent}
+/* #AI:design 照片来源操作菜单及多图缩略展示 */
+.photo-sheet-mask{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.6);display:flex;align-items:flex-end}
+.photo-sheet{width:100%;background:#fff;border-radius:12px 12px 0 0;overflow:hidden;padding-bottom:env(safe-area-inset-bottom)}
+.photo-sheet-title{text-align:center;font-size:16px;font-weight:600;color:rgba(0,0,0,.9);padding:20px 16px;margin:0 18px;border-bottom:1px solid #ebebeb}
+.photo-sheet-item{display:block;width:100%;border:0;background:#fff;text-align:center;font-size:14px;color:#333;padding:20px 0;border-bottom:1px solid #ebebeb}
+.photo-sheet-item:last-child{border:0;padding-bottom:50px}
+.fx-photo-thumbs{position:absolute;inset:0 0 40px;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:72px;overflow:auto;background:#fff;gap:2px}
+.fx-photo-thumbs img{width:100%;height:72px;object-fit:cover}
+.fx-project-photo.has-image .fx-photo-target{top:auto;height:40px}
+.fx-project-photo.is-invalid{box-shadow:inset 0 0 0 3px #fa2b2d}
+.fx-project-photo .fx-photo-cover{z-index:1;cursor:pointer}
+.fx-project-photo.has-image .fx-photo-cover{height:40px;top:230px;background:rgba(31,40,56,.55);font-size:20px;line-height:40px}
+.fx-counter-edit{width:120px;height:60px;border:0;padding:0;background:transparent;text-align:center;color:#000;font-size:28px;line-height:39px;font-weight:500;outline:0;appearance:textfield}
+.fx-counter-edit::-webkit-inner-spin-button,.fx-counter-edit::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.fx-counter-btn{padding:0}
+.fx-choice{cursor:pointer}
+/* #AI:design 交接表单按小程序规范保留页面左右留白，输入线随内容宽度适配 */
+.project-canvas .fx-project-input-row .fx-field-input,.project-canvas .fx-project-input-row .fx-divider{width:100%!important}
+.fx-note-input{position:absolute;left:20px;top:20px;width:614px;height:130px;padding:0;border:0;background:transparent;color:#333;font-size:24px;line-height:34px;outline:0;resize:none}
+.project-canvas .fx-note-input,[data-created-form] .fx-note-input{width:calc(100% - 40px);margin:0;padding:0;border:0;border-radius:0;background:transparent}
+.fx-note-input::placeholder{color:#999;opacity:1}
+.fx-note-count{position:absolute;right:20px;bottom:8px;color:#ccc;font-size:24px;line-height:34px;text-align:right}
+.fx-project-note{border-color:#e6e6e6}
+.fx-project-date-row{position:absolute;left:48px;width:654px;height:51px}
+.fx-project-date-row .fx-divider{left:0;right:0;bottom:0}
+.fx-project-date-row.is-invalid .fx-divider{height:2px;background:#fa2b2d}
+/* #AI:design 消防预计复验日期箭头按小程序选择行规范靠右对齐 */
+.fx-project-date-row .fx-select-arrow{left:auto;right:0}
+.fx-project-date-row .fx-project-date-text{right:48px}
+.ongoing-detail-page{padding:10px 14px 12px;background:#fff}
+.detail-card.ongoing-basic-card,.detail-card.ongoing-project-card,.detail-card.ongoing-record-card{border:0;border-radius:0;background:transparent;overflow:hidden;padding:0}
+.detail-card.ongoing-basic-card{height:373.5px;margin-bottom:10px}
+.detail-card.ongoing-project-card{height:auto;margin-bottom:10px;border:1px solid #e6e6e6;border-radius:5px;background:#fafafa}.ongoing-project-card .ongoing-project-surface{display:none}
+.detail-card.ongoing-record-card{height:120.5px;margin-bottom:10px}
+.ongoing-card-surface{position:absolute;left:0;top:0;display:block;pointer-events:none;z-index:0;transform:scale(.5);transform-origin:top left}
+.ongoing-basic-surface{width:694px;height:747px}
+.ongoing-project-surface{width:694px;height:1680px}
+.ongoing-record-surface{width:694px;height:241px}
+.ongoing-basic-content,.ongoing-project-content,.ongoing-record-content{position:relative;z-index:1}
+.ongoing-basic-content{padding:10px 10px 8px}
+.ongoing-basic-content .detail-card-title{margin-bottom:7px}
+.ongoing-basic-content .detail-info-row{min-height:28px}
+.ongoing-project-content{padding:10px}
+.ongoing-project-content>.detail-card-title{margin-bottom:14px}
+.ongoing-project-content>.detail-card-title::before{left:-10px}
+.ongoing-record-content{padding:10px}
+.ongoing-category{position:relative;margin:0 2px;padding:0}
+.ongoing-category-head{height:19px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0}
+.ongoing-category-title{display:flex;align-items:center;gap:4px;min-width:0;font-size:14px;line-height:19px;font-weight:600;color:#111}
+.ongoing-category-info{margin:7px 0 0;font-size:13px;line-height:18px;color:#666}
+.ongoing-category-info strong{margin-left:4px;color:#000;font-weight:400}
+.ongoing-base-category{padding-bottom:10px}
+.ongoing-key-category{padding-bottom:10px}
+.ongoing-fire-category{padding-bottom:14.5px}
+.ongoing-meter-project{padding:10px 0;border:0}
+.ongoing-meter-project:not(:last-child){padding-bottom:10px}
+.ongoing-meter-project:last-child{padding-bottom:0}
+.ongoing-project-name{margin:0 0 4px;font-size:13px;line-height:18px;font-weight:600;color:#333}
+.ongoing-reading{margin:0;font-size:13px;line-height:18px;color:#000}
+.ongoing-reading span{color:#666}
+.ongoing-meter-photo{display:block;width:160px;height:135px;object-fit:cover;margin-top:10px;border-radius:3px}
+.ongoing-key-list{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.ongoing-key-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;column-gap:8px}
+.ongoing-key-name{grid-column:1;grid-row:1;font-size:13px;line-height:18px;font-weight:600;color:#333}
+.ongoing-key-count{grid-column:1;grid-row:2;display:flex;gap:4px;margin-top:4px;font-size:13px;line-height:18px;color:#000}
+.ongoing-key-count span:first-child{color:#666}
+.ongoing-damage-comp{grid-column:1/-1;grid-row:3}
+.ongoing-project-status{grid-column:2;grid-row:1;margin:0;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;font-size:13px;line-height:18px;font-weight:600}
+.ongoing-project-status.ok{color:#00a73b}.ongoing-project-status.damaged{color:#ff251d}.ongoing-project-status.pending{color:#666}
+.ongoing-fire-list{display:flex;flex-direction:column;gap:12px;margin-top:9px}
+.ongoing-fire-row{height:18px;display:flex;align-items:center;justify-content:space-between;font-size:13px;line-height:18px;font-weight:600;color:#333}
+.ongoing-damage-comp{margin:4px 0 0;font-size:13px;line-height:18px;color:#000}
+.ongoing-status-icon-wrap{width:14px;height:14px;flex:none;overflow:hidden}
+.ongoing-status-icon{display:block;width:28px;height:28px;transform:scale(.5);transform-origin:top left}
+/* #AI:design 详情页交接项目保留完好/损坏/无此项标签，与办理交接所选项一致 */
+.ongoing-item-status{display:inline-block;margin-left:6px;padding:0 5px;border-radius:2px;font-size:11px;line-height:17px;font-weight:600;border:1px solid transparent;vertical-align:middle}
+.ongoing-item-status.good{color:#1aba6c;background:#e8f9f0;border-color:#bcebd2}
+.ongoing-item-status.bad{color:#fa2b2d;background:#fff0f0;border-color:#ffd4d4}
+.ongoing-item-status.na{color:#666;background:#f3f4f6;border-color:#e4e4e4}
+.ongoing-separator{display:block;width:323px;height:.5px;margin:0 0 10px}
+.ongoing-records-title{margin:0 0 12px 0;position:relative;font-size:14px;line-height:19px;font-weight:600;color:#333}
+.ongoing-records-title::before{content:"";position:absolute;left:-10px;top:0;width:4px;height:18px;border-radius:0 4px 4px 0;background:#1aba6c}
+.ongoing-record-entry{position:relative;margin-left:3.5px;font-size:12px;line-height:17px;color:#000}
+.ongoing-record-entry:not(:last-child){margin-bottom:14px}
+.ongoing-record-entry::before{content:"";position:absolute;left:-7.5px;top:15px;width:1px;height:35px;background:#e6e6e6}
+.ongoing-record-entry img{position:absolute;left:-9.5px;top:6px;display:block;width:5px;height:5px}
+.ongoing-record-list{margin-top:12px}
+.ongoing-record-heading,.ongoing-record-meta{display:flex;align-items:center;gap:6px;line-height:17px;white-space:nowrap}
+.ongoing-record-heading{font-weight:600;color:#000}
+.ongoing-record-meta{font-weight:400;color:#666}
+.ongoing-record-status.done{color:#1aba6c}.ongoing-record-status.wait{color:#fa2b2d}
+/* #AI:design 待确认详情采用 Figma 750px 画布坐标 */
+.confirm-detail-page{position:relative;width:375px;height:2055.5px;background:#fff;overflow:hidden}
+.confirm-canvas{position:absolute;left:14px;top:16px;width:694px;height:4079px;transform:scale(.5);transform-origin:top left;font-family:"PingFang SC",sans-serif}
+.confirm-panel{position:absolute;left:0;width:694px;background:#fafafa;border:1px solid #e6e6e6;border-radius:10px}
+.confirm-text{position:absolute;font-size:26px;line-height:36px;color:#333;white-space:nowrap}
+.confirm-heading{font-size:28px;line-height:39px;font-weight:600}
+.confirm-label{color:#666}.confirm-value{color:#000}.confirm-strong{font-weight:600}.confirm-green{color:#1aba6c}
+.confirm-record-text{font-size:24px;line-height:34px}
+.confirm-tag{position:absolute;font-size:20px;line-height:28px;padding:4px 10px;border:1px solid #bcebd2;border-radius:4px;background:#e8f9f0;color:#1aba6c;white-space:nowrap}
+/* #AI:design 已完结画板的消防项目保留示例待复验标签 */
+.confirm-tag.pending{border-color:#ffd4d4;background:#fff5f5;color:#fa2b2d}
+.confirm-detail-page.is-finished{height:2103.5px}.confirm-detail-page.is-finished .confirm-canvas{height:4175px}
+.confirm-image{position:absolute;width:320px;height:270px;object-fit:cover;border-radius:6px}
+.confirm-status{position:absolute;display:flex;align-items:center;gap:2px;font-size:26px;line-height:36px;font-weight:600;color:#00a73b;white-space:nowrap}
+.confirm-status.bad{color:#ff251d}.confirm-status img{width:28px;height:28px}
+/* #AI:design 确认详情保留完好/损坏/无此项标签 */
+.confirm-tag.confirm-status-tag{padding:0 8px;border-radius:2px;font-size:18px;line-height:24px;border:1px solid #bcebd2;background:#e8f9f0;color:#1aba6c}
+.confirm-status-tag.bad{background:#fff0f0;color:#fa2b2d;border-color:#ffd4d4}
+.confirm-status-tag.na{background:#f3f4f6;color:#666;border-color:#e4e4e4}
+/* #AI:design 审批记录以每条自身时间排序，无时间项目保留原位置 */
+.approval-history{position:absolute;left:27px;width:640px;font-size:24px;line-height:34px;color:#666}
+.native-approval-history{padding-left:13px;font-size:12px;line-height:18px}.native-approval-history .approval-history-item{padding-bottom:14px}.native-approval-history .approval-history-item:before{left:-9.5px;top:6px;width:5px;height:5px}.native-approval-history .approval-history-item:after{left:-7.5px;top:15px}.native-approval-history .approval-history-head,.native-approval-history .approval-history-meta{gap:6px}
+.approval-history-item{position:relative;padding-bottom:28px;overflow-wrap:anywhere}.approval-history-item:last-child{padding-bottom:0}
+.approval-history-item:before{content:"";position:absolute;left:-19px;top:12px;width:10px;height:10px;border-radius:50%;background:#b3b3b3}
+.approval-history-item:not(:last-child):after{content:"";position:absolute;left:-15px;top:30px;bottom:4px;width:1px;background:#e6e6e6}
+.approval-history-head{display:flex;gap:12px;flex-wrap:wrap;font-weight:600;color:#000}.approval-history-meta{display:flex;gap:12px;flex-wrap:wrap}.approval-history-status{color:#1aba6c}.approval-history-status.red,.approval-history-reason{color:#fa2b2d}.approval-history-status.orange{color:#f19204}
+.confirm-record-marker{position:absolute;width:10px;height:10px}.confirm-record-line{position:absolute;width:1px;height:70px;background:#e6e6e6}
+.assign-page{min-height:100%;padding:20px 16px;background:#f7f8fc}
+.assign-label{margin:0 0 12px 4px;font-size:14px;font-weight:600;line-height:20px;color:#333}
+.assign-candidate{width:100%;height:78px;margin:0 0 13px;padding:0 14px;display:flex;align-items:center;gap:12px;border:0;border-radius:10px;background:#fff;text-align:left;box-shadow:0 6px 18px rgba(26,42,73,.04);color:#333}
+.assign-avatar{width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#1aba6c;color:#fff;font-size:16px}
+.assign-name{flex:1;font-size:16px;font-weight:600}
+.assign-radio{width:20px;height:20px;flex:none;border:1.5px solid #ddd;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px}
+.assign-radio-icon-wrap{width:20px;height:20px;flex:none;overflow:hidden}
+.assign-radio-icon{display:block;width:40px;height:40px;transform:scale(.5);transform-origin:top left}
+.assign-remark-label{margin:12px 0 10px 4px;font-size:14px;font-weight:600;line-height:20px}
+.assign-remark-box{height:101px;position:relative;border:1px solid #dfe3ec;border-radius:5px;background:#fff}
+.assign-remark{width:100%;height:100%;resize:none;border:0;outline:0;padding:12px;font:13px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:#333;background:transparent}
+.assign-remark::placeholder{color:#ccc}
+.assign-remark-count{position:absolute;right:12px;bottom:8px;font-size:13px;color:#ccc;pointer-events:none}
+#bottom.figma-detail-footer .bottom-btn:disabled,#bottom.figma-assign-footer .bottom-btn:disabled{opacity:.35}
+.department-options{position:relative;z-index:1;margin-top:24px;display:grid;grid-template-columns:107px 106px 106px;gap:10px 8px}
+.department-option{height:36px;border:1px solid transparent;border-radius:5px;background:#f7f7f7;color:#333;font-size:14px}
+.department-option.selected{border-color:#1aba6c;background:rgba(26,186,108,.05);color:#1aba6c;font-weight:600}
+.sheet-confirm{position:absolute;z-index:2;left:20px;right:20px;bottom:40px;width:calc(100% - 40px);height:44px;border:0;border-radius:6px;background:#1aba6c;color:#fff;font-size:16px;font-weight:600}
+.stall-sheet{position:absolute;left:0;right:0;bottom:0;height:570.5px;padding:10px 10px 90px;overflow:hidden;background:#fff;border-radius:6px 6px 0 0}
+.stall-sheet-surface{position:absolute;left:-5px;top:0;width:770px;height:1161px;transform:scale(.5);transform-origin:top left;pointer-events:none}
+.stall-search{height:32px;position:relative;z-index:1;display:flex;align-items:center;gap:4px;padding:0 12px;border:1px solid #1aba6c;border-radius:5px;background:#fff}
+.stall-search img{display:block;width:20px;height:20px;flex:none}
+.stall-search input{width:100%;height:30px;min-width:0;border:0;outline:0;background:transparent;color:#333;font-size:12px}
+.stall-search input::placeholder{color:#ccc;opacity:1}
+.stall-results{position:absolute;left:10px;right:10px;top:62px;bottom:90px;overflow:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start;gap:10px}
+.stall-option{height:36px;border:1px solid transparent;border-radius:5px;background:#f7f7f7;color:#333;font-size:14px;line-height:18px}
+.stall-option.selected{border-color:#1aba6c;background:rgba(26,186,108,.05);color:#1aba6c}
+.stall-option:disabled{color:#ccc;cursor:default}
+.stall-actions{position:absolute;z-index:1;left:0;right:0;bottom:0;height:90px;padding:6px 18px 40px;display:flex;gap:15px;border-top:0;background:#fff}
+.stall-actions::before{content:"";position:absolute;left:0;top:0;width:750px;height:180px;transform:scale(.5);transform-origin:top left;background:url("./assets/figma/stall-418c4.svg") no-repeat 0 0;pointer-events:none}
+.stall-actions button{position:relative;z-index:1;height:44px;flex:1;border-radius:6px;font-size:16px}
+.stall-cancel{border:1px solid #1aba6c;background:#fff;color:#1aba6c}
+.stall-confirm{border:1px solid #1aba6c;background:#1aba6c;color:#fff;font-weight:600}
+.stall-confirm:disabled{opacity:.3}
+.date-sheet{position:absolute;left:0;right:0;bottom:0;height:calc(426.5px + max(40px,env(safe-area-inset-bottom)));max-height:85%;overflow:hidden;background:#fff;border-radius:12px 12px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+.date-picker-title{height:60px;padding:20px 16px;text-align:center;color:rgba(0,0,0,.9);font-size:16px;font-weight:600;line-height:20px}
+.date-picker-divider{height:.5px;margin:0 18px;background:#ebebeb}
+.date-picker-month{position:absolute;left:18px;right:18px;top:73px;height:36px;display:flex;align-items:center;justify-content:space-between}
+.date-month-label{color:#333;font-size:15px;font-weight:600}
+.date-month-nav{width:32px;height:32px;padding:0;border:0;border-radius:16px;background:transparent;color:#666;font-size:22px;line-height:30px}
+.date-month-nav:active{background:#f5f5f5}
+.date-weekdays{position:absolute;left:18px;right:18px;top:116px;height:26px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:center;text-align:center;color:#999;font-size:12px}
+.date-days{position:absolute;left:18px;right:18px;top:148px;bottom:calc(50.5px + max(40px,env(safe-area-inset-bottom)));display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:36px;align-content:start}
+.date-empty{width:36px;height:36px;justify-self:center}
+.date-day{width:36px;height:36px;justify-self:center;padding:0;border:0;border-radius:18px;background:transparent;color:#333;font-size:14px;line-height:36px}
+.date-day:active{background:#f0fbf5}
+.date-day.selected{background:#1aba6c;color:#fff;font-weight:600}
+.date-picker-actions{position:absolute;left:0;right:0;bottom:0;height:calc(50.5px + max(40px,env(safe-area-inset-bottom)));padding:6px 18px max(40px,env(safe-area-inset-bottom));display:flex;gap:15px;border-top:.5px solid #ededed;background:#fff}
+.date-picker-actions button{height:44px;flex:1;border-radius:6px;font-size:16px}
+.date-picker-cancel{border:.5px solid #1aba6c;background:#fff;color:#1aba6c}
+.date-picker-confirm{border:.5px solid #1aba6c;background:#1aba6c;color:#fff;font-weight:600}
+.date-picker-confirm:disabled{opacity:.4;cursor:default}
+/* #AI:design:end */
+.modal-mask{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:18px;z-index:5}
+.modal{width:90%;max-width:340px;background:#fff;border-radius:16px;padding:22px}
+.modal-title{text-align:center;font-size:17px;font-weight:600;margin-bottom:14px}
+.modal-body{text-align:center;font-size:14px;line-height:1.6;color:#666}
+.modal-actions{display:flex;gap:10px;margin-top:15px}
+.modal-actions button{flex:1;height:40px;border-radius:5px;font-size:14px}
+.modal-cancel{background:#fff;color:var(--green);border:1px solid var(--green)}
+.modal-ok{background:var(--green);color:#fff;border:0}
+.toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;padding:10px 14px;border-radius:6px;color:#fff;background:rgba(0,0,0,.75);font-size:12px}
+.side{min-width:0;overflow:hidden;padding:4px 6px 4px 0}
+.side-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:12px}
+.side-title{font-size:14px;font-weight:600;margin:0 0 10px}
+.side-text{font-size:12px;line-height:1.65;color:var(--sub)}
+.side-list{padding-left:17px;margin:6px 0}.side-list li{padding:3px 0}
+.demo-lines{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.demo-line{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.5;color:var(--sub)}
+.demo-mark{width:18px;height:18px;border-radius:50%;background:var(--green-light);color:#168a4f;display:flex;align-items:center;justify-content:center;font-size:10px;flex:none}
+@media(max-width:850px){.head{height:94px;flex-basis:94px;padding:7px 12px;display:grid;grid-template-columns:1fr auto;grid-template-rows:32px 32px;gap:5px 6px}.head-title{font-size:14px}.head-sub{display:none}.demo-stamp{font-size:10px;padding:5px 8px}.identity-controls{grid-column:1/-1;gap:6px}.identity-controls .role-control{min-width:0}.identity-controls #previewRole{max-width:138px}.identity-controls #previewIdentity{max-width:105px}.workarea{display:flex;justify-content:center;padding:6px 0 0}.side{display:none}}
+/* #AI:design:end */
+
+/* #AI:design 首页工作区与交房审批列表；示例数据不连接业务系统。 */
+.phone[data-view="home"]::before,.phone[data-view="approval"]::before{display:none}.phone[data-view="home"] .nav-back{visibility:hidden}
+#screen.home-screen{background:#fff;padding:0}#screen.approval-screen{background:#f7f8fc;padding:0;scrollbar-width:none}
+#bottom.home-footer{height:73px;flex:0 0 73px;padding:0;border:0;background:#fff}.home-bottom{height:73px;border-top:1px solid #e9eeee;display:flex;justify-content:space-around}.home-bottom-item{width:80px;text-align:center;font-size:10px;color:#666;padding-top:6px}.home-bottom-item img{display:block;width:26px;height:26px;margin:0 auto 3px}.home-bottom-item:first-child{color:#1aba6c}
+#bottom.approval-footer{display:none}.home-page{position:relative;width:375px;height:720px;background:#fff}.home-search{position:absolute;left:14px;top:8px;width:347px;height:32px;border:1px solid #1aba6c;border-radius:5px;color:#ccc;font-size:12px;padding:7px 12px}.home-banner{position:absolute;left:27px;top:48px;width:321px;height:130px;object-fit:cover;border-radius:8px}.home-news{position:absolute;left:14px;top:188px;width:347px;height:38px;border-radius:6px;background:linear-gradient(90deg,#f5f8ff,#e6ebf7);padding:10px;font-size:13px;color:#000}.home-news b{color:#1aba6c;margin-right:8px}.home-tile{position:absolute;border-radius:6px;overflow:hidden}.home-tile img{position:absolute;width:100%;height:100%;inset:0}.home-tile strong,.home-tile span{position:absolute;left:10px;color:#000;white-space:nowrap}.home-tile strong{top:8px;font-size:13px}.home-tile span{top:30px;font-size:11px;color:#333}.home-work{position:absolute;left:14px;top:382px;width:347px;height:71px;background:#f4f5f7;border-radius:7px;display:flex;gap:20px;padding-left:13.5px}.home-work button{width:48px;padding:8px 0 0;border:0;background:transparent;color:#333;font-size:12px;align-self:start}.home-work img{display:block;width:32px;height:32px;margin:0 auto 2px}.home-recommend{position:absolute;left:14px;top:469px;width:347px}.home-recommend-head{height:33px;border-bottom:1px solid #dfe8f6;display:flex;justify-content:space-between;align-items:start;font-size:13px}.home-recommend-head strong{font-size:16px;color:#000;border-bottom:2px solid #1aba6c;padding-bottom:8px}.home-car{display:flex;gap:10px;margin-top:12px;font-size:12px}.home-car img{width:105px;height:79px;object-fit:cover;border-radius:4px}.home-car strong{display:block;font-size:14px;color:#333}.home-car p{margin:3px 0;color:#999;font-size:11px}.home-car b{color:#fa2b2d;font-size:16px}
+.approval-tabs{height:40px;position:sticky;top:0;z-index:3;background:linear-gradient(to bottom,#fff 0,#fff 31.5px,#f7f8fc 31.5px,#f7f8fc 100%);display:flex;justify-content:space-between;padding:6px 14px 0}.approval-tabs .list-tab{color:#4c4c4c}.approval-tabs .list-tab.active{color:#1aba6c}.approval-tabs .list-tab.active:after{bottom:-6px}.approval-cards{padding:7px 14px 12px;display:flex;flex-direction:column;gap:10px}.approval-card{position:relative;height:238.5px;flex:none;padding:12px 14px}.approval-surface{position:absolute;left:-6px;top:-5px;width:718px;height:501px;transform:scale(.5);transform-origin:top left;pointer-events:none}.approval-content{position:relative;height:100%}.approval-name{margin:0;color:#1aba6c;font-size:14px;font-weight:600;line-height:20px}.approval-card .list-metrics{margin-top:8px}.approval-card .list-card-meta{margin-top:8px}.approval-divider{position:absolute;left:2px;top:174px;width:629px;height:2px;transform:scale(.5);transform-origin:top left;pointer-events:none}.approval-actions{position:absolute;right:0;top:186.5px;display:flex;justify-content:flex-end}.approval-actions .list-action{width:72px;height:28px}
+
+.home-search{display:flex;align-items:center;gap:4px;padding:0 12px}.home-search img{width:20px;height:20px}.home-banner-side{position:absolute;top:48px;width:311px;height:130px;object-fit:cover;border-radius:8px}.home-banner-prev{left:-296px}.home-banner-next{left:360px}.home-tile img.home-circle{left:auto;right:-6px;top:12.5px;width:60px;height:60px}.home-tile img.home-tile-icon{left:auto;right:6px;top:30.625px;width:35px;height:23.125px}.home-tile img.home-tile-mask{right:0;top:0;width:59.5px;height:64px}.home-work-surface{position:absolute;width:347px;height:71px;left:0;top:0}.home-work button{position:relative;z-index:1}.home-car-tags{display:flex;gap:4px;margin:2px 0 4px}.home-car-tags span{display:flex;align-items:center;border:1px solid #1aba6c;color:#1aba6c;border-radius:2px;font-size:9px;line-height:12px;padding:0 3px}.home-car-tags img{width:10px;height:10px;margin-right:2px}.home-car b small{font-size:11px}.home-price-tag{display:inline-block;background:#ff251d;color:#fff;font-size:9px;border-radius:2px;padding:0 4px;margin-left:4px}
+.home-news{display:flex;align-items:center;gap:10px;padding:0 10px}.home-news b{font-size:10.5px;line-height:12.5px;margin:0;color:#000}.home-news b em{font-style:normal;color:#1aba6c}.home-news span{font-size:13px}.home-news img{margin-left:auto;width:16px;height:16px;transform:rotate(180deg)}
+.home-price-tag{background:transparent;background-repeat:no-repeat;background-size:100% 100%;height:14px;line-height:14px;padding:0;text-align:center}.home-price-tag.one-price{width:35px;background-image:url("./assets/figma/home-af838.svg")}.home-price-tag.special-price{width:26px;background-image:url("./assets/figma/home-ea04d.svg")}
+/* #AI:design 首页画板图片按原遮罩尺寸和偏移裁切；部门卡片省去合同日期行。 */
+.home-service-mask{position:absolute;right:0;top:0;width:59.5px;height:64px;overflow:hidden;mask-image:url("./assets/figma/home-ce612.svg");mask-size:59.5px 64px;mask-repeat:no-repeat}.home-service-mask.narrow{mask-image:url("./assets/figma/home-645a5.svg")}.home-tile .home-service-mask .service-circle{position:absolute;left:6px;top:12.5px;width:60px;height:60px}.home-tile .home-service-mask .service-icon{position:absolute;left:18.5px;top:30.625px;width:35px;height:23.125px}.home-tile .home-service-mask .service-icon.narrow{left:21.455px;top:32.5px;width:29.432px;height:19.46px}.home-tile .home-service-mask .service-mask-group{position:absolute;left:0;top:0;width:59.5px;height:64px}.home-car{min-height:79px;margin-top:12.5px}.home-recommend-head+.home-car{margin-top:10.5px}.home-car-crop{position:relative;width:105px;height:79px;flex:none;overflow:hidden;mask-image:url("./assets/figma/home-900a5.svg");mask-size:105px 79px;mask-repeat:no-repeat}.home-car .home-car-crop img{position:absolute;left:-10.5px;top:-7.5px;width:126px;height:95px;object-fit:cover;border-radius:0}.home-car .home-car-crop.second img{top:-3.5px}.approval-card.department-card{height:auto;padding-bottom:12px;background:#fff;border-radius:5px;box-shadow:0 2px 6px rgba(0,0,0,.05)}.department-card .approval-surface{display:none}.department-card .approval-content{height:auto}.department-card .approval-divider{position:relative;display:block;left:2px;top:auto;margin-top:12px}.department-card .approval-actions{position:relative;top:auto;right:auto;margin-top:11.5px}
+.home-car>div:last-child{min-width:0;width:232px}.home-recommend-head+.home-car strong{white-space:nowrap}
+/* #AI:design 审批表单及驳回记录 */
+.phone[data-view="approvalForm"]::before{display:none}
+.approval-form-page{padding:16px 14px;background:#f7f8fc;min-height:100%}
+.approval-form-card{position:relative;height:228px;background:#fff;border-radius:5px}
+.approval-form-label{position:absolute;left:10px;top:10px;font-size:14px;font-weight:500;line-height:19.5px;color:#333}
+.approval-form-label .star{position:absolute;right:100%;top:0;color:#fa2b2d}
+.approval-form-options{position:absolute;left:12px;top:37.5px;display:flex;gap:10px}
+.approval-form-option{width:122px;height:36px;border:1px solid transparent;border-radius:5px;background:#f7f7f7;color:#333;font-size:14px}
+.approval-form-option.selected.pass{border-color:#1aba6c;background:rgba(26,186,108,.05);color:#1aba6c;font-weight:600}
+.approval-form-option.selected.reject{border-color:#fa2b2d;background:rgba(250,43,45,.05);color:#fa2b2d;font-weight:600}
+.approval-form-label.reason{left:14px;top:93.5px}
+.approval-input-wrap{position:absolute;left:10px;top:123px;width:327px;height:91px;border:1px solid #dce1eb;border-radius:5px;background:#fff}
+.approval-input-wrap textarea{width:100%;height:100%;resize:none;border:0;outline:0;background:transparent;padding:10px 10px 26px;font-family:inherit;font-size:13px;line-height:18px;color:#333}
+.approval-input-wrap textarea::placeholder{color:#ccc}.approval-input-count{position:absolute;right:10px;bottom:10px;font-size:13px;color:#ccc;pointer-events:none}
+.rejected-record{font-size:12px;line-height:18px;overflow-wrap:anywhere}.rejected-record p{margin:4px 0}.rejected-record .red{color:#fa2b2d}
+/* #AI:design 居中确认弹窗按花乡小程序规范 */
+.final-confirm-mask{position:absolute;inset:0;z-index:20;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
+.final-confirm-dialog{width:90%;max-width:360px;background:#fff;border-radius:16px;padding:24px;box-sizing:border-box}
+.final-confirm-title{margin:0 0 16px;text-align:center;font-size:17px;line-height:24px;font-weight:600;color:#333}
+.final-confirm-description{margin:0;text-align:center;font-size:14px;line-height:1.6;color:#666}
+.final-confirm-actions{display:flex;gap:10px;margin-top:14px}.final-confirm-actions button{flex:1;padding:10px 0;border-radius:6px;font-size:14px;line-height:20px}.final-confirm-cancel{background:#fff;color:#1aba6c;border:.5px solid #1aba6c;font-weight:400}.final-confirm-accept{background:#1aba6c;color:#fff;border:0;font-weight:600}
+.confirm-red{color:#fa2b2d}.confirm-orange{color:#f19204}.phone[data-view="approvalDetail"]::before{display:none}
+</style>
+</head>
+<body>
+<div class="workbench">
+  <header class="head">
+    <div><span class="head-title">花乡交房管理 · 交房交接</span><span class="head-sub">小程序原型走查</span></div>
+    <span class="demo-stamp">原型示例数据 · 不连接业务系统</span>
+    <div class="identity-controls"><label class="role-control" for="previewRole">演示角色 <select id="previewRole"><option value="director">部门主任</option><option value="employee">部门员工</option><option value="recipient">待使用部门主任</option><option value="returnRecipient">停用部门主任</option><option value="merchant">商户</option></select></label><label class="role-control" for="previewIdentity"><span id="identityLabel">演示部门</span><select id="previewIdentity"></select></label></div>
+  </header>
+  <div class="workarea">
+    <section class="device-stage" id="deviceStage" aria-label="交房管理小程序预览">
+      <div class="phone" id="phone">
+        <div class="statusbar" aria-hidden="true">
+          <img class="statusbar-time" src="./assets/figma/list-fd8b6.svg" alt="">
+          <img class="statusbar-symbols" src="./assets/figma/list-3cc25.svg" alt="">
+        </div>
+        <header class="navbar"><button class="nav-back" id="back" aria-label="返回"><img src="./assets/figma/list-03676.svg" alt=""></button><div class="nav-title" id="navTitle">交房交接</div><span class="wechat-pill" aria-label="微信小程序胶囊">
+  <img class="wechat-more" src="./assets/figma/list-6ccc0.svg" alt="">
+  <span class="wechat-divider"><img src="./assets/figma/list-fb9fc.svg" alt=""></span>
+  <img class="wechat-circle" src="./assets/figma/list-091d3.svg" alt="">
+</span></header>
+        <main id="screen"></main>
+        <footer id="bottom"></footer>
+        <div id="overlayRoot"></div>
+      </div>
+    </section>
+    <aside class="side">
+      <section class="side-card">
+        <h2 class="side-title">本次演示范围</h2>
+        <div class="side-text">本原型提供交房列表、新增任务表单、三类任务详情与共用指派页；新增提交可生成本地演示任务，并按所选部门和类别演示办理及审批。</div>
+        <div class="demo-lines">
+          <div class="demo-line"><span class="demo-mark">i</span><span>合同、商户、摊位、部门、房屋及员工均为 Figma/原型示例数据；不连接业务系统。</span></div>
+          <div class="demo-line"><span class="demo-mark">i</span><span>仅在本浏览器演示，不创建真实任务、不保存业务数据、不发送短信。</span></div>
+          <div class="demo-line"><span class="demo-mark">i</span><span>三类详情和指派页按新增设计稿提供演示入口；演示人员、备注和指派结果不代表真实人员来源、权限或业务记录。</span></div>
+          <div class="demo-line"><span class="demo-mark">i</span><span>750 设计稿等比缩放；手机画布内可滚动，浏览器外层不滚动。</span></div>
+        </div>
+      </section>
+      <section class="side-card">
+        <h2 class="side-title">评审时请重点确认</h2>
+        <div class="side-text">
+          <ul class="side-list">
+            <li>Q6：截图项目与现有配置、类型、部门的对应及清单完整性。</li>
+            <li>Q6：未标星项必填性、费用字段、照片上传限制。</li>
+            <li>Q8：员工候选、角色权限、操作端与可见范围；通知文案及微信通知待确认。</li>
+          </ul>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+<script src="./assets/preview-reset.js"></script>
+<script src="./assets/approval-flow.js"></script>
+<script>
+// #AI:design:start
+const CONTRACTS=[
+  {id:'HT-DEMO-001',stall:'A-1023',merchant:'花乡新世纪二手车',rent:'收款中',allowed:true,area:'2900㎡',indoor:'5个',outdoor:'17个',contractStart:'2026-12-20',contractEnd:'2027-12-23'},
+  {id:'HT-DEMO-002',stall:'A-2734',merchant:'示例商户甲',rent:'收款中',allowed:true,area:'20.85㎡',indoor:'28个',outdoor:'20个',contractStart:'2026-12-20',contractEnd:'2027-12-23'},
+  {id:'HT-DEMO-003',stall:'G-0081',merchant:'花乡新世纪二手车',rent:'已完结',allowed:true,area:'2900㎡',indoor:'4个',outdoor:'20个',contractStart:'2026-12-20',contractEnd:'2027-12-23'},
+  {id:'HT-DEMO-004',stall:'A-0009',merchant:'示例商户丙',rent:'代收款',allowed:false,area:'20.85㎡',indoor:'28个',outdoor:'20个',contractStart:'2026-12-20',contractEnd:'2027-12-23'}
+].concat(Array.from({length:17},function(_,i){const stall='A-'+String(2735+i).padStart(4,'0');return{id:'HT-DEMO-'+String(5+i).padStart(3,'0'),stall:stall,merchant:'示例商户甲',rent:'收款中',allowed:true,area:'20.85㎡',indoor:'28个',outdoor:'20个',contractStart:'2026-12-20',contractEnd:'2027-12-23'}}));
+const DEPTS=['管理部','物业部','财务部','安保部'];
+// #AI:design 截图可见市场的类别示例，并非完整配置。
+const DEMO_CATEGORIES={'管理部':['房屋现状'],'物业部':['给排水系统','门窗系统','基建系统','基础表数'],'安保部':['消防系统']};
+const DEMO_CATEGORY_ITEMS={'房屋现状':['现状交房','回复原样'],'给排水系统':['水龙头'],'门窗系统':['门','窗'],'基建系统':['基建名称'],'基础表数':['水表','电表'],'消防系统':['消防栓','灭火器','室内喷淋','报警器']};
+let selectedCategories={},draftCategories={};
+// 以下房产仅用于演示筛选逻辑；占用标记不是现网状态口径，Q11仍待确认。
+const DEMO_HOUSES=[
+  {id:'HOUSE-DEMO-001',name:'东4门北侧控制室',department:'财务部',usage:'自用',unoccupied:true,inUse:false,info:{organization:'演示组织',region:'G',floors:'演示楼层',area:'28.5㎡',buildingNo:'16',structure:'演示结构',landNo:'京丰国用（2005转）第002419号',propertyType:'演示房产类型'}},
+  {id:'HOUSE-DEMO-002',name:'演示自用房屋甲',department:'管理部',usage:'自用',unoccupied:false,inUse:true,info:{organization:'演示组织',region:'演示区域',floors:'演示楼层',area:'演示面积',buildingNo:'演示编号',structure:'演示结构',landNo:'演示证书编号',propertyType:'演示房产类型'}},
+  {id:'HOUSE-DEMO-003',name:'演示自用房屋乙',department:'安保部',usage:'自用',unoccupied:false,inUse:true,info:{organization:'演示组织',region:'演示区域',floors:'演示楼层',area:'演示面积',buildingNo:'演示编号',structure:'演示结构',landNo:'演示证书编号',propertyType:'演示房产类型'}},
+  {id:'HOUSE-DEMO-004',name:'演示自用房屋丙',department:'物业部',usage:'自用',unoccupied:true,inUse:false,info:{organization:'演示组织',region:'演示区域',floors:'演示楼层',area:'演示面积',buildingNo:'演示编号',structure:'演示结构',landNo:'演示证书编号',propertyType:'演示房产类型'}}
+];
+// #AI:design 模拟预收租金“待收款”列表，独立于既有发起准入状态。
+const DEMO_UNPAID_STALLS=['A-2734'];
+const STALL_CHOICES=CONTRACTS.filter(function(contract){return contract.id!=='HT-DEMO-001'}).map(function(contract){return{key:contract.id,stall:contract.stall,contractId:contract.id,allowed:contract.allowed}});
+/* #AI:design 稳定演示任务标识，用于在列表状态间沿用原任务数据 */
+const APPROVAL_COMPLETE_TIME='2026-10-20 10:34:56';
+const LIST_ITEMS=[
+  {id:'delivery-demo-1',type:'新签商户',title:'基础表数、钥匙交接',name:'摊位号：A-1023',values:['2900㎡','5个','17个'],labels:['房屋面积','室内车位','室外车位'],end:'2027-12-23',date:'2026-10-20',depts:'物业部、安保部',contractId:'HT-DEMO-001',active:true},
+  {id:'delivery-demo-2',type:'部门自用',title:'基础表数、钥匙交接',name:'房屋名称：东4门北侧控制室',values:['20.85㎡','28','G'],labels:['房屋面积','建筑编号','区域'],end:'2026-12-23',date:'2026-12-20',depts:'物业部、安保部',active:true},
+  {id:'delivery-demo-3',type:'部门交回',title:'基础表数、钥匙交接',name:'房屋名称：博瑞拍停车场活动房1号',values:['20.85㎡','28','G'],labels:['房屋面积','建筑编号','区域'],end:'2026-12-23',date:'2026-12-20',depts:'物业部、安保部',active:true}
+];
+const ONGOING_LIST_ITEMS=LIST_ITEMS.map(function(item,i){return i===1?Object.assign({},item,{name:'房屋名称：东4门北侧控制室'}):Object.assign({},item)});
+// #AI:design 示例确认时间，列表与详情共用，不代表真实确认记录。
+const DEPARTMENT_CONFIRM_TIME='2026-12-20 10:34:56';
+// #AI:design 画板水表仅作原型演示；实际关联数据和缺失处理待确认。
+const DEMO_WATER_METERS=[{id:'demo1',number:'A100-101ZLS0101',tag:'自来水表',receipt:'34.8',date:'2026年8月21日记录'},{id:'demo2',number:'A116ZLS0101',tag:'中水表',receipt:'24.8',date:'2026年8月21日记录'}];
+let selectedContract='',meetingTime='',dateDraft='',dateTarget='meetingTime',dateCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1),selectedDepts=[],task=null,view='home',approvalTab=0,activeDept=0,formData={},errors=[],renderedView='',activeTab=0,overlay='',draftStall='HT-DEMO-002',draftDepts=[],stallQuery='',houseQuery='',createType='new',selectedUseDept='',selectedReturnDept='',selectedHouseId='',draftCreateDept='',draftHouseId='',detailIndex=0,assignmentSelected=0,assignmentRemark='',assignReturnView='detail',handoverReturnView='list',handoverProject='',projectReceiverDraft='',recheckTaskId='';
+const projectInitialForms={
+  meter:{electricPhoto:null,electricReading:'',waterPhoto:null,waterReading:'',electricDue:'',electricRefund:'',waterDue:'',waterRefund:'',receiver:''},
+  key:{doorCount:'6',doorStatus:'good',officeCount:'2',officeStatus:'bad',doorFee:'',storeCount:'2',storeStatus:'good'},
+  fire:{hydrantNote:'',alarmNote:'',hydrantPhoto:null,hydrantStatus:'good',alarmPhoto:null,alarmStatus:'bad',fireFee:'',recheck:'yes',recheckDate:'',notes:''}
+};
+/* #AI:design 角色仅控制演示入口和列表，不映射真实账号或任务。 */
+let previewRole='director',previewDept='物业部',recipientDept='财务部',previewMerchant='HT-DEMO-001';
+function restrictedRole(){return previewRole==='recipient'||previewRole==='returnRecipient'||previewRole==='merchant'}
+/* #AI:design 演示主体映射：财务部对应部门自用示例，商户对应示例合同。 */
+function mayViewTask(item){if(!item)return false;if(previewRole==='recipient')return (item.id==='delivery-demo-2'&&recipientDept==='财务部')||(item.demoCreated&&item.type==='部门自用'&&item.confirmDept===recipientDept);if(previewRole==='returnRecipient')return item.demoCreated&&item.type==='部门交回'&&item.confirmDept===recipientDept;if(previewRole==='merchant')return item.type==='新签商户'&&item.contractId===previewMerchant;return true}
+// #AI:design v1.65 主任按部门展示创建入口和类型，权限仅供原型演示。
+function mayCreate(){return previewRole==='director'&&(previewDept==='物业部'||previewDept==='管理部')}
+function allowedCreateType(type){return mayCreate()&&(previewDept==='管理部'?type==='new':['self','return'].includes(type))}
+function updatePreviewIdentity(){const select=document.getElementById('previewIdentity'),merchant=previewRole==='merchant';document.getElementById('identityLabel').textContent=merchant?'演示商户':'演示部门';const options=merchant?[['HT-DEMO-001','花乡新世纪（示例）'],['HT-DEMO-002','示例商户甲']]:DEPTS.map(function(d){return[d,d]});select.innerHTML=options.map(function(o){return '<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>'}).join('');select.value=merchant?previewMerchant:(previewRole==='recipient'||previewRole==='returnRecipient')?recipientDept:previewDept}
+
+/* #AI:design 最终确认仅存于当前浏览器演示；房屋占用以现有演示房源为准。 */
+const finalConfirmationsByTask={};
+let pendingFinalConfirm=null;
+function demoHouseForTask(item){return item.id==='delivery-demo-2'?DEMO_HOUSES.find(function(h){return h.id==='HOUSE-DEMO-001'}):null}
+function finalIdentity(){return previewRole==='merchant'?'merchant:'+previewMerchant:(previewRole==='recipient'||previewRole==='returnRecipient')?previewRole+':'+recipientDept:''}
+function finalFinished(item){return !!finalConfirmationsByTask[item.id]?.finished}
+function canFinalConfirm(item){const stage=readSharedPreview().tasks[item?.id]?.stage;if(!restrictedRole()||!mayViewTask(item)||finalFinished(item)||(stage&&stage!=='待确认'))return false;if(previewRole==='merchant')return item.type==='新签商户';return ['部门自用','部门交回'].includes(item.type)&&!finalConfirmationsByTask[item.id]?.recipientConfirmed}
+function sortTimedRecords(records){const dated=records.filter(function(r){return /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(r.time||'')}).slice().sort(function(a,b){return b.time.localeCompare(a.time)});let i=0;return records.map(function(r){return /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(r.time||'')?dated[i++]:r})}
+function historyRows(records){return sortTimedRecords(records).map(function(r){return '<div class="approval-history-item" data-record-time="'+esc(r.time||'')+'"><div class="approval-history-head">'+esc(r.title)+'<span class="approval-history-status '+(r.status==='已驳回'?'red':r.status==='未审批'?'orange':'')+'">'+esc(r.status)+'</span></div>'+(r.person||r.time?'<div class="approval-history-meta">'+(r.person?'<span>'+esc(r.person)+'</span>':'')+(r.time?'<span>'+esc(r.time)+'</span>':'')+'</div>':'')+(r.reason!==undefined?'<div class="approval-history-reason">驳回原因：'+esc(r.reason)+'</div>':'')+'</div>'}).join('')}
+function demoTime(){const d=new Date(),pad=function(x){return String(x).padStart(2,'0')};return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())}
+const projectStatesByTask={};
+/* #AI:design 同源原型专用演示数据；照片文件仍保留在当前页面，不写入共享存储。 */
+const SHARED_PREVIEW_KEY='huaxiang:20261023:handover:preview:v1';
+function readSharedPreview(){try{const raw=localStorage.getItem(SHARED_PREVIEW_KEY);if(raw===null)return {version:1,tasks:{}};const value=JSON.parse(raw);return value&&value.version===1&&value.tasks&&typeof value.tasks==='object'?value:{version:1,tasks:{},readOnly:true}}catch(e){return {version:1,tasks:{},readOnly:true}}}
+function saveSharedPreview(value){if(value.readOnly){console.warn('原型共享数据格式不可识别，未覆盖');return false}try{localStorage.setItem(SHARED_PREVIEW_KEY,JSON.stringify(value));return true}catch(e){console.warn('原型共享数据未保存',e);return false}}
+function seedSharedPreview(){const data=readSharedPreview();let changed=false;LIST_ITEMS.forEach(function(item){if(!data.tasks[item.id]){data.tasks[item.id]={item:Object.assign({},item)};changed=true}});if(changed)saveSharedPreview(data);return data}
+function syncSharedTask(id,stage){const item=LIST_ITEMS.find(function(x){return x.id===id});if(!item)return;const data=readSharedPreview(),previous=data.tasks[id]||{},state=projectStatesByTask[id],projects=Object.assign({},previous.projects||{});if(state)Object.keys(state.saved).forEach(function(key){if(state.saved[key])projects[key]=JSON.parse(JSON.stringify(state.saved[key],function(k,v){return k==='file'||k==='url'?undefined:v}))});const next=Object.assign({},previous,{item:Object.assign({},item),projects:projects});if(stage)next.stage=stage;if(finalConfirmationsByTask[id])next.final=finalConfirmationsByTask[id];data.tasks[id]=next;saveSharedPreview(data)}
+function hydrateSharedPreview(){const data=seedSharedPreview();LIST_ITEMS.forEach(function(item){const entry=data.tasks[item.id];if(!entry)return;if(entry.final)finalConfirmationsByTask[item.id]=entry.final;if(entry.stage==='交接中'||entry.approvalRecords||Object.keys(entry.projects||{}).length){const state=projectStatesByTask[item.id]||(projectStatesByTask[item.id]={saved:{meter:null,key:null,fire:null},draft:{meter:null,key:null,fire:null},errors:{meter:[],key:[],fire:[]},recheckProjects:{}});if(entry.stage==='交接中')state.handoverStatus='ongoing';if(entry.approvalRecords)state.approvalRecords=entry.approvalRecords;if(entry.projects?.key)state.saved.key=entry.projects.key;['meter','fire'].forEach(function(key){if(entry.projects?.[key])state.draft[key]=entry.projects[key]})}})}
+hydrateSharedPreview();
+/* #AI:design 固定演示审批部门；非真实账号权限 */
+
+let approvalChoice='pass',approvalDraft={pass:'',reject:''};
+const projectPreviewUrls=[];
+const projectDemoReceivers=['演示候选人A（演示数据）','演示候选人B（演示数据）'];
+const screen=document.getElementById('screen'),bottom=document.getElementById('bottom'),deviceStage=document.getElementById('deviceStage'),phone=document.getElementById('phone'),overlayRoot=document.getElementById('overlayRoot');
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function setTitle(title){const back=document.getElementById('back');document.getElementById('navTitle').textContent=title;back.disabled=view==='home';back.setAttribute('aria-disabled',String(view==='home'))}
+function selected(){return CONTRACTS.find(function(x){return x.id===selectedContract})}
+function selectedHouse(){return DEMO_HOUSES.find(function(x){return x.id===selectedHouseId})}
+function eligibleReturnDepts(){return DEPTS.filter(function(dept){return DEMO_HOUSES.some(function(house){return house.department===dept&&house.usage==='自用'&&house.inUse})})}
+// #AI:design 自用排除已使用；交回排除其他部门已使用房屋。
+function houseOptions(){return DEMO_HOUSES.filter(function(h){return h.usage==='自用'&&(createType==='self'?!h.inUse:createType==='return'&&!!selectedReturnDept&&(!h.inUse||h.department===selectedReturnDept))})}
+function currentStall(){return STALL_CHOICES.find(function(x){return x.key===draftStall})}
+function parseDateValue(value){const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(value||'');return match?new Date(Number(match[1]),Number(match[2])-1,Number(match[3])):null}
+function dateValue(year,month,day){return String(year)+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0')}
+function render(){
+  phone.dataset.view=view;
+  screen.classList.toggle('home-screen',view==='home');screen.classList.toggle('approval-screen',view==='approval');bottom.classList.toggle('home-footer',view==='home');bottom.classList.toggle('approval-footer',view==='approval');
+  bottom.classList.toggle('figma-footer',view==='list'||view==='create'||view==='approvalForm');
+  bottom.classList.toggle('figma-detail-footer',view==='detail'||(view==='approvalDetail'&&approvalTab===0));
+  /* #AI:design 仅待复验详情展示底部复验入口 */
+  bottom.classList.remove('figma-recheck-detail-footer');
+  bottom.classList.toggle('single-action-detail-footer',(view==='detail'&&(activeTab===1||activeTab===2||(activeTab===4&&restrictedRole())))||(view==='approvalDetail'&&approvalTab===0));
+  bottom.classList.toggle('ongoing-detail-footer',view==='detail'&&activeTab===2&&detailIndex===0);
+  bottom.classList.toggle('detail-footer-hidden',((view==='approvalDetail'&&approvalTab!==0||view==='detail'&&(activeTab===2||(activeTab===4&&!restrictedRole())||activeTab===5)))||(view==='list'&&(!mayCreate()||activeTab===4||activeTab===5)));
+  bottom.classList.toggle('figma-assign-footer',view==='assign');
+  bottom.classList.toggle('figma-handover-footer',view==='handover');
+  bottom.classList.toggle('figma-project-footer',view==='project');
+  screen.classList.toggle('figma-screen',view==='list'||view==='create'||view==='detail'||view==='approvalDetail'||view==='approvalForm'||view==='assign'||view==='handover'||view==='project');
+  screen.classList.toggle('figma-detail',view==='detail'||view==='approvalDetail');
+  screen.classList.toggle('figma-assign',view==='assign');
+  screen.classList.toggle('figma-create',view==='create');
+  screen.classList.toggle('figma-handover',view==='handover');
+  screen.classList.toggle('figma-project',view==='project');
+  setTitle(({home:'2SC花乡二手车',approval:'交房审批',approvalDetail:'任务详情',approvalForm:'立即审批',list:'交房交接',create:'新增交房任务',detail:'任务详情',assign:'指派交接人员',handover:'办理交接',project:projectTitle(handoverProject),fill:'现场填写',review:'部门审批',recheck:'员工复验',legal:'商户确认',done:'交房确认'})[view]||'交房交接');
+  if(view==='home')renderHome();
+  else if(view==='approval')renderApproval();
+  else if(view==='approvalDetail')renderConfirmDetail(false);
+  else if(view==='approvalForm')renderApprovalForm();
+  else if(view==='list')renderList();
+  else if(view==='create')renderCreate();
+  else if(view==='detail')renderDetail();
+  else if(view==='assign')renderAssign();
+  else if(view==='handover')renderHandover();
+  else if(view==='project')renderProject();
+  else if(view==='fill'||view==='recheck')renderFill();
+  else if(view==='review')renderReview();
+  else if(view==='legal'||view==='done')renderLegal();
+  if(view!==renderedView){screen.scrollTop=0;renderedView=view}
+  deviceStage.scrollTop=0;
+  if(overlay==='finalConfirmation')renderFinalConfirmation();else if((view==='create'||view==='project')&&overlay)renderOverlay();else overlayRoot.innerHTML='';
+}
+function footer(action,label,secondary){
+  bottom.innerHTML='<div class="bottom-row">'+(secondary?'<button type="button" class="outline-btn" data-action="'+secondary.action+'">'+secondary.label+'</button>':'')+'<button type="button" class="bottom-btn" data-action="'+action+'">'+label+'</button></div>';
+}
+function projectTitle(key){return DEMO_CATEGORY_ITEMS[key]?key:({meter:'基础表数',key:'钥匙交接',fire:'消防系统'})[key]||'交接项目'}
+/* #AI:design 仅复用现有详情页中的责任部门演示值，不作为正式映射。 */
+const DEMO_PROJECT_DEPTS={meter:'管理部',key:'安保部',fire:'物业部'};
+function demoDepartmentProjects(dept){return Object.keys(DEMO_PROJECT_DEPTS).filter(function(key){return DEMO_PROJECT_DEPTS[key]===dept})}
+/* #AI:design 待复验项目跟随原任务稳定标识，标签切换不改变归属 */
+function activeTaskId(){return recheckTaskId||((LIST_ITEMS[detailIndex]||LIST_ITEMS[0]).id)}
+function activeProjectState(){
+  const id=activeTaskId();
+  if(!projectStatesByTask[id])projectStatesByTask[id]={saved:{meter:null,key:null,fire:null},draft:{meter:null,key:null,fire:null},errors:{meter:[],key:[],fire:[]},recheckProjects:{}};
+  return projectStatesByTask[id];
+}
+function renderHandover(){
+  if(LIST_ITEMS[detailIndex]?.demoCreated){renderCreatedHandover();return}
+  const projects=[['meter','基础表数',16,46.5,268],['key','钥匙交接',106,136.5,448],['fire','消防系统',196,226.5,628]];
+  const state=activeProjectState();
+  if(state.approvalRecords?.[previewDept]?.returned){const keys=demoDepartmentProjects(previewDept);projects.splice(0,projects.length,...projects.filter(p=>keys.includes(p[0])).map((p,i)=>[p[0],p[1],16+i*90,46.5+i*90,268+i*180]))}
+  screen.innerHTML='<div class="handover-page"><div class="handover-projects">'+projects.map(function(p){const done=state.saved[p[0]]!==null,pending=false,label=done?'去修改':'去办理';return '<button type="button" class="handover-project '+(done?'is-done':'')+(pending?' is-recheck':'')+'" style="top:'+p[2]+'px" data-handover-project="'+p[0]+'" aria-label="'+p[1]+' '+label+'"><span class="handover-project-icon" aria-hidden="true"><img src="./assets/figma/handover-file-text.png" alt=""></span>'+(done?'<span class="handover-status">已完成</span>':'')+'<span class="handover-project-name" style="top:'+(p[3]-p[2])+'px">'+p[1]+'</span><span class="handover-project-action" style="top:'+((p[4]-188)/2-p[2])+'px">'+label+'</span></button>'}).join('')+'</div></div>';
+  /* #AI:design 底部按钮沿用项目卡片的已保存完成判定 */
+  const allCompleted=projects.length>0&&projects.every(function(p){return state.saved[p[0]]!==null});
+  bottom.innerHTML='<button type="button" class="bottom-btn" data-action="finishHandover" '+(allCompleted?'':'disabled')+'>'+(allCompleted?'完成交接':'请完成所有项目检查')+'</button>';
+}
+function fxNode(cls,x,y,w,h,html,extra){return '<div class="'+cls+'" style="left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px;'+(extra||'')+'">'+html+'</div>'}
+function fxText(text,x,y,w,h,cls,extra){return fxNode('fx-text '+(cls||''),x,y,w,h,esc(text),extra||'')}
+function fxButton(cls,x,y,w,h,text){return '<button type="button" class="'+cls+'" style="left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px">'+esc(text)+'</button>'}
+function fxStar(y){return '<img class="fx-required" style="left:32px;top:'+y+'px" src="./assets/figma/create-16b0f.svg" alt="必填">'}
+function fxMarker(y){return fxNode('fx-section-marker',28,y,8,36,'')}
+function fxDivider(x,y,w){return fxNode('fx-divider',x,y,w,1,'')}
+function projectForm(key){const state=activeProjectState();return state.draft[key]||projectInitialForms[key]}
+function startProjectDraft(key){const state=activeProjectState();state.draft[key]=Object.assign({},state.draft[key]||state.saved[key]||projectInitialForms[key]);state.errors[key]=[]}
+function projectHasError(key){return (activeProjectState().errors[handoverProject]||[]).indexOf(key)>=0}
+function projectMissingRequired(key){
+  const data=projectForm(key);
+  if(key==='meter'){
+    const waterFields=LIST_ITEMS[detailIndex].type==='新签商户'?DEMO_WATER_METERS.flatMap(function(m){return ['waterPhoto_'+m.id,'waterReading_'+m.id]}):['waterPhoto','waterReading'];
+    return ['electricPhoto','electricReading'].concat(waterFields).filter(function(field){const value=data[field];return field.indexOf('Photo')>=0?!(value&&value.file):!String(value||'').trim()});
+  }
+  /* #AI:design 复验日期仅在选择“是”时校验；切换选项不清空草稿值 */
+  if(key==='fire')return ['hydrantPhoto','alarmPhoto'].filter(function(field){const value=data[field];return field.endsWith('Photo')?!(value&&value.file):!String(value||'').trim()});
+  return [];
+}
+function updateProjectFieldError(field){
+  const errors=activeProjectState().errors[handoverProject]||[],index=errors.indexOf(field);
+  if(index<0)return;
+  errors.splice(index,1);
+  const control=screen.querySelector('[data-project-field="'+field+'"],[data-project-photo="'+field+'"]')||(field==='receiver'?screen.querySelector('.fx-project-select-row'):null);
+  if(control){const row=control.closest('.fx-project-input-row,.fx-project-select-row,.fx-project-date-row,.fx-project-photo');if(row){row.classList.remove('is-invalid');const message=row.nextElementSibling;if(message&&message.classList.contains('fx-validation-message'))message.remove()}}
+}
+function confirmProject(){
+  const missing=projectMissingRequired(handoverProject);
+  if(missing.length){
+    activeProjectState().errors[handoverProject]=missing;
+    const oldScroll=screen.scrollTop;render();screen.scrollTop=oldScroll;
+    const first=screen.querySelector('[data-project-field="'+missing[0]+'"],[data-project-photo="'+missing[0]+'"]');
+    if(first){const rect=first.getBoundingClientRect(),screenRect=screen.getBoundingClientRect();screen.scrollTop+=rect.top-screenRect.top-24}
+    return;
+  }
+  const state=activeProjectState(),saved=Object.assign({},state.draft[handoverProject]);state.saved[handoverProject]=saved;
+  state.draft[handoverProject]=null;state.errors[handoverProject]=[];
+  if(LIST_ITEMS[detailIndex]?.demoCreated&&handoverProject==='meter'){
+    const data=readSharedPreview(),entry=data.tasks[activeTaskId()];entry.projects=entry.projects||{};entry.projects[previewDept]=entry.projects[previewDept]||{};
+    entry.projects[previewDept]['基础表数']=Object.assign({department:previewDept},JSON.parse(JSON.stringify(saved,function(k,v){return k==='file'||k==='url'?undefined:v})));
+    if(saveSharedPreview(data)){view='handover';render()}return;
+  }
+  syncSharedTask(activeTaskId());view='handover';render();
+}
+function fxPhoto(key,y,label,caption,required,accessibleLabel){
+  const value=projectForm(handoverProject)[key],error=projectHasError(key),fileId='project-photo-'+handoverProject+'-'+key;
+  const src=value&&value.url?value.url:'./assets/figma/handover-upload-placeholder.png';
+  const thumbs=value&&value.photos&&value.photos.length?'<span class="fx-photo-thumbs">'+value.photos.map(function(p){return '<img src="'+esc(p.url)+'" alt="'+esc(p.name)+'">'}).join('')+'</span>':'';
+  const bottomCaption=value&&value.url?'点击添加照片':caption;
+  return fxText(label,48,y-59,320,39,'fx-medium')+(required?fxStar(y-45):'')+
+    fxNode('fx-photo fx-project-photo'+(value&&value.url?' has-image':'')+(error?' is-invalid':''),48,y,320,270,'<img class="fx-photo-image" src="'+esc(src)+'" alt="'+esc(value&&value.name?value.name:label)+'"><span class="fx-photo-cover"></span><span class="fx-photo-caption" style="left:0;width:320px">'+esc(bottomCaption)+'</span>'+thumbs+'<input class="fx-photo-input" id="'+fileId+'" type="file" accept="image/*" data-project-photo="'+key+'" aria-label="'+esc(accessibleLabel||label)+'"><button type="button" class="fx-photo-target" data-photo-target="'+fileId+'" aria-label="选择照片来源"></button>','')+
+    (error?fxNode('fx-validation-message',48,y+274,320,28,'请添加照片',''):'');
+}
+function fxInputRow(y,label,placeholder,required,key,type,accessibleLabel){
+  const value=projectForm(handoverProject)[key]||'',error=projectHasError(key),inputType=type||'number';
+  const input='<input class="fx-field-input" style="left:0;top:5px;width:654px;height:36px" type="'+inputType+'" '+(inputType==='number'?'step="any" ':'')+'value="'+esc(value)+'" placeholder="'+esc(placeholder||'')+'" aria-label="'+esc(accessibleLabel||label)+'" data-project-field="'+key+'">'+fxDivider(0,50,654);
+  return (required?fxStar(y+14):'')+fxText(label,48,y,654,39,'fx-medium')+
+    fxNode('fx-project-input-row'+(error?' is-invalid':''),48,y+58,654,51,input,'')+
+    (error?fxNode('fx-validation-message',48,y+112,654,28,'请填写此项',''):'');
+}
+function fxKeyCategory(label,labelY,rowY,countKey){
+  const data=projectForm('key');
+  const statusKey=countKey.replace('Count','Status');
+  return fxMarker(labelY+1)+fxText(label,48,labelY,180,39,'fx-section-title')+
+    '<button type="button" class="fx-control fx-counter-btn" style="left:48px;top:'+rowY+'px;width:60px;height:60px" data-project-adjust="'+countKey+'" data-delta="-1" aria-label="减少'+label+'数量">−</button>'+
+    fxNode('fx-control fx-counter-value',120,rowY,120,60,'<input class="fx-counter-edit" type="number" step="any" value="'+esc(data[countKey])+'" aria-label="'+label+'数量" data-project-field="'+countKey+'">','')+
+    '<button type="button" class="fx-control fx-counter-btn" style="left:252px;top:'+rowY+'px;width:60px;height:60px" data-project-adjust="'+countKey+'" data-delta="1" aria-label="增加'+label+'数量">+</button>'+
+    fxStatusChoices(statusKey,rowY,['good','bad'],418,136,12);
+}
+/* #AI:design 钥匙、消防、通用模板共用两/三态选择，选中色沿用原表单规则 */
+function fxStatusChoices(key,rowY,values,start,width,gap){
+  const labels={good:'完好',bad:'损坏',na:'无此项'},current=projectForm(handoverProject)[key]||'';
+  return values.map(function(v,i){
+    const selected=current===v?' selected-'+(v==='na'?'na':v):'';
+    return '<button type="button" class="fx-choice'+selected+'" style="left:'+(start+i*(width+gap))+'px;top:'+rowY+'px;width:'+width+'px;height:'+(values.length===3?64:60)+'px" data-project-choice="'+key+'" data-value="'+v+'" aria-pressed="'+(current===v)+'">'+labels[v]+'</button>';
+  }).join('');
+}
+/* #AI:design 限定交接表单内容区，保留设计稿纵向尺寸和可容纳的控件尺寸 */
+function fitHandoverForm(){
+  const canvas=screen.querySelector('.project-canvas');if(!canvas)return;
+  canvas.querySelectorAll(':scope > [style]').forEach(function(el){
+    const left=parseFloat(el.style.left),width=parseFloat(el.style.width);if(!Number.isFinite(left))return;
+    if(el.classList.contains('project-panel')){el.style.left='56px';el.style.width='638px';return}
+    if(el.classList.contains('fx-choice'))return;
+    const x=left+28;el.style.left=x+'px';
+    if(Number.isFinite(width)&&width>674-x)el.style.width=Math.max(0,674-x)+'px';
+  });
+  const choices=Array.from(canvas.querySelectorAll(':scope > .fx-choice'));
+  const rows={};choices.forEach(function(el){(rows[el.style.top]||(rows[el.style.top]=[])).push(el)});
+  Object.values(rows).forEach(function(row){
+    if(row.length===2)row.forEach(function(el,i){el.style.left=(398+i*144)+'px';el.style.width='132px'});
+    if(row.length===3)row.forEach(function(el,i){el.style.width=((598-48)/3)+'px';el.style.left=(76+i*((598-48)/3+24))+'px'});
+  });
+}
+// #AI:design 交接表单仅展示各子项备注，保留已有历史数据。
+function renderProject(){
+  if(LIST_ITEMS[detailIndex]?.demoCreated&&handoverProject!=='meter'){renderCreatedProject();return}
+  let body='',pageClass='',pageStyle='',canvasStyle='';
+  if(handoverProject==='meter'){
+    const showReceipt=LIST_ITEMS[detailIndex].type==='新签商户',shift=showReceipt?151:0;
+    const panelHeight=showReceipt?910+DEMO_WATER_METERS.length*730:1283;
+    pageClass='project-meter'+(showReceipt?' with-receipt':'');
+    if(showReceipt){pageStyle='height:'+((220+panelHeight)/2-39.5)+'px';canvasStyle='height:'+(220+panelHeight+238)+'px'}
+    // #AI:design 收房读数仅为演示值，未绑定真实记录。
+    body=fxNode('project-panel',28,220,694,panelHeight,'')+
+      fxText('基础表数',48,240,112,39,'fx-green-title')+
+      fxText('检查电表和水表读数及设备状态',48,283,500,34,'fx-intro')+
+      fxMarker(350)+fxText('电表',48,349,112,39,'fx-section-title')+
+      fxPhoto('electricPhoto',471,'请上传电表照片','点击上传电表照片',true)+
+      (showReceipt?fxStar(795)+fxText('收房电表读数（kWh）',48,781,654,39,'fx-medium')+fxText('308',48,844,654,36,'fx-receipt-value')+fxText('2026年8月21日记录',48,844,654,36,'fx-receipt-date')+fxDivider(48,892,654):'')+
+      fxInputRow(781+shift,showReceipt?'交房电表读数（kWh）':'电表读数（kWh）','请输入电表读数',true,'electricReading')+
+      fxMarker(933+shift)+fxText('水表',48,932+shift,112,39,'fx-section-title')+
+      (showReceipt?DEMO_WATER_METERS.map(function(m,i){
+        const y=1142+i*730;
+        return fxNode('fx-water-header',48,y,654,39,'<span>水表编号：'+esc(m.number)+'</span><span class="fx-water-tag">'+esc(m.tag)+'</span>')+
+          fxPhoto('waterPhoto_'+m.id,y+118,'请上传水表照片','点击上传水表照片',true,m.number+' 水表照片')+
+          fxStar(y+442)+fxText('收房水表读数（m³）',48,y+428,654,39,'fx-medium')+fxText(m.receipt,48,y+491,654,36,'fx-receipt-value')+fxText(m.date,48,y+491,654,36,'fx-receipt-date')+fxDivider(48,y+539,654)+
+          fxInputRow(y+579,'交房水表读数（m³）','请输入水表读数',true,'waterReading_'+m.id,'number',m.number+' 交房水表读数（m³）');
+      }).join(''):fxPhoto('waterPhoto',1054,'请上传水表照片','点击上传水表照片',true)+fxInputRow(1364,'水表读数（m³）','请输入水表读数',true,'waterReading'));
+  }else if(handoverProject==='key'){
+    pageClass='project-keys';
+    body=fxNode('project-panel',28,220,694,608,'')+
+      fxText('钥匙交接',48,240,112,39,'fx-green-title')+
+      fxText('清点钥匙数量并检查状态',48,283,400,34,'fx-intro')+
+      fxKeyCategory('大门钥匙',349,412,'doorCount')+
+      fxKeyCategory('办公室钥匙',512,575,'officeCount')+
+      fxKeyCategory('仓库钥匙',675,738,'storeCount');
+  }else{
+    pageClass='project-fire';
+    const fire=projectForm('fire');
+    body=fxNode('project-panel',28,220,694,1740,'')+
+      fxText('消防系统',48,240,112,39,'fx-green-title')+
+      fxText('检查消防栓、灭火器、报警器等设备',48,283,520,34,'fx-intro')+
+      fxMarker(350)+fxText('消防栓',48,349,160,39,'fx-section-title')+
+      fxPhoto('hydrantPhoto',471,'上传消防栓照片','点击上传消防栓照片',true)+
+      fxStatusChoices('hydrantStatus',781,['good','bad','na'],48,202,24)+
+      fxText('备注说明',48,875,300,39,'fx-medium')+
+      fxNode('fx-note-box fx-project-note',48,934,654,182,'<textarea class="fx-note-input" placeholder="请输入备注说明" maxlength="50" aria-label="消防栓备注说明" data-project-field="hydrantNote">'+esc(fire.hydrantNote||'')+'</textarea><span class="fx-note-count" data-project-note-count="hydrantNote">'+String((fire.hydrantNote||'').length)+'/50</span>')+
+      fxMarker(1150)+fxText('报警器',48,1149,160,39,'fx-section-title')+
+      fxPhoto('alarmPhoto',1271,'上传报警器照片','点击上传报警器照片',true)+
+      fxStatusChoices('alarmStatus',1581,['good','bad','na'],48,202,24)+
+      fxText('备注说明',48,1675,300,39,'fx-medium')+
+      fxNode('fx-note-box fx-project-note',48,1734,654,182,'<textarea class="fx-note-input" placeholder="请输入备注说明" maxlength="50" aria-label="报警器备注说明" data-project-field="alarmNote">'+esc(fire.alarmNote||'')+'</textarea><span class="fx-note-count" data-project-note-count="alarmNote">'+String((fire.alarmNote||'').length)+'/50</span>');
+  }
+  screen.innerHTML='<div class="project-page '+pageClass+'" style="'+pageStyle+'"><div class="project-canvas" style="'+canvasStyle+'">'+body+'</div></div>';
+  fitHandoverForm();
+  bottom.innerHTML='<button type="button" class="bottom-btn" data-action="projectConfirm">确认</button>';
+}
+/* #AI:design 待复验卡片按原任务归并，并复用 Figma 列表卡片的字段与排布 */
+// #AI:design 首页入口及审批列表为独立演示，不模拟审批操作或任务流转。
+function renderHome(){
+  const a='./assets/figma/home-';
+  function tile(x,y,w,asset,title,sub,icon){return '<div class="home-tile" style="left:'+x+'px;top:'+y+'px;width:'+w+'px;height:64px"><img src="'+a+asset+'" alt="">'+(icon?'<div class="home-service-mask '+((w===80||asset==='55d23.svg')?'narrow':'')+'">'+(icon==='c4152.svg'?'<img class="service-mask-group" src="'+a+icon+'" alt="">':'<img class="service-circle" src="'+a+(asset==='99eb8.svg'||asset==='55d23.svg'?'369ae.svg':'0a118.svg')+'" alt=""><img class="service-icon '+(w===80?'narrow':'')+'" src="'+a+icon+'" alt="">')+'</div>':'')+'<strong>'+title+'</strong>'+(sub?'<span>'+sub+'</span>':'')+'</div>'}
+  screen.innerHTML='<div class="home-page"><div class="home-search"><img src="'+a+'d6f5b.svg" alt="">输入搜索内容</div><img class="home-banner-side home-banner-prev" src="'+a+'806bf.png" alt=""><img class="home-banner-side home-banner-next" src="'+a+'62dfc.png" alt=""><img class="home-banner" src="'+a+'f8940.png" alt=""><div class="home-news"><b><em>热门</em><br>资讯</b><span>2024年第26场“博瑞现场拍”</span><img src="'+a+'30aed.svg" alt=""></div>'+tile(14,236,169.5,'99eb8.svg','我要卖车','卖价更高 交易安全','e1965.svg')+tile(191.5,236,169.5,'55d23.svg','我要买车','放心好车 价格超值','7f789.svg')+tile(14,308,169.5,'d47da.svg','检测服务','深度检测 精准报价','75442.svg')+tile(191.5,308,80,'58184.svg','品牌专区','','4446c.svg')+tile(281,308,80,'58184.svg','拍卖车源','','c4152.svg')+'<div class="home-work"><img class="home-work-surface" src="'+a+'a3e85.svg" alt=""><button type="button" data-home-entry="list"><img src="'+a+'b3744.svg" alt="">交房交接</button>'+(previewRole==='director'?'<button type="button" data-home-entry="approval"><img src="'+a+'54e2f.svg" alt="">交房审批</button>':'')+'</div><section class="home-recommend"><div class="home-recommend-head"><strong>推荐车源</strong><span>新到</span><span>降价</span><span>检测</span></div><div class="home-car"><div class="home-car-crop first"><img src="'+a+'d2b65.png" alt=""></div><div><strong>奥迪A6L 2024款 45TFSI臻选动感型</strong><p>2022年 / 6.4万公里 / 北京</p><div class="home-car-tags"><span><img src="'+a+'41549.svg" alt="">放心车</span><span>博瑞严选卖场</span></div><b>28.48<small>万</small></b><span class="home-price-tag one-price">一口价</span><span class="home-price-tag special-price">特价</span></div></div><div class="home-car"><div class="home-car-crop second"><img src="'+a+'5f1a1.png" alt=""></div><div><strong>长城汽车坦克700 2024款 Hi4-T 首发限定版</strong><p>2024年 / 20.55万公里 / 乌鲁木齐</p><div class="home-car-tags"><span><img src="'+a+'41549.svg" alt="">放心车</span><span>博瑞严选卖场</span></div><b>58.38<small>万</small></b></div></div></section></div>';
+  bottom.innerHTML='<div class="home-bottom"><div class="home-bottom-item"><img src="'+a+'9536e.svg" alt="">首页</div><div class="home-bottom-item"><img src="'+a+'3f0cc.svg" alt="">全部车源</div><div class="home-bottom-item"><img src="'+a+'24b15.svg" alt="">数据</div><div class="home-bottom-item"><img src="'+a+'138b8.svg" alt="">个人中心</div></div>';
+}
+function createdHandoverTime(entry,dept){const records=(entry?.handoverRecords||[]).filter(function(record){return record.dept===dept&&record.time});return records.length?records[records.length-1].time:'—'}
+function renderApproval(){
+ const shared=readSharedPreview().tasks,names=['待我审批','审批中','已驳回'],tabs=names.map(function(name){return[name,String(LIST_ITEMS.filter(function(item){return HandoverApproval.status(shared[item.id],previewDept)===name}).length)]});
+ const cards=LIST_ITEMS.map(function(item,i){if(HandoverApproval.status(shared[item.id],previewDept)!==names[approvalTab])return '';return '<article class="approval-card '+(i?'department-card':'')+'" data-approval-index="'+i+'"><img class="approval-surface" src="./assets/figma/approval-e04b2.svg" alt=""><div class="approval-content"><h2 class="approval-name">'+esc(item.name)+'</h2><div class="list-metrics">'+item.values.map(function(v,j){return '<div class="list-metric"><strong>'+esc(v)+'</strong><span>'+esc(item.labels[j])+'</span></div>'}).join('')+'</div><div class="list-card-meta"><p>交房类型：'+esc(item.type)+'</p>'+(i===0?'<p>合同截止日期：'+esc(item.end)+'</p>':'')+'<p>完成交接日期：'+esc(item.demoCreated?createdHandoverTime(shared[item.id],previewDept):APPROVAL_COMPLETE_TIME)+'</p><p>交接部门：'+esc(item.depts)+'</p></div><img class="approval-divider" src="./assets/figma/list-6185b.svg" alt=""><div class="approval-actions"><button type="button" class="list-action '+(approvalTab===0?'primary':'outline')+'" data-approval-detail="'+i+'">'+(approvalTab===0?'立即审批':'查看详情')+'</button></div></div></article>'}).join('');
+ screen.innerHTML='<div class="list-page"><div class="approval-tabs">'+tabs.map(function(t,i){return '<button type="button" class="list-tab '+(i===approvalTab?'active':'')+'" data-approval-tab="'+i+'">'+t[0]+'<span class="list-count-badge">'+t[1]+'</span></button>'}).join('')+'</div><div class="result-count">共找到'+tabs[approvalTab][1]+'个</div><div class="approval-cards">'+cards+'</div></div>';bottom.innerHTML='';
+}
+function renderList(){
+  const sharedTasks=readSharedPreview().tasks;
+  const pendingCount=LIST_ITEMS.filter(function(item){const stage=sharedTasks[item.id]?.stage;return mayViewTask(item)&&!finalFinished(item)&&(!stage||stage==='待确认')}).length,finishedCount=LIST_ITEMS.filter(function(item){return mayViewTask(item)&&finalFinished(item)}).length;
+  const tabs=[['待认领','2'],['待我交接','10'],['交接中','4'],null,['待确认',restrictedRole()?String(pendingCount):'4'],['已完结',restrictedRole()?String(finishedCount):'']];
+  if(restrictedRole()&&activeTab!==4&&activeTab!==5)activeTab=4;
+  if(!Number.isInteger(activeTab)||activeTab<0||activeTab>=tabs.length||activeTab===3)activeTab=0;
+  const isMyHandover=activeTab===1;
+  const belongsToDept=function(item){return String(item.depts||'').split('、').includes(previewDept)};
+  const isOngoing=activeTab===2,isConfirm=activeTab===4,isFinished=activeTab===5;
+  /* #AI:design 已完结角标为设计稿演示值 */
+  if(isFinished&&!restrictedRole())tabs[5][1]='2';
+  /* #AI:design 按原任务标识过滤已完成交接的任务，保留其他示例 */
+  const entries=(isOngoing||isConfirm||isFinished?ONGOING_LIST_ITEMS:LIST_ITEMS).map(function(item,i){const status=projectStatesByTask[LIST_ITEMS[i].id]?.handoverStatus;return{item:isOngoing&&status==='ongoing'?LIST_ITEMS[i]:item,index:i,projects:null}}).filter(function(entry){
+    if(entry.item.demoCreated){const data=sharedTasks[entry.item.id],stage=data?.stage,deptState=data?.approvalFlow?.departments?.[previewDept],belongs=Object.prototype.hasOwnProperty.call(entry.item.categorySelections||{},previewDept);if(!mayViewTask(entry.item))return false;if(activeTab===1)return belongs&&(deptState==='unsubmitted'||deptState==='rejected');if(activeTab===2&&belongs&&stage==='待我交接'&&Object.values(data?.approvalFlow?.departments||{}).includes('rejected')&&deptState!=='rejected')return true;return stage===tabs[activeTab][0]}
+    const state=projectStatesByTask[LIST_ITEMS[entry.index].id],status=state?.handoverStatus;return (!isMyHandover||belongsToDept(entry.item))&&mayViewTask(entry.item)&&(!sharedTasks[entry.item.id]?.stage||sharedTasks[entry.item.id].stage===tabs[activeTab][0])&&(!isConfirm||!finalFinished(entry.item))&&(!restrictedRole()||(!isConfirm&&!isFinished)||(isFinished===finalFinished(entry.item)))&&(isMyHandover?(!status||!!state?.approvalRecords?.[previewDept]?.returned):isOngoing?status!=='recheck':true)});
+  const cards=entries.map(function(entry){
+    const item=entry.item,i=entry.index;
+    /* #AI:design 待确认使用演示卡片，不推定任务进入条件 */
+    if(isConfirm){return '<article class="list-card" data-list-index="'+i+'"><img class="list-card-surface" src="./assets/figma/list-3c507.svg" alt=""><div class="list-card-content"><h2 class="list-card-title">'+esc(item.title)+'</h2><p class="list-card-name">'+esc(item.name)+'</p><div class="list-metrics">'+item.values.map(function(v,j){return '<div class="list-metric"><strong>'+esc(v)+'</strong><span>'+esc(item.labels[j])+'</span></div>'}).join('')+'</div><div class="list-card-meta"><p>交房类型：'+esc(item.type)+'</p><p>合同截止日期：'+esc(item.end)+'</p><p>计划交接日期：'+esc(item.date)+'</p><p>交接部门：'+esc(item.depts)+'</p></div><div class="list-card-divider"><img src="./assets/figma/list-6185b.svg" alt=""></div><div class="list-card-actions"><button type="button" class="list-action outline" data-list-action="detail" data-index="'+i+'">查看详情</button>'+(canFinalConfirm(item)?'<button type="button" class="list-action primary" data-list-action="finalConfirm" data-index="'+i+'">确认交接</button>':'')+'</div></div></article>'}
+    /* #AI:design 已完结仅展示 Figma 演示样例，不模拟商户端流转 */
+    if(isFinished){return '<article class="list-card" data-list-index="'+i+'"><img class="list-card-surface" src="./assets/figma/list-3c507.svg" alt=""><div class="list-card-content"><h2 class="list-card-title">'+esc(item.title)+'</h2><p class="list-card-name">'+esc(item.name)+'</p><div class="list-metrics">'+item.values.map(function(v,j){return '<div class="list-metric"><strong>'+esc(v)+'</strong><span>'+esc(item.labels[j])+'</span></div>'}).join('')+'</div><div class="list-card-meta"><p>交房类型：'+esc(item.type)+'</p><p>合同截止日期：'+esc(item.end)+'</p><p>'+(i===0?'商户确认时间':'部门确认时间')+'：'+(finalConfirmationsByTask[item.id]?.time||(i===0?'2026-12-20 10:34:56':DEPARTMENT_CONFIRM_TIME))+'</p><p>交接部门：'+esc(item.depts)+'</p></div><div class="list-card-divider"><img src="./assets/figma/list-6185b.svg" alt=""></div><div class="list-card-actions"><button type="button" class="list-action outline" data-list-action="detail" data-index="'+i+'">查看详情</button></div></div></article>'}
+    const returned=projectStatesByTask[item.id]?.approvalRecords?.[previewDept]?.returned;
+    const action=activeTab===0&&!restrictedRole()&&!belongsToDept(item)?'<button type="button" class="list-action outline" data-list-action="detail" data-index="'+i+'">查看详情</button>':returned&&isMyHandover?'<button type="button" class="list-action outline" data-list-action="detail" data-index="'+i+'">查看详情</button><button type="button" class="list-action primary" data-list-action="handle" data-index="'+i+'">办理交接</button>':isOngoing?'<button type="button" class="list-action outline" data-list-action="detail" data-index="'+i+'">查看详情</button>':'<button type="button" class="list-action '+((isMyHandover||(previewRole==='employee'&&activeTab===0))?'primary':'outline')+'" data-list-action="handle" data-index="'+i+'">办理交接</button>'+(isMyHandover||previewRole==='employee'?'':'<button type="button" class="list-action primary" data-list-action="assign" data-index="'+i+'">指派</button>');
+    return '<article class="list-card" data-list-index="'+i+'"><img class="list-card-surface" src="./assets/figma/list-3c507.svg" alt=""><div class="list-card-content"><h2 class="list-card-title">'+item.title+'</h2><p class="list-card-name">'+item.name+'</p><div class="list-metrics">'+item.values.map(function(v,j){return '<div class="list-metric"><strong>'+v+'</strong><span>'+item.labels[j]+'</span></div>'}).join('')+'</div><div class="list-card-meta"><p>交房类型：'+item.type+'</p><p>合同截止日期：'+item.end+'</p><p>计划交接日期：'+item.date+'</p><p>'+(isOngoing?'未交接部门：':'交接部门：')+item.depts+'</p></div><div class="list-card-divider"><img src="./assets/figma/list-6185b.svg" alt=""></div><div class="list-card-actions">'+action+'</div></div></article>'
+  }).join('');
+  screen.innerHTML='<div class="list-page"><div class="list-tabs-wrap"><div class="list-tabs">'+tabs.map(function(t,i){if(!t||(restrictedRole()&&i!==4&&i!==5))return '';return '<button type="button" class="list-tab '+(i===activeTab?'active':'')+'" data-list-tab="'+i+'">'+t[0]+(t[1]?'<span class="list-count-badge">'+t[1]+'</span>':'')+'</button>'}).join('')+'</div><span class="list-tabs-fade"></span></div><div class="result-count">共找到'+(restrictedRole()?entries.length:(isMyHandover?18-(LIST_ITEMS.length-entries.length):18))+'个</div><div class="list-cards">'+cards+'</div></div>';
+  /* #AI:design 待确认画板显示右侧状态栏，不遮挡当前选中项 */
+  if(isConfirm||isFinished){const listTabs=screen.querySelector('.list-tabs');if(listTabs)listTabs.scrollLeft=listTabs.scrollWidth-listTabs.clientWidth}
+  bottom.innerHTML=mayCreate()?'<button type="button" class="bottom-btn" data-action="newTask">新增交房任务</button>':'';
+}
+function renderCreate(){
+  const c=selected(),h=selectedHouse(),propertyType=createType==='self'||createType==='return';
+  const deptValue=selectedDepts.map(function(i){const dept=DEPTS[i],categories=selectedCategories[dept]||[];return dept+(categories.length?'：'+categories.join('、'):'')}).filter(Boolean).join('；');
+  const typeButtons=[['new','新签商户'],['self','部门自用'],['return','部门交回']].filter(function(item){return allowedCreateType(item[0])}).map(function(item){return '<button type="button" class="form-type '+(createType===item[0]?'selected':'')+'" data-create-type="'+item[0]+'" aria-pressed="'+(createType===item[0])+'">'+item[1]+'</button>'}).join('');
+  const typeDept=createType==='self'?selectedUseDept:selectedReturnDept;
+  const typeDeptLabel=createType==='self'?'使用部门':'停用部门';
+  const typeDeptPlaceholder=createType==='self'?'请选择使用部门':'请选择停用部门';
+  const houseDisabled=createType==='return'&&!selectedReturnDept;
+  const housePlaceholder=houseDisabled?'请先选择停用部门':'请选择房屋名称';
+  const houseInfo=h?'<section class="house-info"><img class="house-info-surface" src="./assets/figma/house-info-e76e7.svg" alt=""><div class="house-info-content"><h2 class="house-info-title">基本信息</h2>'+[
+    ['房屋名称',h.name],['区域',h.info.region],['房屋面积',h.info.area],['建筑编号',h.info.buildingNo],['土地证书编号',h.info.landNo]
+  ].map(function(row){return '<div class="house-info-row"><span>'+row[0]+'：</span><strong>'+esc(row[1])+'</strong></div>'}).join('')+'</div></section>':'';
+  const typeFields=propertyType?
+    '<section class="form-field-group first"><div class="form-field-label"><img src="./assets/figma/create-16b0f.svg" alt=""><span>'+typeDeptLabel+'</span></div><button type="button" class="form-select-row '+(typeDept?'has-value':'')+'" data-action="openCreateDept">'+(typeDept?esc(typeDept):typeDeptPlaceholder)+'<img src="./assets/figma/create-2add4.svg" alt=""></button><img class="form-field-line" src="./assets/figma/create-2ab85.svg" alt=""></section>'+
+    '<section class="form-field-group"><div class="form-field-label"><img src="./assets/figma/create-16b0f.svg" alt=""><span>房屋名称</span></div><button type="button" class="form-select-row '+(h?'has-value':'')+'" data-action="openHouse" '+(houseDisabled?'disabled aria-disabled="true"':'')+'>'+(h?esc(h.name):housePlaceholder)+'<img src="./assets/figma/create-2add4.svg" alt=""></button><img class="form-field-line" src="./assets/figma/create-2ab85.svg" alt=""></section>'+houseInfo
+    :'<section class="form-field-group first"><div class="form-field-label"><img src="./assets/figma/create-16b0f.svg" alt=""><span>摊位号</span></div><button type="button" class="form-select-row '+(c?'has-value':'')+'" data-action="openStall">'+(c?esc(c.stall):'请选择摊位号')+'<img src="./assets/figma/create-2add4.svg" alt=""></button><img class="form-field-line" src="./assets/figma/create-2ab85.svg" alt=""></section>'+
+    (c?'<section class="basic-info"><img class="basic-info-surface" src="./assets/figma/filled-f6823.svg" alt=""><div class="basic-info-content"><h2 class="basic-info-title">基本信息</h2><div class="basic-info-row"><span>摊位号：</span><strong>'+esc(c.stall)+'</strong></div><div class="basic-info-row"><span>商户名称：</span><strong>'+esc(c.merchant)+'</strong></div><div class="basic-info-row"><span>房屋面积：</span><strong>'+esc(c.area)+'</strong></div><div class="basic-info-row"><span>室内车位：</span><strong>'+esc(c.indoor)+'</strong></div><div class="basic-info-row"><span>室外车位：</span><strong>'+esc(c.outdoor)+'</strong></div><div class="basic-info-row"><span>合同开始日期：</span><strong>'+esc(c.contractStart)+'</strong></div><div class="basic-info-row"><span>合同截止日期：</span><strong>'+esc(c.contractEnd)+'</strong></div></div></section>'+(DEMO_UNPAID_STALLS.includes(c.stall)?'<p class="rent-warning">该摊位未交租金</p>':''):'');
+  const ready=propertyType?!!(typeDept&&h&&meetingTime&&selectedDepts.length):!!(c&&c.allowed&&meetingTime&&selectedDepts.length);
+  screen.innerHTML='<div class="form-page"><section class="form-type-group"><div class="form-field-label"><img src="./assets/figma/create-16b0f.svg" alt=""><span>交房类型</span></div><div class="form-types">'+typeButtons+'</div></section>'+typeFields+
+    '<section class="form-field-group category-value"><div class="form-field-label"><img src="./assets/figma/create-16b0f.svg" alt=""><span>交接部门</span></div><button type="button" class="form-select-row '+(deptValue?'has-value':'')+'" data-action="openDepartments"><span class="category-value-text">'+(deptValue?esc(deptValue):'请选择交接部门')+'</span><img src="./assets/figma/create-2add4.svg" alt=""></button><img class="form-field-line" src="./assets/figma/create-2ab85.svg" alt=""></section>'+
+    '<section class="form-field-group"><div class="form-field-label"><img src="./assets/figma/create-16b0f.svg" alt=""><span>计划交接时间</span></div><button type="button" class="form-select-row '+(meetingTime?'has-value':'')+'" data-action="openDate">'+(meetingTime?esc(meetingTime):'请选择计划交接时间')+'<img src="./assets/figma/create-2add4.svg" alt=""></button><img class="form-field-line" src="./assets/figma/create-2ab85.svg" alt=""></section></div>';
+  bottom.innerHTML='<button type="button" class="bottom-btn" data-action="create" '+(ready?'':'disabled')+'>提交</button>';
+}
+function renderFinalConfirmation(){overlayRoot.innerHTML='<div class="final-confirm-mask"><section class="final-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="final-confirm-title" aria-describedby="final-confirm-description"><p id="final-confirm-title" class="final-confirm-title">确认交接</p><p id="final-confirm-description" class="final-confirm-description">是否确认本次交房交接</p><div class="final-confirm-actions"><button type="button" class="final-confirm-cancel" data-action="cancelFinalConfirmation">取消</button><button type="button" class="final-confirm-accept" data-action="acceptFinalConfirmation">确认</button></div></section></div>'}
+function openFinalConfirmation(index){const item=LIST_ITEMS[index];if(view!=='list'&&view!=='detail')return;if(activeTab!==4||!canFinalConfirm(item))return;pendingFinalConfirm={id:item.id,index:index,identity:finalIdentity()};overlay='finalConfirmation';renderFinalConfirmation()}
+function renderOverlay(){
+  if(overlay==='date'){
+    const year=dateCursor.getFullYear(),month=dateCursor.getMonth(),firstDay=new Date(year,month,1).getDay(),daysInMonth=new Date(year,month+1,0).getDate();
+    const dateTitle='选择计划交接时间';
+    const cells=Array(firstDay).fill('<span class="date-empty" aria-hidden="true"></span>');
+    for(let day=1;day<=daysInMonth;day++){const value=dateValue(year,month,day);cells.push('<button type="button" class="date-day '+(dateDraft===value?'selected':'')+'" data-date-value="'+value+'" aria-label="'+value+'" aria-pressed="'+(dateDraft===value)+'">'+day+'</button>')}
+    overlayRoot.innerHTML='<div class="selection-mask" data-overlay-mask="true"><section class="date-sheet" role="dialog" aria-label="'+dateTitle+'"><div class="date-picker-title">'+dateTitle+'</div><div class="date-picker-divider"></div><div class="date-picker-month"><button type="button" class="date-month-nav" data-date-nav="-1" aria-label="上个月">‹</button><span class="date-month-label">'+year+'年'+(month+1)+'月</span><button type="button" class="date-month-nav" data-date-nav="1" aria-label="下个月">›</button></div><div class="date-weekdays">'+['日','一','二','三','四','五','六'].map(function(d){return'<span>'+d+'</span>'}).join('')+'</div><div class="date-days">'+cells.join('')+'</div><div class="date-picker-actions"><button type="button" class="date-picker-cancel" data-action="cancelDate">取消</button><button type="button" class="date-picker-confirm" data-action="confirmDate" '+(dateDraft?'':'disabled')+'>确定</button></div></section></div>';
+    return;
+  }
+  if(overlay==='stall'){
+    const query=stallQuery.trim().toLowerCase();
+    const matches=STALL_CHOICES.filter(function(item){return query?item.stall.toLowerCase().indexOf(query)>=0:item.stall.indexOf('A-27')===0});
+    overlayRoot.innerHTML='<div class="selection-mask" data-overlay-mask="true"><section class="stall-sheet" role="dialog" aria-label="选择摊位号"><img class="stall-sheet-surface" src="./assets/figma/stall-3330c.svg" alt=""><label class="stall-search"><img src="./assets/figma/stall-d6f5b.svg" alt=""><input data-stall-search type="search" value="'+esc(stallQuery)+'" placeholder="请输入摊位号" aria-label="请输入摊位号"></label><div class="stall-results">'+matches.map(function(item){const c=CONTRACTS.find(function(x){return x.id===item.contractId});return '<button type="button" class="stall-option '+(draftStall===item.key?'selected':'')+'" data-stall-option="'+item.key+'" '+(!item.allowed||!c||!c.allowed?'disabled':'')+'>'+item.stall+'</button>'}).join('')+'</div><div class="stall-actions"><button type="button" class="stall-cancel" data-action="cancelOverlay">取消</button><button type="button" class="stall-confirm" data-action="confirmStall" '+(!currentStall()||!currentStall().allowed?'disabled':'')+'>确定</button></div></section></div>';
+    return;
+  }
+  if(overlay==='departments'){
+    overlayRoot.innerHTML='<div class="selection-mask" data-overlay-mask="true"><section class="department-sheet category-sheet" role="dialog" aria-label="选择交接部门及类别"><h2 class="selection-title">选择交接部门及类别</h2><div class="category-scroll"><div class="category-depts">'+DEPTS.map(function(d,i){return '<button type="button" class="department-option '+(draftDepts.indexOf(i)>=0?'selected':'')+'" data-dept-option="'+i+'" aria-pressed="'+(draftDepts.indexOf(i)>=0)+'">'+esc(d)+'</button>'}).join('')+'</div>'+draftDepts.map(function(i){const dept=DEPTS[i],options=DEMO_CATEGORIES[dept]||[],chosen=draftCategories[dept]||[];return '<section class="category-group"><h3 class="category-group-title">'+esc(dept)+' · 交接类别</h3><div class="category-options">'+(options.length?options.map(function(c){return '<button type="button" class="category-option '+(chosen.includes(c)?'selected':'')+'" data-category-dept="'+i+'" data-category="'+esc(c)+'" aria-pressed="'+chosen.includes(c)+'">'+esc(c)+'</button>'}).join(''):'<span class="category-empty">暂无截图示例类别</span>')+'</div></section>'}).join('')+'</div><button type="button" class="sheet-confirm" data-action="confirmDepartments">确定</button></section></div>';
+    return;
+  }
+  if(overlay==='createDept'){
+    const options=createType==='return'?eligibleReturnDepts():DEPTS;
+    const title=createType==='self'?'请选择使用部门':'请选择停用部门';
+    overlayRoot.innerHTML='<div class="selection-mask" data-overlay-mask="true"><section class="department-sheet" role="dialog" aria-label="'+title+'"><img class="department-sheet-surface" src="./assets/figma/department-8c6b4.svg" alt=""><h2 class="selection-title">'+title+'</h2><div class="department-options">'+options.map(function(dept,i){return '<button type="button" class="department-option create-department-option '+(draftCreateDept===dept?'selected':'')+'" data-create-dept="'+esc(dept)+'" aria-pressed="'+(draftCreateDept===dept)+'">'+esc(dept)+'</button>'}).join('')+'</div><button type="button" class="sheet-confirm" data-action="confirmCreateDept" '+(draftCreateDept?'':'disabled')+'>确定</button></section></div>';
+    return;
+  }
+  if(overlay==='houses'){
+    const options=houseOptions().filter(function(h){return h.name.toLowerCase().includes(houseQuery.trim().toLowerCase())});
+    overlayRoot.innerHTML='<div class="selection-mask" data-overlay-mask="true"><section class="house-sheet" role="dialog" aria-label="请选择房屋名称"><h2 class="selection-title">请选择房屋名称</h2><input class="house-search" data-house-search type="search" value="'+esc(houseQuery)+'" placeholder="请输入房屋名称" aria-label="请输入房屋名称"><div class="house-options">'+options.map(function(house){return '<button type="button" class="house-option '+(draftHouseId===house.id?'selected':'')+'" data-house-option="'+house.id+'" aria-pressed="'+(draftHouseId===house.id)+'">'+esc(house.name)+'</button>'}).join('')+(options.length?'':'<div class="house-options-empty">暂无符合条件的房屋</div>')+'</div><button type="button" class="sheet-confirm" data-action="confirmHouse" '+(draftHouseId?'':'disabled')+'>确定</button></section></div>';
+    return;
+  }
+  overlayRoot.innerHTML='';
+}
+// #AI:design 交接中只读取当前任务已记录的数据，缺失处理不作推定。
+function ongoingRecordSections(id){
+ const entry=readSharedPreview().tasks[id]||{},handover=Array.isArray(entry.handoverRecords)?entry.handoverRecords:[],approval=Array.isArray(entry.approvalFlow?.history)?entry.approvalFlow.history:[];
+ const handoverHtml=handover.map(function(r){return '<div class="ongoing-record-entry"><img src="./assets/figma/ongoing-detail-record-marker.svg" width="10" height="10" alt=""><div class="ongoing-record-heading"><strong>'+esc(r.dept)+'交接</strong><span class="ongoing-record-status done">已完成</span></div>'+(r.person||r.time?'<div class="ongoing-record-meta">'+(r.person?'<span>'+esc(r.person)+'</span>':'')+(r.time?'<time>'+esc(r.time)+'</time>':'')+'</div>':'')+'</div>'}).join('');
+ const approvalEntries=approval.map(function(r){return {title:r.dept+'主任审批',status:r.status,person:r.person,time:r.time,reason:r.reason}});
+ (entry.final?.events||[]).forEach(function(r){approvalEntries.push({title:r.role,status:'已确认',person:r.person,time:r.time})});
+ const approvalHtml=historyRows(approvalEntries);
+ return '<section class="detail-card rejected-record"><h2 class="detail-card-title">办理交接记录</h2><div class="ongoing-record-list">'+handoverHtml+'</div></section><section class="detail-card rejected-record"><h2 class="detail-card-title">审批记录</h2><div class="native-approval-history">'+approvalHtml+'</div></section>';
+}
+/* #AI:design 详情页状态标签取值为办理交接选择结果，缺省不显示 */
+function fxStatusText(v){return v==='good'?'完好':v==='bad'?'损坏':v==='na'?'无此项':''}
+function fxStatusTag(v){const t=fxStatusText(v);return t?'<span class="ongoing-item-status '+(v==='na'?'na':v)+'">'+t+'</span>':''}
+function renderOngoingMerchantDetail(){
+  const taskState=activeProjectState(),sharedProjects=readSharedPreview().tasks[LIST_ITEMS[detailIndex].id]?.projects||{},meter=taskState.saved.meter||sharedProjects.meter,key=taskState.saved.key||sharedProjects.key,fire=taskState.saved.fire||sharedProjects.fire,firePending=false,fireDone=!!fire;
+  const value=function(v,fallback){return v===undefined||v===null||v===''?(fallback||'—'):String(v)},picture=function(v,fallback){return esc(v?.url||(v?.name?'./assets/figma/handover-upload-placeholder.png':'./assets/figma/'+fallback))};
+  const rows=[
+    ['任务编号','JF202610281415'],['交房类型','新签商户'],['摊位号','G-081'],['商户名称','花乡新世纪二手车'],['房屋面积','2900㎡'],['室内车位','4个'],['室外车位','20个'],['合同开始日期','2026-12-20'],['合同截止日期','2027-12-20'],['交接部门','物业部、安保部'],['计划交接时间','2026-10-20']
+  ];
+  /* #AI:design 流转后的详情沿用原任务已有的合同与列表数据 */
+  {const item=LIST_ITEMS[detailIndex],contract=CONTRACTS.find(function(c){return c.id===item.contractId});rows[2][1]=item.name.split('：')[1];rows[4][1]=item.values[0];rows[5][1]=item.values[1];rows[6][1]=item.values[2];rows[8][1]=item.end;rows[9][1]=item.depts;rows[10][1]=item.date;if(contract){rows[3][1]=contract.merchant;rows[7][1]=contract.contractStart}}
+  screen.innerHTML='<div class="detail-page ongoing-detail-page"><section class="detail-card ongoing-basic-card"><img class="ongoing-card-surface ongoing-basic-surface" src="./assets/figma/ongoing-detail-basic-card.svg" width="694" height="747" alt=""><div class="ongoing-basic-content"><h2 class="detail-card-title">基本信息</h2><div class="detail-info">'+rows.map(function(r){return '<div class="detail-info-row"><span>'+esc(r[0])+'：</span><strong>'+esc(r[1])+'</strong></div>'}).join('')+'</div></div></section>'+ 
+  '<section class="detail-card ongoing-project-card"><img class="ongoing-card-surface ongoing-project-surface" src="./assets/figma/ongoing-detail-project-card.svg" width="694" height="1680" alt=""><div class="ongoing-project-content"><h2 class="detail-card-title">交接项目</h2>'+ 
+  '<section class="ongoing-category ongoing-base-category"><div class="ongoing-category-head"><span class="ongoing-category-title">基础表数 <span class="detail-tag">本部门负责</span></span><span class="detail-tag">已交接</span></div><p class="ongoing-category-info">责任部门：<strong>物业部</strong></p>'+ 
+  '<div class="ongoing-meter-project"><h3 class="ongoing-project-name">电表</h3><p class="ongoing-reading"><span>读数：</span>'+esc(meter?value(meter.electricReading)+'kWh':'1222.5kWh')+'</p><img class="ongoing-meter-photo" src="'+picture(meter?.electricPhoto,'ongoing-meter-photo.png')+'" alt="电表照片示例"></div>'+ 
+  '<div class="ongoing-meter-project"><h3 class="ongoing-project-name">水表</h3><p class="ongoing-reading"><span>读数：</span>'+esc(meter?value(meter.waterReading_demo1)+'m³':'64.5m³')+'</p><img class="ongoing-meter-photo" src="'+picture(meter?.waterPhoto_demo1,'ongoing-meter-photo.png')+'" alt="水表照片示例"></div></section>'+ 
+  '<img class="ongoing-separator" src="./assets/figma/ongoing-detail-separator.svg" width="647" height="1" alt="">'+ 
+  '<section class="ongoing-category ongoing-key-category"><div class="ongoing-category-head"><span class="ongoing-category-title">钥匙交接 <span class="detail-tag">本部门负责</span></span><span class="detail-tag">已交接</span></div><p class="ongoing-category-info">责任部门：<strong>物业部</strong></p><div class="ongoing-key-list">'+
+  '<div class="ongoing-key-item"><strong class="ongoing-key-name">大门钥匙'+fxStatusTag(key?key.doorStatus:'good')+'</strong><div class="ongoing-key-count"><span>数量：</span><span>'+esc(key?value(key.doorCount):'3')+'</span></div></div>'+ 
+  '<div class="ongoing-key-item"><strong class="ongoing-key-name">办公室钥匙'+fxStatusTag(key?key.officeStatus:'bad')+'</strong><div class="ongoing-key-count"><span>数量：</span><span>'+esc(key?value(key.officeCount):'2')+'</span></div></div></div></section>'+ 
+  '<img class="ongoing-separator" src="./assets/figma/ongoing-detail-separator.svg" width="647" height="1" alt="">'+ 
+  '<section class="ongoing-category ongoing-fire-category"><div class="ongoing-category-head"><span class="ongoing-category-title">消防系统</span><span class="detail-tag '+(firePending?'pending':'')+'">'+(fireDone?'已交接':'未交接')+'</span></div><p class="ongoing-category-info">责任部门：<strong>安保部</strong></p><div class="ongoing-fire-list">'+
+  [['消防栓','hydrantStatus','good'],['报警器','alarmStatus','bad']].map(function(x){const v=fire?fire[x[1]]:x[2];return '<div class="ongoing-fire-row"><span>'+x[0]+fxStatusTag(v)+'</span><span class="ongoing-project-status '+(fireDone?'ok':'pending')+'">'+(fireDone?'已交接':'待检查')+'</span></div>'}).join('')+'</div></section></div></section>'+ 
+  ongoingRecordSections(LIST_ITEMS[detailIndex].id)+'</div>';
+  bottom.innerHTML='';
+}
+/* #AI:design:start */
+function departmentDetailRows(item){
+  const house=DEMO_HOUSES[0],rows=[
+    ['任务编号','JF202610281415'],['交房类型',item.type],[detailIndex===1?'使用部门':'停用部门',house.department],['房屋名称',house.name],['区域',house.info.region],['房屋面积',house.info.area],['建筑编号',house.info.buildingNo],['土地证书编号',house.info.landNo],['交接部门','物业部、安保部'],['计划交接时间',item.date]
+  ];
+  rows[3][1]=item.name.split('：')[1];rows[4][1]=item.values[2];rows[5][1]=item.values[0];rows[6][1]=item.values[1];rows[8][1]=item.depts
+  return rows;
+}
+// #AI:design 以浏览器实际像素计算末行与背景的间距，适配画布缩放。
+function sizeDepartmentConfirm(){
+  const page=screen.querySelector('.confirm-detail-page.department-confirm');if(!page)return;
+  const canvas=page.querySelector('.confirm-canvas'),panel=canvas.querySelector('.confirm-panel'),last=canvas.querySelectorAll('.basic-last');
+  const scale=canvas.getBoundingClientRect().width/canvas.offsetWidth,top=panel.getBoundingClientRect().top;
+  const bottom=Math.max(...Array.from(last,function(node){const range=document.createRange();range.selectNodeContents(node);return range.getBoundingClientRect().bottom}));
+  const height=(bottom-top+28)/scale,shift=height-747;
+  panel.style.height=height+'px';
+  Array.from(canvas.children).forEach(function(node){if(!node.dataset.originalTop&&node.style.top)node.dataset.originalTop=node.style.top;const y=parseFloat(node.dataset.originalTop);if(y>=767)node.style.top=(y+shift)+'px'});
+  canvas.style.height=((page.classList.contains('is-finished')?4087:3991)+shift)+'px';
+  page.style.height=((page.classList.contains('is-finished')?2059.5:2011.5)+shift/2)+'px';
+  canvas.dataset.finalBaseHeight=canvas.style.height;page.dataset.finalBaseHeight=page.style.height;
+}
+function sizeApprovalHistory(){const page=screen.querySelector('.confirm-detail-page'),canvas=page?.querySelector('.confirm-canvas'),history=canvas?.querySelector('.approval-history');if(!history)return;const panel=canvas.querySelectorAll('.confirm-panel')[3];if(!canvas.dataset.finalBaseHeight){canvas.dataset.finalBaseHeight=canvas.style.height;page.dataset.finalBaseHeight=page.style.height}const height=parseFloat(history.style.top)-parseFloat(panel.style.top)+history.offsetHeight+28;panel.style.height=height+'px';const needed=parseFloat(panel.style.top)+height+24,base=parseFloat(canvas.dataset.finalBaseHeight),extra=Math.max(0,needed-base);canvas.style.height=(base+extra)+'px';page.style.height=(parseFloat(page.dataset.finalBaseHeight)+extra/2)+'px'}
+function renderConfirmDetail(finished){
+  if(LIST_ITEMS[detailIndex]?.demoCreated){renderCreatedDetail(view==='approvalDetail');return}
+  const isApproval=view==='approvalDetail',rejected=isApproval&&approvalTab===2;
+  const item=ONGOING_LIST_ITEMS[detailIndex]||ONGOING_LIST_ITEMS[0],merchant=detailIndex===0;
+  const finalEvents=finished&&!isApproval?(finalConfirmationsByTask[item.id]?.events||[]):[];
+  /* #AI:design 有实际演示填写时，按同一任务回显；旧静态示例保留原值。 */
+  const sharedProjects=readSharedPreview().tasks[item.id]?.projects||{},liveProjects=projectStatesByTask[item.id]?.saved||{},meterData=liveProjects.meter||sharedProjects.meter,keyData=liveProjects.key||sharedProjects.key,fireData=liveProjects.fire||sharedProjects.fire;
+  function recorded(value,fallback){return value===undefined||value===null||value===''?(fallback||'—'):String(value)}
+  const contract=CONTRACTS.find(function(c){return c.id===item.contractId});
+  const rows=merchant?[['任务编号','JF202610281415'],['交房类型',item.type],['摊位号',item.name.split('：')[1]],['商户名称',contract.merchant],['房屋面积',item.values[0]],['室内车位',item.values[1]],['室外车位',item.values[2]],['合同开始日期',contract.contractStart],['合同截止日期',item.end],['交接部门',item.depts],finished?['商户确认时间',finalConfirmationsByTask[item.id]?.time||'2026-10-20 10:34:56']:['计划交接时间',item.date]]:departmentDetailRows(LIST_ITEMS[detailIndex]);
+  if(!merchant){rows[2][0]='使用部门';if(finished)rows[9]=['部门确认时间',finalConfirmationsByTask[item.id]?.time||DEPARTMENT_CONFIRM_TIME]}
+  if((isApproval||restrictedRole())&&!merchant){rows[3][1]=item.name.split('：')[1];rows[4][1]=item.values[2];rows[5][1]=item.values[0];rows[6][1]=item.values[1]}
+  if(isApproval)rows[rows.length-1]=['完成交接时间',APPROVAL_COMPLETE_TIME]
+  function textAt(text,x,y,cls){return '<span class="confirm-text '+(cls||'')+'" style="left:'+x+'px;top:'+y+'px">'+esc(text)+'</span>'}
+  function tag(text,x,y){return '<span class="confirm-tag" style="left:'+x+'px;top:'+y+'px">'+text+'</span>'}
+  function title(text,y){return '<span style="position:absolute;left:0;top:'+(y+1)+'px;width:8px;height:36px;border-radius:0 8px 8px 0;background:#1aba6c"></span>'+textAt(text,20,y,'confirm-heading')}
+  function photo(file,y,alt,value){const src=value?.url|| (value?.name?'./assets/figma/handover-upload-placeholder.png':'./assets/figma/'+file);return '<img class="confirm-image" style="left:24px;top:'+y+'px" src="'+esc(src)+'" alt="'+alt+'示例">'}
+  function status(text,y,bad){return '<span class="confirm-status '+(bad?'bad':'')+'" style="left:588px;top:'+y+'px"><img src="./assets/figma/ongoing-detail-'+(bad?'damaged':'ok')+'.svg" alt="">'+text+'</span>'}
+  function statusTagAt(v,x,y){const t=fxStatusText(v);return t?'<span class="confirm-tag confirm-status-tag '+(v==='na'?'na':v)+'" style="left:'+x+'px;top:'+y+'px">'+t+'</span>':''}
+  function record(titleText,y,name,date,approval){return '<img class="confirm-record-marker" style="left:8px;top:'+(y+12)+'px" src="./assets/figma/ongoing-detail-record-marker.svg" alt="">'+textAt(titleText,27,y,'confirm-record-text confirm-strong')+textAt(approval==='merchant'?'已确认':approval?'已通过':'已完成',approval==='merchant'?135:approval?207:159,y,'confirm-record-text confirm-strong confirm-green')+textAt(name,27,y+34,'confirm-record-text confirm-label')+textAt(date,111,y+34,'confirm-record-text confirm-label')}
+  let html='<div class="confirm-detail-page '+(finished?'is-finished ':'')+(merchant?'':'department-confirm')+'"><div class="confirm-canvas">';
+  html+='<div class="confirm-panel" style="top:0;height:747px"></div><div class="confirm-panel" style="top:767px;height:2722px"></div><div class="confirm-panel" style="top:3509px;height:275px"></div><div class="confirm-panel" style="top:3804px;height:'+(finished&&merchant?371:275)+'px"></div>';
+  html+=title('基本信息',20)+rows.map(function(row,i){const last=!merchant&&i===rows.length-1?' basic-last':'';return '<span class="confirm-text confirm-label'+last+'" style="left:48px;top:'+(83+i*60)+'px;width:182px;text-align:right">'+esc(row[0])+'：</span>'+textAt(row[1],238,83+i*60,'confirm-value'+last)}).join('');
+  html+=title('交接项目',787)+textAt('基础表数',24,854,'confirm-heading')+tag('本部门负责',144,856)+tag('已交接',590,856)+textAt('责任部门：',24,905,'confirm-label')+textAt('物业部',162,905,'confirm-value');
+  html+=textAt('电表',24,961,'confirm-strong')+textAt('读数：',24,1005,'confirm-label')+textAt(meterData?recorded(meterData.electricReading)+'kWh':'1222.5kWh',110,1005,'confirm-value')+photo('ongoing-meter-photo.png',1061,'电表照片',meterData?.electricPhoto);
+  html+=textAt('水表',24,1371,'confirm-strong')+textAt('读数：',24,1415,'confirm-label')+textAt(meterData?recorded(merchant?meterData.waterReading_demo1:meterData.waterReading)+'m³':'64.5m³',110,1415,'confirm-value')+photo('confirm-water.png',1471,'水表照片',merchant?meterData?.waterPhoto_demo1:meterData?.waterPhoto);
+  html+='<img style="position:absolute;left:24px;top:1760px;width:647px;height:1px" src="./assets/figma/ongoing-detail-separator.svg" alt="">'+textAt('钥匙交接',24,1781,'confirm-heading')+tag('本部门负责',144,1783)+tag('已交接',590,1783)+textAt('责任部门：',24,1832,'confirm-label')+textAt('物业部',162,1832,'confirm-value');
+  html+=textAt('大门钥匙',24,1888,'confirm-strong')+statusTagAt(keyData?keyData.doorStatus:'good',132,1888)+textAt('数量：',24,1932,'confirm-label')+textAt(keyData?recorded(keyData.doorCount):'3',110,1932,'confirm-value')+textAt('办公室钥匙',24,1988,'confirm-strong')+statusTagAt(keyData?keyData.officeStatus:'bad',156,1988)+textAt('数量：',24,2032,'confirm-label')+textAt(keyData?recorded(keyData.officeCount):'2',110,2032,'confirm-value');
+  html+='<img style="position:absolute;left:24px;top:2132px;width:647px;height:1px" src="./assets/figma/ongoing-detail-separator.svg" alt="">'+textAt('消防系统',24,2152,'confirm-heading')+tag('已交接',590,2154)+textAt('责任部门：',24,2203,'confirm-label')+textAt('安保部',162,2203,'confirm-value');
+  html+=textAt('消防栓',24,2259,'confirm-strong')+statusTagAt(fireData?fireData.hydrantStatus:'good',110,2259)+textAt('备注：',24,2303,'confirm-label')+textAt(fireData?recorded(fireData.hydrantNote):'—',110,2303,'confirm-value')+photo('confirm-hydrant.png',2359,'消防栓照片',fireData?.hydrantPhoto);
+  html+=textAt('灭火器',24,2653,'confirm-strong')+textAt('备注：',24,2697,'confirm-label')+textAt('需要更换',110,2697,'confirm-value')+photo('confirm-extinguisher.png',2797,'灭火器照片');
+  html+=textAt('报警器',24,3091,'confirm-strong')+statusTagAt(fireData?fireData.alarmStatus:'bad',110,3091)+textAt('备注：',24,3135,'confirm-label')+textAt(fireData?recorded(fireData.alarmNote):'—',110,3135,'confirm-value')+photo('confirm-alarm.png',3191,'报警器照片',fireData?.alarmPhoto);
+  html+=title('办理交接记录',3529)+record('物业部交接',3592,'王大壮','2024-03-04 16:01:05')+record('安保部交接',3688,'李师傅','2024-03-07 16:01:05')+'<span class="confirm-record-line" style="left:12px;top:3622px"></span>';
+  let history;
+  if(readSharedPreview().tasks[item.id]?.approvalFlow){history=readSharedPreview().tasks[item.id].approvalFlow.history.map(function(r){return {title:r.dept+'主任审批',status:r.status,time:r.time,reason:r.reason}})}else if(rejected){history=[{title:'物业部主任审批',status:'已驳回',person:'王主任',time:'2024-03-04 16:01:05',reason:'交接项目未完成，需重新办理交接'},{title:'安保部主任审批',status:'已通过',person:'刘主任',time:'2024-03-07 16:01:05'},{title:'安保部主任审批',status:'未审批'}]}
+  else if(finished&&merchant){history=[{title:'商户确认',status:'已确认',person:'王老五',time:'2026-10-10 16:01:05'},{title:'安保部主任审批',status:'已通过',person:'刘主任',time:'2026-10-07 16:01:05'},{title:'安保部主任审批',status:'已通过',person:'刘主任',time:'2026-10-03 16:01:05'}];if(finalEvents.length)history.shift()}
+  else{history=[{title:'物业部主任审批',status:'已通过',person:'王主任',time:'2024-03-04 16:01:05'},{title:'安保部主任审批',status:'已通过',person:'刘主任',time:'2024-03-07 16:01:05'}]}
+  finalEvents.forEach(function(event){history.push({title:event.role,status:'已确认',person:event.person,time:event.time})});
+  html+=title('审批记录',3824)+'<div class="approval-history" style="top:3887px">'+historyRows(history)+'</div></div></div>';
+  screen.innerHTML=html;bottom.innerHTML=isApproval&&approvalTab===0?'<div class="bottom-row"><button class="bottom-btn" data-action="openApprovalForm">立即审批</button></div>':(!isApproval&&!finished&&canFinalConfirm(item)?'<div class="bottom-row"><button class="bottom-btn" data-action="finalConfirm">确认交接</button></div>':'');
+  /* #AI:design 移除赔偿行后，收紧详情卡片并同步下移内容的位置。 */
+  const canvas=screen.querySelector('.confirm-canvas'), panels=canvas.querySelectorAll('.confirm-panel');
+  panels[1].style.height='2634px';
+  Array.from(canvas.children).forEach(function(node){const y=parseFloat(node.style.top);if(Number.isFinite(y)&&y>=2132)node.style.top=(y-(y>=2797?88:44))+'px'});
+  canvas.style.height=(finished?4087:3991)+'px';screen.querySelector('.confirm-detail-page').style.height=(finished?2059.5:2011.5)+'px';
+  sizeDepartmentConfirm();
+  sizeApprovalHistory();
+}
+/* #AI:design:end */
+function renderDetail(){
+  if(LIST_ITEMS[detailIndex]?.demoCreated){renderCreatedDetail(false);return}
+  if(!mayViewTask(LIST_ITEMS[detailIndex])){view='list';render();return}
+  if(activeTab===4||activeTab===5){renderConfirmDetail(activeTab===5);return}
+  if((activeTab===2||activeTab===3)&&detailIndex===0){renderOngoingMerchantDetail();return}
+  const item=LIST_ITEMS[detailIndex]||LIST_ITEMS[0],isMerchant=detailIndex===0;
+  const rows=isMerchant?[
+    ['任务编号','JF202610281415'],['交房类型','新签商户'],['摊位号','G-081'],['商户名称','花乡新世纪二手车'],['房屋面积','2900㎡'],['室内车位','4个'],['室外车位','20个'],['合同开始日期','2026-12-20'],['合同截止日期','2027-12-20'],['交接部门','物业部、安保部'],['计划交接时间','2026-10-20']
+  ]:departmentDetailRows(item);
+  const categories=[
+    {key:'meter',name:'基础表数',ownsDept:true,department:DEMO_PROJECT_DEPTS.meter,items:['水表','电表']},
+    {key:'key',name:'钥匙交接',ownsDept:false,department:DEMO_PROJECT_DEPTS.key,items:['大门钥匙','办公室钥匙','仓库钥匙']},
+    {key:'fire',name:'消防系统',ownsDept:false,department:DEMO_PROJECT_DEPTS.fire,items:['消防栓','灭火器','报警器']}
+  ];
+  if(isMerchant){const contract=CONTRACTS.find(function(c){return c.id===item.contractId});rows[2][1]=item.name.split('：')[1];rows[4][1]=item.values[0];rows[5][1]=item.values[1];rows[6][1]=item.values[2];rows[8][1]=item.end;rows[9][1]=item.depts;rows[10][1]=item.date;if(contract){rows[3][1]=contract.merchant;rows[7][1]=contract.contractStart}}
+  const state=activeProjectState(),rejection=activeTab===1?state.approvalRecords?.[previewDept]:null;
+  if(rejection?.returned&&isMerchant){rows[2][1]=item.name.split('：')[1];rows[5][1]=item.values[1];rows[6][1]=item.values[2];rows[8][1]=item.end}else if(rejection?.returned){rows[3][1]=item.name.split('：')[1];rows[4][1]=item.values[2];rows[5][1]=item.values[0];rows[6][1]=item.values[1]}
+  screen.innerHTML='<div class="detail-page"><section class="detail-card"><h2 class="detail-card-title">基本信息</h2><div class="detail-info">'+rows.map(function(r){return '<div class="detail-info-row"><span>'+esc(r[0])+'：</span><strong>'+esc(r[1])+'</strong></div>'}).join('')+'</div></section><section class="detail-card detail-project"><h2 class="detail-card-title">交接项目</h2>'+categories.filter(function(category){return restrictedRole()||category.department===previewDept}).map(function(category,index){const pending=false,done=state.saved[category.key]!==null;return '<div class="detail-project-item"><div class="detail-project-head"><span class="ongoing-category-title">'+esc(category.name)+((rejection?.returned?category.department===previewDept:category.ownsDept)?'<span class="detail-tag">本部门负责</span>':'')+'</span><span class="detail-tag '+(pending?'pending':'')+'">'+(done?'已交接':'未交接')+'</span></div><p class="ongoing-category-info">责任部门：<strong>'+esc(category.department)+'</strong></p><div class="detail-subprojects">'+category.items.map(function(project){return '<p class="detail-project-desc ongoing-project-name">'+esc(project)+'</p>'}).join('')+'</div></div>'+(index<categories.length-1?'<img class="ongoing-separator" src="./assets/figma/ongoing-detail-separator.svg" width="647" height="1" alt="">':'')}).join('')+'</section>'+(activeTab===2?ongoingRecordSections(item.id):'')+(rejection?.returned?'<section class="detail-card rejected-record"><h2 class="detail-card-title">审批记录</h2><div class="native-approval-history">'+historyRows((readSharedPreview().tasks[activeTaskId()]?.approvalFlow?.history||[]).map(function(r){return {title:r.dept+'主任审批',status:r.status,time:r.time,reason:r.reason}}))+'</div></section>':'')+'</div>';
+  bottom.innerHTML=(activeTab===2||activeTab===3||(activeTab===0&&!String(item.depts||'').split('、').includes(previewDept)))?'':(activeTab===1||previewRole==='employee')?'<div class="bottom-row"><button class="bottom-btn" data-action="detailHandle">办理交接</button></div>':'<div class="bottom-row"><button class="outline-btn" data-action="detailHandle">办理交接</button><button class="bottom-btn" data-action="detailAssign">指派</button></div>';
+}
+function renderApprovalForm(){
+ const reject=approvalChoice==='reject';
+ screen.innerHTML='<div class="approval-form-page"><div class="approval-form-card"><div class="approval-form-label"><span class="star">*</span>审批操作</div><div class="approval-form-options"><button type="button" class="approval-form-option pass '+(!reject?'selected':'')+'" data-approval-choice="pass" aria-pressed="'+(!reject)+'">审批通过</button><button type="button" class="approval-form-option reject '+(reject?'selected':'')+'" data-approval-choice="reject" aria-pressed="'+reject+'">审批驳回</button></div><label for="approvalNote" class="approval-form-label reason">'+(reject?'<span class="star">*</span>':'')+(reject?'驳回原因':'审批意见')+'</label><div class="approval-input-wrap"><textarea id="approvalNote" placeholder="请输入'+(reject?'驳回原因':'审批意见')+'">'+esc(approvalDraft[approvalChoice])+'</textarea><span class="approval-input-count">'+approvalDraft[approvalChoice].length+'/50</span></div></div></div>';
+ bottom.innerHTML='<button type="button" class="bottom-btn" data-action="confirmApproval">确认</button>';
+}
+function renderAssign(){
+  const people=[['老五','王老五'],['老四','赵老四'],['老四','赵老四']];
+  screen.innerHTML='<div class="assign-page"><h2 class="assign-label">选择交接人员</h2>'+people.map(function(p,i){return '<button type="button" class="assign-candidate '+(assignmentSelected===i?'selected':'')+'" data-assignee="'+i+'" aria-pressed="'+(assignmentSelected===i)+'"><span class="assign-avatar">'+p[0]+'</span><span class="assign-name">'+p[1]+'</span>'+(assignmentSelected===i?'<span class="assign-radio-icon-wrap" aria-hidden="true"><img class="assign-radio-icon" src="./assets/figma/assignment-check-circle-filled.svg" alt=""></span>':'<span class="assign-radio" aria-hidden="true"></span>')+'</button>'}).join('')+'<label class="assign-remark-label" for="assignmentRemark">备注</label><div class="assign-remark-box"><textarea id="assignmentRemark" class="assign-remark" maxlength="100" placeholder="请输入备注信息">'+esc(assignmentRemark)+'</textarea><span class="assign-remark-count">'+assignmentRemark.length+'/100</span></div></div>';
+  bottom.innerHTML='<div class="bottom-row"><button class="outline-btn" data-action="cancelAssign">取消</button><button class="bottom-btn" data-action="confirmAssign" '+(assignmentSelected>=0?'':'disabled')+'>确认指派</button></div>';
+}
+function photo(id,title,error){
+  const done=!!formData[id];
+  return '<div class="project-item"><div class="label">'+title+' <span class="required">*</span></div><button type="button" class="upload '+(done?'done ':'')+(error?'invalid':'')+'" data-action="photo" data-key="'+id+'"><span class="plus">'+(done?'✓':'+')+'</span><span>'+(done?'已添加示例照片':'添加示例照片')+'</span></button><div class="upload-note">原型图片占位，不执行真实上传</div>'+(error?'<div class="error">请添加截图标星照片。</div>':'')+'</div>';
+}
+function statusOptions(key,values){
+  return '<div class="status-options">'+values.map(function(v){return '<button type="button" class="status-option '+(formData[key]===v?'on':'')+'" aria-pressed="'+(formData[key]===v)+'" data-action="status" data-key="'+key+'" data-value="'+v+'">'+v+'</button>'}).join('')+'</div>';
+}
+function renderFill(){
+  const retry=view==='recheck',d=task.depts[activeDept],miss=['meterEle','meterWater','hydrant','extinguisher','alarm'].filter(function(x){return !formData[x]});
+  screen.innerHTML='<div class="page-pad"><p class="eyebrow">'+(retry?'员工复验 · 演示视角':'员工现场办理 · 演示视角')+'</p><h1 class="page-heading">'+(retry?'复验后重新提交':'填写交接内容')+'</h1>'+
+    (retry?'<div class="warning">仅本部门员工复验并重提；其他部门已完成的审批记录保持不变。</div>':'')+
+    '<div class="warning">下列内容仅取原收房原型截图可见字段作填写示例。是否适用于类型①、部门项目如何对应仍待确认；截图未标星项不在本原型中校验。</div>'+
+    '<section class="card"><h2 class="card-title">基础表数</h2>'+
+    '<div class="project-item"><label class="label">电表读数（kWh）</label><input class="field" aria-label="电表读数（kWh）" type="number" data-save="electricity" value="'+esc(formData.electricity||'')+'" placeholder="请输入电表读数"><p class="hint">截图未标星，必填性待确认。</p></div>'+
+    photo('meterEle','上传电表照片',errors.indexOf('meterEle')>=0)+
+    '<div class="project-item"><label class="label">水表读数（m³）</label><input class="field" aria-label="水表读数（m³）" type="number" data-save="water" value="'+esc(formData.water||'')+'" placeholder="请输入水表读数"><p class="hint">截图未标星，必填性待确认。</p></div>'+
+    photo('meterWater','上传水表照片',errors.indexOf('meterWater')>=0)+'</section>'+
+    '<section class="card"><h2 class="card-title">钥匙交接</h2>'+
+    ['大门钥匙','办公室钥匙','仓库钥匙'].map(function(k,i){let key='key'+i,qty='qty'+i;return '<div class="project-item"><div class="label">'+k+'</div><div class="grid2"><div class="mini-field"><label class="label">数量</label><input class="field" type="number" data-save="'+qty+'" value="'+esc(formData[qty]||'')+'" placeholder="截图未标星"></div><div><span class="label">状态</span>'+statusOptions(key,['完好','损坏'])+'</div></div><p class="hint">数量及状态均未标星，必填性待确认。</p>'+(i===0&&formData[key]==='损坏'?'<div class="mini-field" style="margin-top:8px"><label class="label">损坏赔偿金（元）</label><input class="field" type="number" data-save="doorFee" value="'+esc(formData.doorFee||'')+'" placeholder="非必填"></div>':'')+'</div>'}).join('')+
+    '</section><section class="card"><h2 class="card-title">消防系统</h2>'+
+    '<div class="project-item"><div class="label">消防栓</div>'+statusOptions('hydrantStatus',['完好','损坏','无此项'])+photo('hydrant','上传消防栓照片',errors.indexOf('hydrant')>=0)+'</div>'+
+    '<div class="project-item"><div class="label">灭火器</div>'+statusOptions('extStatus',['完好','损坏','无此项'])+photo('extinguisher','上传灭火器照片',errors.indexOf('extinguisher')>=0)+'</div>'+
+    '<div class="project-item"><div class="label">报警器</div>'+photo('alarm','上传报警器照片',errors.indexOf('alarm')>=0)+'<p class="hint">截图未显示报警器状态选项，本原型不添加。</p></div>'+
+    '</section><section class="card"><h2 class="card-title">费用结算</h2><p class="hint">截图仅显示标题；字段与规则待确认，本原型不展开。</p></section>'+
+    '<p class="hint">原截图页面提示“请完成所有项目”；此处仅校验截图明确标星的照片。若现网项目未配置，应按 PRD 处理，不在此模拟。</p>'+
+    (errors.indexOf('photos')>=0?'<div class="error">补齐标星照片后再提交。</div>':'')+'</div>';
+  footer(retry?'resubmit':'submit',retry?'复验后重新提交':'提交本部门内容',{action:'list',label:'返回列表'});
+}
+function renderReview(){
+  const d=task.depts[activeDept];
+  screen.innerHTML='<div class="page-pad"><p class="eyebrow">主任审批 · 演示视角</p><h1 class="page-heading">审批本部门交接内容</h1><section class="card"><h2 class="card-title">'+esc(d.name)+'</h2><div class="readonly"><span>提交人</span><strong>'+esc(d.assignee||'演示员工')+'</strong></div><div class="readonly"><span>交接对象</span><strong>'+selected().stall+' · '+selected().merchant+'</strong></div><div class="readonly"><span>提交节点</span><strong>'+(d.rejected?'员工复验后重新提交':'员工现场提交')+'</strong></div><p class="hint">主任只审批当前部门。驳回原因的填写字段与规则待确认，本原型不添加。</p></section>'+
+    '<div class="warning">驳回只退回本部门员工复验；其他部门已提交或已审批内容不受影响。</div></div>';
+  bottom.innerHTML='<div class="bottom-row"><button class="outline-btn" data-action="reject">驳回本部门</button><button class="bottom-btn" data-action="approve">通过本部门审批</button></div>';
+}
+function renderLegal(){
+  const all=task.depts.every(function(d){return d.approved});
+  screen.innerHTML='<div class="page-pad"><p class="eyebrow">商户法人 · 最终确认</p><h1 class="page-heading">'+(view==='done'?'交房确认完成':'确认交房')+'</h1><section class="card"><h2 class="card-title">交接信息</h2><div class="readonly"><span>商户</span><strong>'+selected().merchant+'</strong></div><div class="readonly"><span>摊位号</span><strong>'+selected().stall+'</strong></div><div class="readonly"><span>交接时间</span><strong>'+esc(meetingTime.replace('T',' '))+'</strong></div><div class="readonly"><span>部门审批</span><strong>'+(all?'全部完成':'尚未完成')+'</strong></div></section>'+
+    (view==='done'?'<div class="info">原型示例已确认。此操作只更新本浏览器演示状态，不形成真实业务确认。</div>':'<div class="warning">全部执行部门主任审批完成后由商户法人统一确认。该最终确认不可驳回。</div>')+
+    '<div class="progress-list card"><div class="card-title">部门审批记录</div>'+task.depts.map(function(d){return '<div class="progress-row"><span class="dot '+(d.approved?'on':'wait')+'"></span><span>'+esc(d.name)+' · '+(d.approved?'主任审批完成':'尚未完成')+'</span></div>'}).join('')+'</div></div>';
+  bottom.innerHTML=view==='done'?'<button class="bottom-btn" disabled>已完成演示确认</button>':all?'<button class="bottom-btn" data-action="confirm">商户法人最终确认</button>':'<button class="bottom-btn" disabled>待全部部门审批完成</button>';
+}
+function openListExample(index,action){
+  const item=LIST_ITEMS[index];
+  if(!item||!mayViewTask(item)||(action==='assign'&&previewRole==='employee'))return;
+  detailIndex=index;recheckTaskId='';meetingTime=item.date;selectedDepts=[1,3];errors=[];formData={};assignmentSelected=0;assignmentRemark='';
+  if(index===0)selectedContract='HT-DEMO-003';
+  task=null;
+  if(action==='assign'){activeDept=1;view='assign'}
+  else if(action==='handover'){activeDept=0;handoverReturnView='list';view='handover'}
+  else{activeDept=0;view='detail'}
+  render();
+}
+function goBack(){
+  if(overlay){overlay='';render();return}
+  if(view==='home')return;
+  if(view==='approvalForm'){view='approvalDetail';render();return}
+  if(view==='approvalDetail'){view='approval';render();return}
+  if(view==='list'||view==='approval'){view='home';render();return}
+  if(view==='create'||view==='detail'){view='list';recheckTaskId='';render();return}
+  if(view==='assign'){view=assignReturnView;render();return}
+  if(view==='project'&&LIST_ITEMS[detailIndex]?.demoCreated){view='handover';render();return}
+  if(view==='project'){const state=activeProjectState();state.draft[handoverProject]=null;state.errors[handoverProject]=[];view='handover';render();return}
+  if(view==='handover'){view=handoverReturnView;render();return}
+  view='list';render();
+}
+function createTask(){
+  if(!allowedCreateType(createType))return;
+  const c=selected(),h=selectedHouse(),propertyType=createType!=='new',dept=createType==='self'?selectedUseDept:selectedReturnDept;
+  if(!(propertyType?dept&&h&&meetingTime&&selectedDepts.length:c&&c.allowed&&meetingTime&&selectedDepts.length))return;
+  const names=selectedDepts.map(function(i){return DEPTS[i]}),selections={};
+  names.forEach(function(name){selections[name]=(selectedCategories[name]||[]).slice()});
+  const id='delivery-preview-'+Date.now(),type=propertyType?(createType==='self'?'部门自用':'部门交回'):'新签商户';
+  const item={id:id,demoCreated:true,type:type,title:Object.values(selections).flat().join('、'),name:propertyType?'房屋名称：'+h.name:'摊位号：'+c.stall,values:propertyType?[h.info.area,h.info.buildingNo,h.info.region]:[c.area,c.indoor,c.outdoor],labels:propertyType?['房屋面积','建筑编号','区域']:['房屋面积','室内车位','室外车位'],end:propertyType?'—':c.contractEnd,date:meetingTime,depts:names.join('、'),contractId:c?c.id:'',confirmDept:propertyType?dept:'',houseId:propertyType?h.id:'',categorySelections:selections};
+  const data=readSharedPreview();data.tasks[id]={item:item,stage:'待认领',projects:{}};if(!saveSharedPreview(data))return;
+  LIST_ITEMS.push(item);ONGOING_LIST_ITEMS.push(item);detailIndex=LIST_ITEMS.length-1;activeTab=0;view='list';render();return;
+}
+// #AI:design 新建任务使用截图中可见的市场示例。
+function renderCreatedDetail(isApproval){
+ const item=LIST_ITEMS[detailIndex],entry=readSharedPreview().tasks[item.id],groups=item.categorySelections||{};
+ const cats=Object.keys(groups).filter(function(dept){return restrictedRole()||dept===previewDept}).flatMap(function(dept){return groups[dept].map(function(c){
+  const record=entry.projects?.[dept]?.[c];
+  return '<div class="detail-project-item"><div class="detail-project-head"><span class="ongoing-category-title">'+esc(c)+(dept===previewDept?'<span class="detail-tag">本部门负责</span>':'')+'</span><span class="detail-tag">'+(record?'已交接':'未交接')+'</span></div><p class="ongoing-category-info">责任部门：<strong>'+esc(dept)+'</strong></p>'+(DEMO_CATEGORY_ITEMS[c]||[]).map(function(name){const value=record?.items?.[name],reading=c==='基础表数'?(name==='电表'?record?.electricReading:record?.waterReading):value?.reading;return '<p class="detail-project-desc">'+esc(name)+(reading?'：'+esc(reading):'')+(value?.note?' · '+esc(value.note):'')+(value?.photo?' · '+esc(value.photo):'')+'</p>'}).join('')+(record?.notes?'<p class="detail-project-desc">备注说明：'+esc(record.notes)+'</p>':'')+'</div>';
+ })}).join('');
+ const rows=[['交房类型',item.type],[item.name.split('：')[0],item.name.split('：')[1]],['交接部门',item.depts],['计划交接时间',item.date]];
+ screen.innerHTML='<div class="detail-page"><section class="detail-card"><h2 class="detail-card-title">基本信息</h2><div class="detail-info">'+rows.map(function(row){return '<div class="detail-info-row"><span>'+esc(row[0])+'：</span><strong>'+esc(row[1])+'</strong></div>'}).join('')+'</div></section><section class="detail-card detail-project"><h2 class="detail-card-title">交接项目</h2>'+cats+'</section>'+ongoingRecordSections(item.id)+'</div>';
+ bottom.innerHTML=isApproval?(approvalTab===0?'<div class="bottom-row"><button class="bottom-btn" data-action="openApprovalForm">立即审批</button></div>':''):((activeTab===0||activeTab===1)&&String(item.depts||'').split('、').includes(previewDept)?'<div class="bottom-row"><button class="bottom-btn" data-action="detailHandle">办理交接</button></div>':(canFinalConfirm(item)?'<div class="bottom-row"><button class="bottom-btn" data-action="finalConfirm">确认交接</button></div>':''));
+}
+/* #AI:design 新建任务的办理交接沿用既有项目卡片布局，按所选类别逐项展示 */
+function renderCreatedHandover(){
+ const item=LIST_ITEMS[detailIndex],entry=readSharedPreview().tasks[item.id],cats=item.categorySelections[previewDept]||[],records=entry.projects?.[previewDept]||{};
+ screen.innerHTML='<div class="handover-page"><div class="handover-projects">'+cats.map(function(c,i){const done=!!records[c],label=done?'去修改':'去办理';return '<button type="button" class="handover-project '+(done?'is-done':'')+'" style="top:'+(16+i*90)+'px" data-created-project="'+esc(c)+'" aria-label="'+esc(c)+' '+label+'"><span class="handover-project-icon" aria-hidden="true"><img src="./assets/figma/handover-file-text.png" alt=""></span>'+(done?'<span class="handover-status">已完成</span>':'')+'<span class="handover-project-name" style="top:30.5px">'+esc(c)+'</span><span class="handover-project-action" style="top:24px">'+label+'</span></button>'}).join('')+'</div></div>';
+ const ready=cats.length>0&&cats.every(function(c){return !!records[c]});
+ bottom.innerHTML='<button class="bottom-btn" data-action="finishCreatedHandover" '+(ready?'':'disabled')+'>'+(ready?'完成交接':'请完成所有项目检查')+'</button>';
+}
+function fxCreatedStatus(index,current,y){
+  const labels={good:'完好',bad:'损坏',na:'无此项'},keys=['good','bad','na'],width=202,gap=24;
+  return keys.map(function(v,i){
+    const selected=current===v?' selected-'+(v==='na'?'na':v):'';
+    return '<button type="button" class="fx-choice'+selected+'" style="left:'+(48+i*(width+gap))+'px;top:'+y+'px;width:'+width+'px;height:64px" data-created-status="'+index+'" data-value="'+v+'" aria-pressed="'+(current===v)+'">'+labels[v]+'</button>';
+  }).join('');
+}
+function renderCreatedProject(){
+ const entry=readSharedPreview().tasks[activeTaskId()],record=entry.projects?.[previewDept]?.[handoverProject]||{},items=DEMO_CATEGORY_ITEMS[handoverProject]||[];
+ const itemH=817,end=350+items.length*itemH, panelHeight=end+40-220;
+ let body=fxNode('project-panel',28,220,694,panelHeight,'')+fxText(handoverProject,48,240,600,39,'fx-green-title')+fxText(items.join('、'),48,283,650,34,'fx-intro');
+ items.forEach(function(name,i){
+  const y=350+i*itemH,saved=record.items?.[name]||{},id='created-photo-'+i;
+  body+=fxMarker(y)+fxText(name,48,y,600,39,'fx-section-title')+fxStar(y+76)+fxText('上传'+name+'照片',48,y+62,600,39,'fx-medium');
+  body+=fxNode('fx-photo fx-project-photo',48,y+121,320,270,'<img class="fx-photo-image" src="./assets/figma/handover-upload-placeholder.png" alt=""><span class="fx-photo-cover"></span><span class="fx-photo-caption" style="left:0;width:320px">'+(saved.photo?'点击更换照片':'点击上传照片')+'</span><input class="fx-photo-input" id="'+id+'" type="file" accept="image/*" data-created-photo="'+i+'" aria-label="上传'+esc(name)+'照片"><button type="button" class="fx-photo-target" data-photo-target="'+id+'" aria-label="选择照片来源"></button>');
+  body+=fxCreatedStatus(i,saved.status||'good',y+431)+fxText('备注说明',48,y+535,300,39,'fx-medium')+fxNode('fx-note-box fx-project-note',48,y+594,654,182,'<textarea class="fx-note-input" placeholder="请输入备注说明" maxlength="50" data-created-note="'+i+'">'+esc(saved.note||'')+'</textarea><span class="fx-note-count" data-created-note-count="'+i+'">'+String((saved.note||'').length)+'/50</span>');
+ });
+ screen.innerHTML='<div class="project-page" data-created-form style="height:'+((end+40)/2-94)+'px"><div class="project-canvas" style="height:'+(end+40)+'px">'+body+'</div></div>';
+ fitHandoverForm();
+ bottom.innerHTML='<button class="bottom-btn" data-action="saveCreatedProject">确认</button>';
+}
+function fillMissing(){
+  errors=['meterEle','meterWater','hydrant','extinguisher','alarm'].filter(function(x){return !formData[x]});
+  if(errors.length){renderFill();screen.scrollTo({top:0,behavior:'smooth'});return false}
+  errors=[];return true;
+}
+function act(action,el){
+  const index=Number(el.dataset.index||activeDept);
+  if(action==='saveCreatedProject'){
+    const data=readSharedPreview(),entry=data.tasks[activeTaskId()],form=screen.querySelector('[data-created-form]'),old=entry.projects?.[previewDept]?.[handoverProject]||{},items={};
+    (DEMO_CATEGORY_ITEMS[handoverProject]||[]).forEach(function(name,i){const note=form.querySelector('[data-created-note="'+i+'"]'),photo=form.querySelector('[data-created-photo="'+i+'"]'),reading=form.querySelector('[data-created-reading="'+i+'"]'),status=form.querySelector('[data-created-status="'+i+'"][aria-pressed="true"]'),current=old.items?.[name]||{};items[name]={note:note?note.value:(current.note||''),photo:[current.photo||'',photo?._photos?.map(function(p){return p.name}).join('、')||''].filter(Boolean).join('、'),reading:reading?reading.value:(current.reading||''),status:status?status.dataset.value:(current.status||'good')}});
+    // #AI:design 不覆盖历史类别备注，展示与迁移规则待确认。
+    entry.projects=entry.projects||{};entry.projects[previewDept]=entry.projects[previewDept]||{};entry.projects[previewDept][handoverProject]={department:previewDept,items:items,notes:old.notes||''};
+    if(saveSharedPreview(data)){view='handover';render()}return;
+  }
+  if(action==='finishCreatedHandover'){
+    const item=LIST_ITEMS[detailIndex],data=readSharedPreview(),entry=data.tasks[item.id],cats=item.categorySelections[previewDept]||[],records=entry.projects?.[previewDept]||{};
+    if(!cats.length||!cats.every(function(c){return !!records[c]}))return;
+    if(!HandoverApproval.submit(entry,previewDept))return;
+    entry.handoverRecords=Array.isArray(entry.handoverRecords)?entry.handoverRecords:[];entry.handoverRecords.push({dept:previewDept,time:demoTime()});
+    if(!saveSharedPreview(data))return;
+    activeTab=1;view='list';render();return;
+  }
+  if(action==='finalConfirm'){openFinalConfirmation(detailIndex);return}
+  if(action==='cancelFinalConfirmation'){overlay='';pendingFinalConfirm=null;overlayRoot.innerHTML='';return}
+  if(action==='acceptFinalConfirmation'){const pending=pendingFinalConfirm,item=pending&&LIST_ITEMS[pending.index];if(!pending||!item||item.id!==pending.id||pending.identity!==finalIdentity()||activeTab!==4||!canFinalConfirm(item)){overlay='';pendingFinalConfirm=null;overlayRoot.innerHTML='';return}const record=finalConfirmationsByTask[item.id]||{};const eventTime=demoTime(),events=record.events||(record.events=[]);events.push({role:previewRole==='merchant'?'商户法人确认':item.type==='部门交回'?'停用部门主任确认':'待使用部门主任确认',person:previewRole==='merchant'?'商户法人（演示）':recipientDept+'主任（演示）',identity:pending.identity,time:eventTime});if(previewRole==='merchant'){record.merchantConfirmed=true;record.finished=true}else{record.recipientConfirmed=true;record.finished=true}if(record.finished)record.time=eventTime;finalConfirmationsByTask[item.id]=record;syncSharedTask(item.id,record.finished?'已完结':undefined);overlay='';pendingFinalConfirm=null;if(record.finished){activeTab=5;view='list'}render();return}
+  if(action==='newTask'){if(!mayCreate())return;selectedContract='';meetingTime='';selectedDepts=[];selectedCategories={};createType=previewDept==='管理部'?'new':'self';selectedUseDept='';selectedReturnDept='';selectedHouseId='';draftCreateDept='';draftHouseId='';errors=[];overlay='';view='create';render();return}
+  if(action==='openCreateDept'){draftCreateDept=createType==='self'?selectedUseDept:selectedReturnDept;overlay='createDept';render();return}
+  if(action==='confirmCreateDept'){
+    if(!draftCreateDept)return;
+    if(createType==='self')selectedUseDept=draftCreateDept;
+    else if(createType==='return'&&selectedReturnDept!==draftCreateDept){selectedReturnDept=draftCreateDept;selectedHouseId=''}
+    overlay='';render();return
+  }
+  if(action==='openHouse'){
+    houseQuery='';
+    if(createType==='return'&&!selectedReturnDept)return;
+    draftHouseId=houseOptions().some(function(h){return h.id===selectedHouseId})?selectedHouseId:'';
+    overlay='houses';render();return
+  }
+  if(action==='confirmHouse'){
+    if(draftHouseId&&houseOptions().some(function(h){return h.id===draftHouseId})){selectedHouseId=draftHouseId;overlay='';render()}
+    return
+  }
+  if(action==='openStall'){overlay='stall';stallQuery='';draftStall=selected()?((STALL_CHOICES.find(function(x){return x.contractId===selectedContract})||{}).key||'HT-DEMO-002'):'HT-DEMO-002';render();return}
+  if(action==='confirmStall'){const choice=currentStall();if(choice&&choice.allowed){const contract=CONTRACTS.find(function(x){return x.id===choice.contractId});if(contract&&contract.allowed){selectedContract=contract.id;errors=errors.filter(function(x){return x!=='contract'});overlay='';render()}}return}
+  if(action==='openDepartments'){overlay='departments';draftDepts=selectedDepts.slice();draftCategories=JSON.parse(JSON.stringify(selectedCategories));render();return}
+  if(action==='confirmDepartments'){selectedDepts=draftDepts.filter(function(i){return (draftCategories[DEPTS[i]]||[]).length});selectedCategories={};selectedDepts.forEach(function(i){selectedCategories[DEPTS[i]]=draftCategories[DEPTS[i]].slice()});errors=errors.filter(function(x){return x!=='depts'});overlay='';render();return}
+  if(action==='cancelOverlay'){overlay='';render();return}
+  if(action==='openDate'){dateTarget='meetingTime';dateDraft=meetingTime;const currentDate=parseDateValue(meetingTime)||new Date();dateCursor=new Date(currentDate.getFullYear(),currentDate.getMonth(),1);overlay='date';render();return}
+  /* #AI:design 消防预计复验日期使用共享日历，确定后仅回写该项目字段 */
+  if(action==='cancelDate'){dateDraft='';overlay='';render();return}
+  if(action==='confirmDate'){if(dateDraft){meetingTime=dateDraft;errors=errors.filter(function(x){return x!=='time'});dateDraft='';overlay='';render()}return}
+  if(action==='listTab'){const tabs=screen.querySelector('.list-tabs');const scrollLeft=tabs?tabs.scrollLeft:0;activeTab=Number(el.dataset.listTab||0);render();const nextTabs=screen.querySelector('.list-tabs');if(nextTabs&&activeTab!==4&&activeTab!==5)nextTabs.scrollLeft=scrollLeft;return}
+  if(action==='listDetail'){openListExample(index,'handle');return}
+  if(action==='listHandle'){openListExample(index,'handover');return}
+  if(action==='listAssign'){assignReturnView='list';openListExample(index,'assign');return}
+  if(action==='create'){createTask();return}
+  if(action==='list'){view='list';render();return}
+  if(action==='openApprovalForm'){approvalChoice='pass';approvalDraft={pass:'',reject:''};view='approvalForm';render();return}
+  if(action==='confirmApproval'){if(approvalChoice==='reject'&&!approvalDraft.reject.trim()){const note=document.createElement('div');note.className='toast';note.textContent='请输入驳回原因';phone.appendChild(note);setTimeout(function(){note.remove()},2000);return}const data=readSharedPreview(),entry=data.tasks[activeTaskId()];if(!entry||!HandoverApproval.decide(entry,previewDept,approvalChoice,approvalDraft.reject,demoTime())||!saveSharedPreview(data))return;hydrateSharedPreview();approvalTab=approvalChoice==='reject'?2:(entry.stage==='交接中'?1:0);view='approval';render();return}
+  if(action==='detailHandle'){handoverReturnView='detail';view='handover';render();return}
+  /* #AI:design 完成交接后按复验需求流转原任务，并返回待我交接 */
+  if(action==='finishHandover'){const state=activeProjectState();const returned=!!state.approvalRecords?.[previewDept]?.returned,required=returned?(demoDepartmentProjects(previewDept)):['meter','key','fire'];if((state.handoverStatus&&!returned)||!required.length||!required.every(function(key){return state.saved[key]!==null}))return;syncSharedTask(activeTaskId());const data=readSharedPreview(),entry=data.tasks[activeTaskId()];if(!entry||!HandoverApproval.submit(entry,previewDept))return;entry.handoverRecords=Array.isArray(entry.handoverRecords)?entry.handoverRecords:[];entry.handoverRecords.push({dept:previewDept,time:demoTime()});if(!saveSharedPreview(data))return;state.handoverStatus='ongoing';state.approvalRecords=entry.approvalRecords;activeTab=1;recheckTaskId='';view='list';render();return}
+  if(action==='projectConfirm'){confirmProject();return}
+  if(action==='detailAssign'){if(previewRole==='employee')return;assignReturnView='detail';view='assign';render();return}
+  if(action==='cancelAssign'){view=assignReturnView;render();return}
+  if(action==='confirmAssign'){view=assignReturnView;render();return}
+  if(action==='fill'){activeDept=index;formData=task.depts[index].formData;view='fill';errors=[];render();return}
+  if(action==='recheck'){activeDept=index;formData=task.depts[index].formData;view='recheck';errors=[];render();return}
+  if(action==='submit'||action==='resubmit'){if(!fillMissing())return;task.depts[activeDept].submitted=true;task.depts[activeDept].rejected=false;view='list';render();return}
+  if(action==='review'){activeDept=index;view='review';render();return}
+  if(action==='approve'){task.depts[activeDept].approved=true;task.depts[activeDept].rejected=false;view='list';render();return}
+  if(action==='reject'){task.depts[activeDept].approved=false;task.depts[activeDept].submitted=false;task.depts[activeDept].rejected=true;view='list';render();return}
+  if(action==='legal'){view=task.depts.every(function(d){return d.approved})?'legal':'list';render();return}
+  if(action==='confirm'){if(task.depts.every(function(d){return d.approved})){view='done';render()}return}
+  if(action==='photo'){formData[el.dataset.key]=true;errors=errors.filter(function(x){return x!==el.dataset.key});renderFill();return}
+  if(action==='status'){formData[el.dataset.key]=el.dataset.value;renderFill();return}
+}
+// #AI:design 照片选择仅限制单次选择数量，保留已有照片。
+let pendingPhotoInput=null;
+document.addEventListener('click',function(e){
+  const photoTarget=e.target.closest('[data-photo-target]');
+  if(photoTarget){pendingPhotoInput=document.getElementById(photoTarget.dataset.photoTarget);overlayRoot.innerHTML='<div class="photo-sheet-mask"><section class="photo-sheet" role="dialog" aria-label="选择上传方式"><div class="photo-sheet-title">选择上传方式</div><button type="button" class="photo-sheet-item" data-photo-source="library">选择照片</button><button type="button" class="photo-sheet-item" data-photo-source="camera">拍摄上传</button></section></div>';return}
+  if(e.target.classList.contains('photo-sheet-mask')){overlayRoot.innerHTML='';pendingPhotoInput=null;return}
+  const source=e.target.closest('[data-photo-source]');
+  if(source&&pendingPhotoInput){const input=pendingPhotoInput;overlayRoot.innerHTML='';pendingPhotoInput=null;input.value='';if(source.dataset.photoSource==='camera'){input.removeAttribute('multiple');input.setAttribute('capture','environment')}else{input.setAttribute('multiple','');input.removeAttribute('capture')}input.click();return}
+  if(e.target.classList&&e.target.classList.contains('selection-mask')){overlay='';render();return}
+  const dateNav=e.target.closest('[data-date-nav]');
+  if(dateNav){dateCursor=new Date(dateCursor.getFullYear(),dateCursor.getMonth()+Number(dateNav.dataset.dateNav),1);renderOverlay();return}
+  const dateOption=e.target.closest('[data-date-value]');
+  if(dateOption){dateDraft=dateOption.dataset.dateValue;renderOverlay();return}
+  const homeEntry=e.target.closest('[data-home-entry]');if(homeEntry){if(homeEntry.dataset.homeEntry==='approval'&&previewRole!=='director')return;if(homeEntry.dataset.homeEntry==='list'&&restrictedRole())activeTab=4;view=homeEntry.dataset.homeEntry;render();return}
+  const approvalChoiceButton=e.target.closest('[data-approval-choice]');if(approvalChoiceButton){approvalChoice=approvalChoiceButton.dataset.approvalChoice;renderApprovalForm();return}
+  const approvalCard=e.target.closest('[data-approval-index]');if(approvalCard){detailIndex=Number(approvalCard.dataset.approvalIndex);recheckTaskId='';view='approvalDetail';render();return}
+  const approvalOption=e.target.closest('[data-approval-tab]');if(approvalOption){approvalTab=Number(approvalOption.dataset.approvalTab);screen.scrollTop=0;render();return}
+  const listTab=e.target.closest('[data-list-tab]');
+  if(listTab){act('listTab',listTab);return}
+  const listAction=e.target.closest('[data-list-action]');
+  if(listAction){if(!listAction.disabled){const action=listAction.dataset.listAction;if(action==='finalConfirm'){openFinalConfirmation(Number(listAction.dataset.index));return}act(action==='assign'?'listAssign':action==='detail'?'listDetail':'listHandle',listAction)}return}
+  const listCard=e.target.closest('[data-list-index]');
+  if(listCard&&!e.target.closest('button')){const index=Number(listCard.dataset.listIndex);openListExample(index,'handle');return}
+  const handoverProjectOption=e.target.closest('[data-handover-project]');
+  if(handoverProjectOption){handoverProject=handoverProjectOption.dataset.handoverProject;startProjectDraft(handoverProject);view='project';render();return}
+  const createdProject=e.target.closest('[data-created-project]');
+  if(createdProject){handoverProject=createdProject.dataset.createdProject;if(handoverProject==='基础表数'){handoverProject='meter';startProjectDraft('meter')}view='project';render();return}
+  const deptOption=e.target.closest('[data-dept-option]');
+  if(deptOption){const i=Number(deptOption.dataset.deptOption);if(draftDepts.includes(i)){draftDepts=draftDepts.filter(function(x){return x!==i});delete draftCategories[DEPTS[i]]}else{draftDepts.push(i);draftCategories[DEPTS[i]]=(DEMO_CATEGORIES[DEPTS[i]]||[]).slice()}renderOverlay();return}
+  const categoryOption=e.target.closest('[data-category]');
+  if(categoryOption){const dept=DEPTS[Number(categoryOption.dataset.categoryDept)],category=categoryOption.dataset.category,chosen=draftCategories[dept]||[];draftCategories[dept]=(DEMO_CATEGORIES[dept]||[]).filter(function(x){return x===category?!chosen.includes(x):chosen.includes(x)});const scroll=overlayRoot.querySelector('.category-scroll').scrollTop;renderOverlay();overlayRoot.querySelector('.category-scroll').scrollTop=scroll;return}
+  const createDeptOption=e.target.closest('[data-create-dept]');
+  if(createDeptOption){draftCreateDept=createDeptOption.dataset.createDept;renderOverlay();return}
+  const houseOption=e.target.closest('[data-house-option]');
+  if(houseOption){draftHouseId=houseOption.dataset.houseOption;renderOverlay();return}
+  const assignee=e.target.closest('[data-assignee]');
+  if(assignee){assignmentSelected=Number(assignee.dataset.assignee);render();return}
+  const createTypeOption=e.target.closest('[data-create-type]');
+  if(createTypeOption){const next=createTypeOption.dataset.createType;if(!allowedCreateType(next))return;if(next!==createType){createType=next;selectedDepts=[];selectedCategories={};meetingTime='';selectedUseDept='';selectedReturnDept='';selectedHouseId='';draftCreateDept='';draftHouseId='';errors=[];overlay='';render()}return}
+  const stallOption=e.target.closest('[data-stall-option]');
+  if(stallOption&&!stallOption.disabled){draftStall=stallOption.dataset.stallOption;renderOverlay();return}
+  const contract=e.target.closest('[data-contract]');
+  if(contract){if(contract.disabled)return;selectedContract=contract.dataset.contract;errors=errors.filter(function(x){return x!=='contract'});render();return}
+  const dept=e.target.closest('[data-dept]');
+  if(dept){const i=Number(dept.dataset.dept);selectedDepts=selectedDepts.indexOf(i)>=0?selectedDepts.filter(function(x){return x!==i}):selectedDepts.concat(i);errors=errors.filter(function(x){return x!=='depts'});render();return}
+  const projectChoice=e.target.closest('[data-project-choice]');
+  if(projectChoice){projectForm(handoverProject)[projectChoice.dataset.projectChoice]=projectChoice.dataset.value;updateProjectFieldError(projectChoice.dataset.projectChoice);const pos=screen.scrollTop;render();screen.scrollTop=pos;return}
+  const createdStatus=e.target.closest('[data-created-status]');
+  if(createdStatus){const btns=createdStatus.parentElement.querySelectorAll('[data-created-status="'+createdStatus.dataset.createdStatus+'"]');btns.forEach(function(b){b.classList.remove('selected-good','selected-bad','selected-na');b.setAttribute('aria-pressed','false')});const v=createdStatus.dataset.value;createdStatus.classList.add('selected-'+(v==='na'?'na':v));createdStatus.setAttribute('aria-pressed','true');return}
+  const projectAdjust=e.target.closest('[data-project-adjust]');
+  if(projectAdjust){const key=projectAdjust.dataset.projectAdjust,data=projectForm(handoverProject),current=Number(data[key]);data[key]=String((Number.isFinite(current)?current:0)+Number(projectAdjust.dataset.delta));const pos=screen.scrollTop;render();screen.scrollTop=pos;return}
+  const button=e.target.closest('[data-action]');
+  if(button&&!button.disabled){act(button.dataset.action,button);return}
+});
+document.addEventListener('input',function(e){
+  if(e.target.hasAttribute('data-created-note')){const wrap=e.target.parentElement.querySelector('[data-created-note-count]');if(wrap)wrap.textContent=e.target.value.length+'/50';return}
+  if(e.target.hasAttribute('data-created-notes')){const counter=e.target.parentElement.querySelector('.fx-note-count');if(counter)counter.textContent=e.target.value.length+'/50';return}
+  if(e.target.id==='approvalNote'){approvalDraft[approvalChoice]=e.target.value;const counter=screen.querySelector('.approval-input-count');if(counter)counter.textContent=e.target.value.length+'/50';return}
+  if(e.target.id==='assignmentRemark'){assignmentRemark=e.target.value.slice(0,100);const counter=document.querySelector('.assign-remark-count');if(counter)counter.textContent=assignmentRemark.length+'/100';return}
+  if(e.target.dataset.houseSearch!==undefined){const position=e.target.selectionStart;houseQuery=e.target.value;renderOverlay();const input=overlayRoot.querySelector('[data-house-search]');if(input){input.focus();input.setSelectionRange(position,position)}return}
+  if(e.target.dataset.stallSearch!==undefined){const position=e.target.selectionStart;stallQuery=e.target.value;renderOverlay();const input=overlayRoot.querySelector('[data-stall-search]');if(input){input.focus();input.setSelectionRange(position,position)}return}
+  if(e.target.dataset.save){formData[e.target.dataset.save]=e.target.value}
+  if(e.target.dataset.projectField){const field=e.target.dataset.projectField;projectForm(handoverProject)[field]=e.target.value;updateProjectFieldError(field);if(field==='notes'||field==='hydrantNote'||field==='alarmNote'){const count=screen.querySelector('[data-project-note-count="'+field+'"]');if(count)count.textContent=e.target.value.length+'/50'}if(field==='recheckDate'){const text=screen.querySelector('[data-project-date-text="'+field+'"]');if(text){text.textContent=e.target.value||'请选择日期';text.classList.toggle('has-value',!!e.target.value)}}}
+});
+document.addEventListener('change',function(e){
+  if(e.target.hasAttribute('data-created-photo')||e.target.dataset.projectPhoto){
+    const input=e.target,files=Array.from(input.files||[]);if(!files.length)return;
+    if(input.hasAttribute('multiple')&&files.length>9){input.value='';const note=document.createElement('div');note.className='toast';note.textContent='单次最多选择9张照片';phone.appendChild(note);setTimeout(function(){note.remove()},2000);return}
+    const added=files.map(function(file){const url=URL.createObjectURL(file);projectPreviewUrls.push(url);return {file:file,name:file.name,url:url}});
+    if(input.dataset.projectPhoto){const field=input.dataset.projectPhoto,previous=projectForm(handoverProject)[field],photos=(previous?.photos|| (previous?.file?[previous]:[])).concat(added);projectForm(handoverProject)[field]=Object.assign({},photos[0],{photos:photos});updateProjectFieldError(field);const pos=screen.scrollTop;render();screen.scrollTop=pos;return}
+    input._photos=(input._photos||[]).concat(added);const wrap=input.closest('.fx-project-photo');let thumbs=wrap.querySelector('.fx-photo-thumbs');if(!thumbs){thumbs=document.createElement('span');thumbs.className='fx-photo-thumbs';wrap.appendChild(thumbs)}thumbs.innerHTML=input._photos.map(function(p){return '<img src="'+esc(p.url)+'" alt="'+esc(p.name)+'">'}).join('');wrap.classList.add('has-image');wrap.querySelector('.fx-photo-caption').textContent='点击添加照片';return;
+  }
+  if(e.target.dataset.projectField){const field=e.target.dataset.projectField;projectForm(handoverProject)[field]=e.target.value;updateProjectFieldError(field);if(field==='recheckDate'){const text=screen.querySelector('[data-project-date-text="'+field+'"]');if(text){text.textContent=e.target.value||'请选择日期';text.classList.toggle('has-value',!!e.target.value)}}}
+});
+function resetIdentityView(){view='home';overlay='';pendingFinalConfirm=null;recheckTaskId='';render()}
+document.getElementById('previewRole').addEventListener('change',function(e){const wasRestricted=restrictedRole();previewRole=e.target.value;if(restrictedRole())activeTab=4;else if(wasRestricted)activeTab=0;updatePreviewIdentity();resetIdentityView()});
+// #AI:design 另一端刷新后丢弃当前页面内的旧演示操作，避免再次写回。
+let sharedResetId=readSharedPreview().resetId;
+window.addEventListener('storage',function(e){if(e.key!==SHARED_PREVIEW_KEY)return;let changed=false;try{const data=JSON.parse(e.newValue||'null');if(data&&data.resetId!==sharedResetId){sharedResetId=data.resetId;changed=true}}catch(err){}if(changed){Object.keys(projectStatesByTask).forEach(function(k){delete projectStatesByTask[k]});Object.keys(finalConfirmationsByTask).forEach(function(k){delete finalConfirmationsByTask[k]});task=null;pendingFinalConfirm=null;recheckTaskId='';overlay='';overlayRoot.innerHTML='';view='home';activeTab=0;hydrateSharedPreview();render();return}hydrateSharedPreview();if(view==='list'||view==='approval')render()});
+document.getElementById('previewIdentity').addEventListener('change',function(e){if(previewRole==='merchant')previewMerchant=e.target.value;else if(previewRole==='recipient'||previewRole==='returnRecipient')recipientDept=e.target.value;else previewDept=e.target.value;resetIdentityView()});
+updatePreviewIdentity();
+document.getElementById('back').addEventListener('click',goBack);
+window.addEventListener('resize',function(){
+  const stage=document.getElementById('deviceStage'),phone=document.getElementById('phone');
+  const scale=Math.min((stage.clientWidth-12)/375,(stage.clientHeight-12)/812,1);
+  phone.style.setProperty('--phone-scale',String(Math.max(.1,scale)));
+  sizeDepartmentConfirm();
+  sizeApprovalHistory();
+});
+window.dispatchEvent(new Event('resize'));render();
+// #AI:design:end
+</script>
+</body>
+</html>
